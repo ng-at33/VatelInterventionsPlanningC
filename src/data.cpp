@@ -31,7 +31,7 @@ Data* readXLS(string& filename) {
     // Book* book;
     cout << filename << endl;
     if (book->load(filename.c_str())) {
-        Sheet* sheet = book->getSheet(0);
+        Sheet* sheet = book->getSheet(1);
         cout << " first Col " << sheet->firstCol() << endl;
         cout << " last Col " << sheet->lastCol() << endl;
         if (sheet) {
@@ -62,24 +62,24 @@ Data* readXLS(string& filename) {
                         cur_d++;
                         slotOfDay = 0;
                     }
-                }
-                cout << " cur_month " << string(cur_month) ;
-                cout << " cur_day " << string(cur_day);
-                cout << " hour " << cur_hour;
+                    cout << " cur_month " << string(cur_month) ;
+                    cout << " cur_day " << string(cur_day);
+                    cout << " hour " << cur_hour;
 
-                cout << endl;
-                auto slotName = cur_month + "/" + cur_day + "h" + hour;
-                // vector<string> strs;
-                // boost::split(strs, cur_hour, boost::is_any_of(" - "));
-                // cout << "* size of the vector: " << strs.size() << endl;
-                // for (vector<string>::iterator it = strs.begin(); it != strs.end(); ++it)
-                // {
-                //     cout << *it << endl;
-                // }
-                // auto startHour;
-                // auto endHour;
-                // Creating slot
-                TimeSlot* slot = new TimeSlot(colIter, slotName, cur_hour, cur_d, slotOfDay);
+                    cout << endl;
+                    auto slotName = cur_month + "/" + cur_day + "h" + hour;
+                    // vector<string> strs;
+                    // boost::split(strs, cur_hour, boost::is_any_of(" - "));
+                    // cout << "* size of the vector: " << strs.size() << endl;
+                    // for (vector<string>::iterator it = strs.begin(); it != strs.end(); ++it)
+                    // {
+                    //     cout << *it << endl;
+                    // }
+                    // auto startHour;
+                    // auto endHour;
+                    // Creating slot
+                    TimeSlot* slot = new TimeSlot(colIter, slotName, cur_hour, cur_d, slotOfDay);
+                }
                 colIter++;
                 slotOfDay++;
             }
@@ -166,12 +166,12 @@ Data* tempInit() {
     }
     config->days = days;
     config->slots = slots_str;
-    config->nb_weeks = num_weeks;
-    config->nb_days = days.size();
-    config->nb_base_slots = slots_str.size();
-    config->nb_slots = slots.size();
-    config->nb_pros = pros_str.size();
-    config->max_inter = n_max_pros_interv;
+    config->nbWeeks = num_weeks;
+    config->nbDays = days.size();
+    config->nbBaseSlots = slots_str.size();
+    config->nbSlots = slots.size();
+    config->nbPros = pros_str.size();
+    config->maxInter = n_max_pros_interv;
     
     Dimension* dimensions = new Dimension(pros_str.size(), groups.size(), 1, slots.size());
 
@@ -252,8 +252,7 @@ ostream& Config::print(ostream& os) const {
 ostream& TimeSlot::print(ostream& os) const {
     os << "TimeSlot(idx : " << idx; 
     os << ", name : " << name;
-    os << ", time interval : (" << hours.first << " - "
-        << hours.second;
+    os << ", time interval : (" << hours << ")";
     os << ", day : " << day;
     os << ", slotOfDay : " << slotOfDay;
     os << ")" << endl;
