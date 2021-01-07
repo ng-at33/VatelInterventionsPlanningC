@@ -16,12 +16,13 @@ using namespace std;
 using namespace libxl;
 
 // Constructors
+TimeSlot::TimeSlot(){}
+
 TimeSlot::TimeSlot(int idx, std::string name, std::string hours,
-    int day, int slot_of_day) :
+    int day, int slotOfDay) :
     idx(idx), name(name), hours(hours), day(day), slotOfDay(slotOfDay)
     {}
     
-TimeSlot::TimeSlot(){}
 
 // IO functions
 Data* readXLS(string& filename) {
@@ -61,13 +62,15 @@ Data* readXLS(string& filename) {
                         cur_day = day;
                         cur_d++;
                         slotOfDay = 0;
+                    } else {
+                        slotOfDay++;
                     }
                     cout << " cur_month " << string(cur_month) ;
                     cout << " cur_day " << string(cur_day);
                     cout << " hour " << cur_hour;
 
                     cout << endl;
-                    auto slotName = cur_month + "/" + cur_day + "h" + hour;
+                    auto slotName = cur_month + " " + cur_day + " " + hour;
                     // vector<string> strs;
                     // boost::split(strs, cur_hour, boost::is_any_of(" - "));
                     // cout << "* size of the vector: " << strs.size() << endl;
@@ -79,9 +82,9 @@ Data* readXLS(string& filename) {
                     // auto endHour;
                     // Creating slot
                     TimeSlot* slot = new TimeSlot(colIter, slotName, cur_hour, cur_d, slotOfDay);
+                    cout << *slot << endl;
                 }
                 colIter++;
-                slotOfDay++;
             }
             // for (int row = sheet->firstRow(); row < sheet->lastRow(); ++row)
             // {
