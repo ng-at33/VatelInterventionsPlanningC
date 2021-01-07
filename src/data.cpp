@@ -60,7 +60,7 @@ Data* readXLS(string& filename) {
                     if (auto day = sheet->readStr(row_day, colIdx)) {
                         cur_day = day;
                         cur_d++;
-                        slot_of_day = 0;
+                        slotOfDay = 0;
                     }
                 }
                 cout << " cur_month " << string(cur_month) ;
@@ -79,7 +79,7 @@ Data* readXLS(string& filename) {
                 // auto startHour;
                 // auto endHour;
                 // Creating slot
-                TimeSlot* slot = new TimeSlot(colIter, slotName, cur_hour, cur_d, slot_of_day);
+                TimeSlot* slot = new TimeSlot(colIter, slotName, cur_hour, cur_d, slotOfDay);
                 colIter++;
                 slotOfDay++;
             }
@@ -158,7 +158,7 @@ Data* tempInit() {
             new_slot->name = day + " " + base_slots_start[slot_idx] + "-" + base_slots_end[slot_idx];
             new_slot->hours = base_slots_start[slot_idx] + "-" + base_slots_end[slot_idx];
             new_slot->day = cnt_days;
-            new_slot->slot_of_day = slot_idx;
+            new_slot->slotOfDay = slot_idx;
             slots.push_back(new_slot);
             cnt_slots++;
         }
@@ -255,7 +255,7 @@ ostream& TimeSlot::print(ostream& os) const {
     os << ", time interval : (" << hours.first << " - "
         << hours.second;
     os << ", day : " << day;
-    os << ", slot_of_day : " << slot_of_day;
+    os << ", slotOfDay : " << slotOfDay;
     os << ")" << endl;
     return os;
 };
