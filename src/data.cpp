@@ -21,112 +21,197 @@ TimeSlot::TimeSlot(){}
 TimeSlot::TimeSlot(int idx, std::string name, std::string hours,
     int day, int slotOfDay) :
     idx(idx), name(name), hours(hours), day(day), slotOfDay(slotOfDay)
-    {}
+    {};
     
+Professional::Professional(){};
+
+Professional::Professional(int idx, std::string name,
+    std::vector<TimeSlot *> slots) :
+    idx(idx), name(name), slots(slots)
+    {};
+
+Data::Data(){};
+
+Data::Data(Dimension dimensions, Config config,
+    std::vector<Professional *> professionals,
+    std::vector<StudentGroup *> groups, std::vector<TimeSlot *> slots) :
+    dimensions(dimensions), config(config), professionals(professionals),
+    groups(groups), slots(slots)
+    {};
+
+Config::Config(){};
+
+Config::Config(vector<string> days, vector<string> slots, int nbWeeks,
+    int nbDays, int nbSlotsByDay, int nbPros, int maxInter) :
+    days(days), slots(slots), nbWeeks(nbWeeks), nbDays(nbDays),
+    nbSlotsByDay(nbSlotsByDay), nbPros(nbPros), maxInter(maxInter)
+    {};
+
+Dimension* readXLSDimensions(Sheet* sheet) {
+    // Number of slots
+    auto numSlots = 0;
+    auto rowHours = 5;
+    auto colHourOff = 1;
+    auto iterateSlots = true;
+    while (iterateSlots) {
+        auto colIdx = numSlots + colHourOff;
+        auto hour = sheet->readStr(rowHours, colIdx);
+        if (!hour) {
+            iterateSlots = false;
+        } else {
+            numSlots++;
+        }
+    }
+    // Number of pros
+    auto numPros = 0;
+    auto colPros = 0;
+    auto rowIter = 0;
+    auto rowOffset = 6;
+    bool iteratePros = true;
+    while (iteratePros) {
+        auto rowIdx = numPros + rowOffset;
+        auto proName = sheet->readStr(rowIdx, colPros);
+        if (strcmp(proName, "Nombre") == 0) {
+            iteratePros = false;
+        } else {
+            numPros++;
+        }
+    }
+    auto numGroups = 4;
+    auto numLanguages = 0;
+    Dimension* dimensions = new Dimension(numPros, numGroups, numLanguages,
+        numSlots);
+    return dimensions;
+};
+
+Config* readXLSConfig(Sheet* sheet) {
+    auto nbWeeks = 2;
+    // Reading days and slot names
+    vector<string> days {};
+    vector<string> slots {};
+    auto rowDay = 4;
+    auto rowHour = 5;
+    auto nbSlots = 0;
+    auto nbDays = 0;
+    auto nbSlotsByDay = 0;
+    auto colOffset = 1;
+    bool iterateSlots = true;
+    const char* cur_hour = "";
+    string cur_month = "";
+    string cur_day = "";
+    auto cur_d = 0;
+    auto slotOfDay = 0;
+    while (iterateSlots) {
+        auto colIdx = nbSlots + colOffset;
+        auto hour = sheet->readStr(rowHour, colIdx);
+        string cur_hour;
+        if (!hour) {
+            iterateSlots = false;
+        } else {
+            slots.push_back(string(hour));
+            if (auto day = sheet->readStr(rowDay, colIdx)) {
+                days.push_back(string(day));
+                nbDays++;
+            }
+        }
+        nbSlots++;
+    }
+    auto nbPros = 0;
+    Config* config = new Config(days, slots, nbWeeks, nbDays, nbSlotsByDay,
+        nbPros, 3);
+    return config;
+};
+
+vector<TimeSlot *>* readXLSSlots(Sheet* sheet) {
+    vector<TimeSlot *>* slots = new vector<TimeSlot *>();
+    // Reading slots
+    auto row_month = 3;
+    auto row_day = 4;
+    auto row_hour = 5;
+    auto colIter = 0;
+    auto colOffset = 1;
+    bool iterateSlots = true;
+    const char* cur_hour = "";
+    string cur_month = "";
+    string cur_day = "";
+    auto cur_d = 0;
+    auto slotOfDay = 0;
+    while (iterateSlots) {
+        auto colIdx = colIter + colOffset;
+        auto hour = sheet->readStr(row_hour, colIdx);
+        string cur_hour;
+        if (!hour) {
+            iterateSlots = false;
+        } else {
+            cur_hour = string(hour);
+            if (auto month = sheet->readStr(row_month, colIdx)) { cur_month = month; }
+            if (auto day = sheet->readStr(row_day, colIdx)) {
+                cur_day = day;
+                cur_d++;
+                slotOfDay = 0;
+            } else {
+                slotOfDay++;
+            }
+            auto slotName = cur_month + " " + cur_day + " " + hour;
+            TimeSlot* slot = new TimeSlot(colIter, slotName, cur_hour, cur_d, slotOfDay);
+            slots->push_back(slot);
+        }
+        colIter++;
+    } 
+    return slots;
+};
+
+vector<Professional *>* readXLSProfessionals(Data* data, 
+        Sheet* sheet) {
+    vector<Professional *>* pros = new vector<Professional *>();
+    auto colSlotOff = 1;
+    auto colPros = 0;
+    auto rowIter = 0;
+    auto rowOffset = 6;
+    bool iteratePros = true;
+    // Iterating on professionals names until "Nombre"
+    while (iteratePros) {
+        auto rowIdx = rowIter + rowOffset;
+        auto proName = string(sheet->readStr(rowIdx, colPros));
+        if (proName.compare("Nombre") == 0) {
+            iteratePros = false;
+        } else {
+            vector<TimeSlot *> slots {};
+            // Reading availabilities for this professional
+            for (auto slotIdx = 0; slotIdx < data->dimensions.numSlots; slotIdx++) {
+                auto colIdx = slotIdx + colSlotOff;
+                auto cellType = sheet->cellType(rowIdx, colIdx);
+                if (cellType == CELLTYPE_STRING) {
+                    auto slot = data->slots[slotIdx];
+                    slots.push_back(slot);
+                }
+            }
+            Professional* pro = new Professional(rowIter, string(proName),
+                slots);
+            pros->push_back(pro);
+        }
+        rowIter++;
+    } 
+    return pros;
+};
+
+vector<StudentGroup *>* readXLSGroups(Sheet* sheet) {
+    vector<StudentGroup *>* groups = new vector<StudentGroup *>();
+    return groups;
+};
 
 // IO functions
 Data* readXLS(string& filename) {
     Data* data = new Data();
-    cout << filename << endl;
     Book* book = xlCreateXMLBook();
-    // Book* book;
-    cout << filename << endl;
     if (book->load(filename.c_str())) {
         Sheet* sheet = book->getSheet(1);
-        cout << " first Col " << sheet->firstCol() << endl;
-        cout << " last Col " << sheet->lastCol() << endl;
         if (sheet) {
-            // Reading slots
-            auto row_month = 3;
-            auto row_day = 4;
-            auto row_hour = 5;
-            auto colIter = 0;
-            auto colOffset = 1;
-            bool iterateSlots = true;
-            const char* cur_hour = "";
-            string cur_month = "";
-            string cur_day = "";
-            auto cur_d = 0;
-            auto slotOfDay = 0;
-            while (iterateSlots) {
-                auto colIdx = colIter + colOffset;
-                const char* hour = sheet->readStr(row_hour, colIdx);
-                string cur_hour;
-                // cout << " m " << row_month << " d " << row_day << " h " << row_hour << " c " << colIdx << endl;
-                if (!hour) {
-                    iterateSlots = false;
-                } else {
-                    cur_hour = string(hour);
-                    if (auto month = sheet->readStr(row_month, colIdx)) { cur_month = month; }
-                    if (auto day = sheet->readStr(row_day, colIdx)) {
-                        cur_day = day;
-                        cur_d++;
-                        slotOfDay = 0;
-                    } else {
-                        slotOfDay++;
-                    }
-                    cout << " cur_month " << string(cur_month) ;
-                    cout << " cur_day " << string(cur_day);
-                    cout << " hour " << cur_hour;
-
-                    cout << endl;
-                    auto slotName = cur_month + " " + cur_day + " " + hour;
-                    // vector<string> strs;
-                    // boost::split(strs, cur_hour, boost::is_any_of(" - "));
-                    // cout << "* size of the vector: " << strs.size() << endl;
-                    // for (vector<string>::iterator it = strs.begin(); it != strs.end(); ++it)
-                    // {
-                    //     cout << *it << endl;
-                    // }
-                    // auto startHour;
-                    // auto endHour;
-                    // Creating slot
-                    TimeSlot* slot = new TimeSlot(colIter, slotName, cur_hour, cur_d, slotOfDay);
-                    cout << *slot << endl;
-                }
-                colIter++;
-            }
-            // for (int row = sheet->firstRow(); row < sheet->lastRow(); ++row)
-            // {
-            //     for (int col = sheet->firstCol(); col < sheet->lastCol(); ++col)
-            //     {
-            //         CellType cellType = sheet->cellType(row, col);
-            //         std::cout << "(" << row << ", " << col << ") = ";
-            //         if (sheet->isFormula(row, col))
-            //         {
-            //             const char* s = sheet->readFormula(row, col);
-            //             std::cout << (s ? s : "null") << " [formula]";
-            //         }
-            //         else
-            //         {
-            //             switch (cellType)
-            //             {
-            //                 case CELLTYPE_EMPTY: std::cout << "[empty]"; break;
-            //                 case CELLTYPE_NUMBER:
-            //                 {
-            //                     double d = sheet->readNum(row, col);
-            //                     std::cout << d << " [number]";
-            //                     break;
-            //                 }
-            //                 case CELLTYPE_STRING:
-            //                 {
-            //                     const char* s = sheet->readStr(row, col);
-            //                     std::cout << (s ? s : "null") << " [string]";
-            //                     break;        
-            //                 }
-            //                 case CELLTYPE_BOOLEAN:
-            //                 {
-            //                     bool b = sheet->readBool(row, col);
-            //                     std::cout << (b ? "true" : "false") << " [boolean]";
-            //                     break;
-            //                 }
-            //                 case CELLTYPE_BLANK: std::cout << "[blank]"; break;
-            //                 case CELLTYPE_ERROR: std::cout << "[error]"; break;
-            //             }
-            //         }
-            //         std::cout << std::endl;
-            //     }
-            // }
+            data->dimensions = *readXLSDimensions(sheet);
+            data->config = *readXLSConfig(sheet);
+            data->slots = *readXLSSlots(sheet);
+            data->professionals = *readXLSProfessionals(data, sheet);
+            data->groups = *readXLSGroups(sheet);
         }
     }
     book->release();
@@ -171,8 +256,7 @@ Data* tempInit() {
     config->slots = slots_str;
     config->nbWeeks = num_weeks;
     config->nbDays = days.size();
-    config->nbBaseSlots = slots_str.size();
-    config->nbSlots = slots.size();
+    config->nbSlotsByDay = slots_str.size();
     config->nbPros = pros_str.size();
     config->maxInter = n_max_pros_interv;
     
@@ -200,9 +284,6 @@ Data* tempInit() {
         pros.push_back(new_pro);
         cnt_pro++;
     }
-
-    for (auto& slot : slots)
-        cout << slot->name << endl;
 
     Data* data = new Data();
     data->dimensions = *dimensions;
@@ -244,8 +325,7 @@ ostream& Config::print(ostream& os) const {
     for (auto& slot : slots) os << slot << "," << endl;
     os << "nb_weeks : " << nbWeeks << endl;
     os << "nb_days : " << nbDays << endl;
-    os << "nb_base_slots : " << nbBaseSlots << endl;
-    os << "nb_slots : " << nbSlots << endl;
+    os << "nb_base_slots : " << nbSlotsByDay << endl;
     os << "nb_pros : " << nbPros << endl;
     os << "max_inter : " << maxInter;
     os << ")" << endl;

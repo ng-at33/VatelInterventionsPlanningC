@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 
+#include "libxl.h"
+
 struct VatelData;
 struct Dimension;
 struct DisplayConfig;
@@ -42,10 +44,12 @@ struct Config {
     std::vector<std::string> slots;
     int nbWeeks;
     int nbDays;
-    int nbBaseSlots;
-    int nbSlots;
+    int nbSlotsByDay;
     int nbPros;
     int maxInter;
+    Config();
+    Config(std::vector<std::string> days, std::vector<std::string> slots,
+        int nbWeeks, int nbDays, int nbSlotsByDay, int nbPros, int maxInter);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 
@@ -64,7 +68,7 @@ struct TimeSlot {
     std::ostream& print(std::ostream& os = std::cout) const;
     TimeSlot();
     TimeSlot(int idx, std::string name, std::string hours,
-        int day, int slot_of_day);
+        int day, int slotOfDay);
 };
 
 // Override cout
@@ -77,6 +81,8 @@ struct Professional {
     int idx;
     std::string name;
     std::vector<TimeSlot *> slots;
+    Professional();
+    Professional(int idx, std::string name, std::vector<TimeSlot *> slots);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 
@@ -92,11 +98,22 @@ struct Data {
     std::vector<Professional *> professionals;
     std::vector<StudentGroup *> groups;
     std::vector<TimeSlot *>     slots;
+    Data();
+    Data(Dimension dimensions, Config config,
+        std::vector<Professional *> professionals,
+        std::vector<StudentGroup *> groups, std::vector<TimeSlot *> slots);
 };
 
 // Overrides cout
 std::ostream& operator<<(std::ostream& os, const Data& data);
 
+// XLS reading functions
+Dimension* readXLSDimensions(libxl::Sheet* sheet);
+Config* readXLSConfig(libxl::Sheet* sheet);
+std::vector<Professional *>* readXLSProfessionals(Data* data,
+    libxl::Sheet* sheet);
+std::vector<StudentGroup *>* readXLSGroups(libxl::Sheet* sheet);
+std::vector<TimeSlot *>* readXLSSlots(libxl::Sheet* sheet);
 Data* readXLS(std::string& filename);
 
 Data* tempInit();
