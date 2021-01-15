@@ -88,12 +88,13 @@ Config* readXLSConfig(Sheet* sheet) {
     auto nbWeeks = 2;
     // Reading days and slot names
     vector<string> days {};
-    vector<string> slots {};
+    set<string> slots {};
     auto rowDay = 4;
     auto rowHour = 5;
     auto nbSlots = 0;
     auto nbDays = 0;
     auto nbSlotsByDay = 0;
+    auto nbSlotsByDayTmp = 0;
     auto colOffset = 1;
     bool iterateSlots = true;
     const char* cur_hour = "";
@@ -108,16 +109,20 @@ Config* readXLSConfig(Sheet* sheet) {
         if (!hour) {
             iterateSlots = false;
         } else {
-            slots.push_back(string(hour));
+            slots.insert(string(hour));
             if (auto day = sheet->readStr(rowDay, colIdx)) {
                 days.push_back(string(day));
                 nbDays++;
+                nbSlotsByDayTmp = 0;
             }
         }
+        nbSlotsByDay = max(nbSlotsByDay, nbSlotsByDayTmp);
+        nbSlotsByDayTmp++;
         nbSlots++;
     }
     auto nbPros = 0;
-    Config* config = new Config(days, slots, nbWeeks, nbDays, nbSlotsByDay,
+    std::vector<string> slotsVec(slots.begin(), slots.end());
+    Config* config = new Config(days, slotsVec, nbWeeks, nbDays, nbSlotsByDay,
         nbPros, 3);
     return config;
 };
@@ -144,7 +149,9 @@ vector<TimeSlot *>* readXLSSlots(Sheet* sheet) {
             iterateSlots = false;
         } else {
             cur_hour = string(hour);
-            if (auto month = sheet->readStr(row_month, colIdx)) { cur_month = month; }
+            if (auto month = sheet->readStr(row_month, colIdx)) {
+                cur_month = month;
+            }
             if (auto day = sheet->readStr(row_day, colIdx)) {
                 cur_day = day;
                 cur_d++;

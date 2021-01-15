@@ -32,8 +32,6 @@ Solution* AlgorithmStrategy::solve(Data& data)
 
 Solution* AlgorithmMIP::solve(Data& data)
 {
-    cout << data << endl;
-
     MPSolver solver("Vatel rostering", MPSolver::GLOP_LINEAR_PROGRAMMING);
     VatelModel* vatelModel = buildModel(data, solver);
     ofstream lpFStream("mip.lp");
@@ -41,7 +39,7 @@ Solution* AlgorithmMIP::solve(Data& data)
     solver.ExportModelAsLpFormat(false, &lpString);
     lpFStream << lpString << std::endl;
     lpFStream.close();
-
+    Solution* solution;
     const MPSolver::ResultStatus result_status = solver.Solve();
     // Check that the problem has an optimal solution.
     if (result_status != MPSolver::OPTIMAL) {
@@ -49,9 +47,9 @@ Solution* AlgorithmMIP::solve(Data& data)
     }
     else {
         LOG(INFO) << "Success, objective value : " << solver.Objective().Value() << endl;
-        Solution* solution = buildSolution(data, *vatelModel);
-        cout << *solution << endl;
+        solution = buildSolution(data, *vatelModel);
     }
+    return solution;
 }
 
 Solution* AlgorithmHeuristic::solve(Data& data)

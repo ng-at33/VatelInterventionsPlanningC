@@ -24,6 +24,8 @@ int main(int argc, char** argv) {
     // 0 : MIP, 1 : Heuristic
     algo.setAlgorithm(0);
     Solution* sol = algo.solve(*data);
+    sol->print(cout);
+    sol->writeXLS(*data);
 
     return EXIT_SUCCESS;
 }

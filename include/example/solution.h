@@ -31,6 +31,7 @@ inline std::ostream& operator<<(std::ostream& os, const Assignation& as) {
 struct Solution {
     std::vector<Assignation *> assignations;
     std::ostream& print(std::ostream& os = std::cout) const;
+    void writeXLS(Data& data); // Write solution to XLSfile
 };
 
 // Overrides cout

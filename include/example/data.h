@@ -29,7 +29,8 @@ struct Dimension {
 
     Dimension(){};
     Dimension(int numPros, int numGroups, int numLanguages, int numSlots) :
-        numPros(numPros), numGroups(numGroups), numLanguages(numLanguages), numSlots(numSlots)
+        numPros(numPros), numGroups(numGroups), numLanguages(numLanguages),
+        numSlots(numSlots)
         {};
 };
 

@@ -24,7 +24,6 @@ VatelModel* buildModel(Data& data, MPSolver& solver) {
     map<tuple<int, int>, MPVariable*> xVarMap {};
     for (auto& pro : data.professionals) {
         for (auto& slot : pro->slots) {
-            cout << *slot << endl;
             MPVariable* const new_x = solver.MakeBoolVar("x_p" +
                 std::to_string(pro->idx) + "t" + std::to_string(slot->idx));
             xVarMap[make_tuple(pro->idx, slot->idx)] = new_x;
