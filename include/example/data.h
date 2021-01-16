@@ -116,5 +116,3 @@ std::vector<Professional *>* readXLSProfessionals(Data* data,
 std::vector<StudentGroup *>* readXLSGroups(libxl::Sheet* sheet);
 std::vector<TimeSlot *>* readXLSSlots(libxl::Sheet* sheet);
 Data* readXLS(std::string& filename);
-
-Data* tempInit();
