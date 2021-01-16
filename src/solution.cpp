@@ -92,7 +92,23 @@ void Solution::writeXLS(Data& data) {
     book->release();
 }
 
-bool validateSolution(Data& data, Solution& sol) {    
+bool validateSolution(Data& data, Solution& sol) {
+    auto isSolValid = true;
+    Assignation* assignation = new Assignation();
     // Checking that all professionals are not scheduled more than once per time slot
-
+    for (auto& slot : data.slots) {
+        vector<Professional *> prosInSlot {};
+        for (auto& af : sol.assignations) {
+            if (af->slot == slot) {
+                if (find(prosInSlot.begin(), prosInSlot.end(), af->pro) != 
+                        prosInSlot.end()) {
+                    cout << "ERROR : " << (*af->pro).name << " found assigned in slot "
+                        << *slot << " more than once" << endl;
+                    isSolValid = false;
+                }
+                prosInSlot.push_back(af->pro);
+            }
+        }
+    }
+    return isSolValid;
 };

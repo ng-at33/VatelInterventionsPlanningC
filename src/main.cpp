@@ -25,6 +25,7 @@ int main(int argc, char** argv) {
     algo.setAlgorithm(0);
     Solution* sol = algo.solve(*data);
     sol->print(cout);
+    auto isSolValid = validateSolution(*data, *sol);
     sol->writeXLS(*data);
 
     return EXIT_SUCCESS;
