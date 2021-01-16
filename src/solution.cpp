@@ -56,33 +56,36 @@ void Solution::writeXLS(Data& data) {
     Book* book = xlCreateXMLBook();
     Sheet* sheet = book->addSheet("Planning");
 
+    auto rowOff = 1;
     auto startDateCol = 1;
-    auto startSlotRow = 1;
+    auto startSlotRow = 0 + rowOff;
     // Writing days
     for (auto iDay = 0; iDay < data.config.days.size(); iDay++) {
         auto dayStr = data.config.days[iDay];
         sheet->writeStr(startSlotRow, startDateCol + iDay, dayStr.c_str());
     }
     auto startSlotCol = 0;
-    auto rowSlotOffset = 1;
+    auto rowSlotOffset = 1 + rowOff;
     // Writing slots
     for (auto iSlot = 0; iSlot < data.config.slots.size(); iSlot++) {
         auto slotStr = data.config.slots[iSlot];
-        sheet->writeStr(startSlotRow + iSlot + rowSlotOffset, startSlotCol,
+        sheet->writeStr(iSlot + rowSlotOffset, startSlotCol,
             slotStr.c_str());
     }
+    auto rowAssOff = 1 + rowOff;
     // Writing assignations
     for (auto d = 0; d < data.config.nbDays; d++) {
         for (auto s = 0; s < data.config.nbSlotsByDay; s++) {
-            auto row = startSlotRow + s;
+            auto row = s + rowAssOff;
             auto col = startDateCol + d;
-
+            string cellContent = "";
             // Filtering affecations that are on this day/slot
             for (auto& af : this->assignations) {
                 if (af->slot->day == d && af->slot->slotOfDay == s) {
-                    sheet->writeStr(row, col, af->pro->name.c_str());
+                    cellContent += "\n" + af->pro->name;
                 }
             }
+            sheet->writeStr(row, col, cellContent.c_str());
         }
     }
     book->save("planning.xls");
