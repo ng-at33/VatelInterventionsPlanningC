@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
     Data* data = generateData(50, 20, 0.4);
     AlgorithmStrategy algo;
     // 0 : MIP, 1 : Heuristic
-    algo.setAlgorithm(0);
+    algo.setAlgorithm(1);
     Solution* sol = algo.solve(*data);
     sol->print(cout);
     auto isSolValid = validateSolution(*data, *sol);

@@ -305,7 +305,6 @@ Data* generateData(int numPros, int numGroups, float slotCompatProb) {
         new_pro->name = pro;
         for (int i = 0; i < dimensions->numSlots; ++i) {
             auto randFloat = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-            cout << " randFloat " << randFloat << endl;
             if (randFloat <= slotCompatProb) {
                 new_pro->slots.push_back(slots[i]);
             }

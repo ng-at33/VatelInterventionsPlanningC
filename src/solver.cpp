@@ -10,6 +10,7 @@
 
 #include "data.h"
 #include "model.h"
+#include "heuristic.h"
 #include "solution.h"
 #include "solver.h"
 
@@ -54,7 +55,7 @@ Solution* AlgorithmMIP::solve(Data& data)
 
 Solution* AlgorithmHeuristic::solve(Data& data)
 {
-    cout << " NOT IMPLEMENTED " << endl;
+    auto* sol = firstFit(data);
     return NULL;
 }
 
