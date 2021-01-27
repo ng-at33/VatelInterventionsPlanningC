@@ -116,3 +116,7 @@ std::vector<Professional *>* readXLSProfessionals(Data* data,
 std::vector<StudentGroup *>* readXLSGroups(libxl::Sheet* sheet);
 std::vector<TimeSlot *>* readXLSSlots(libxl::Sheet* sheet);
 Data* readXLS(std::string& filename);
+
+// Generate a random data set with the given number of professionals
+// and students groups
+Data* generateData(int numPros, int numGroups, float slotCompatProb);

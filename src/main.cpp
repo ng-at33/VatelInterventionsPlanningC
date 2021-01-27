@@ -18,8 +18,9 @@
 using namespace std;
 
 int main(int argc, char** argv) {
-    string fn = "data/doodle_new.xlsx";
-    Data* data = readXLS(fn);
+    // string fn = "data/doodle_new.xlsx";
+    // Data* data = readXLS(fn);
+    Data* data = generateData(50, 20, 0.4);
     AlgorithmStrategy algo;
     // 0 : MIP, 1 : Heuristic
     algo.setAlgorithm(0);

@@ -226,6 +226,102 @@ Data* readXLS(string& filename) {
     return data;
 };
 
+Data* generateData(int numPros, int numGroups, float slotCompatProb) {
+    // Init DisplayConfig
+    auto num_weeks = 2;
+    auto n_max_pros_interv = 3;
+    auto n_min_class_interv = 1;
+    vector<string> days{ "2020-11-09", "2020-11-11", "2020-11-12", "2020-11-13", "2020-11-14", "2020-11-15", "2020-11-16", "2020-11-17", "2020-11-18", "2020-11-19" };
+    vector<string> base_slots_start{ "9h", "10h30", "14h", "15h30" };
+    vector<string> base_slots_end{ "10h30", "12h", "15h30", "17h" };
+
+    srand(time(NULL));
+    static string charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+    string proName;
+    int strLength = 10;
+    proName.resize(strLength);
+    vector<string> pros_str {};
+    for (int proI; proI < numPros; proI++) {
+        for (int i = 0; i < strLength; i++) {
+            proName[i] = charset[rand() % charset.length()];
+        }
+        pros_str.push_back(proName);
+    }
+
+    string groupName;
+    strLength = 6;
+    groupName.resize(strLength);
+    vector<string> groups {};
+    for (int grpI; grpI < numGroups; grpI++) {
+        for (int i = 0; i < strLength; i++) {
+            groupName[i] = charset[rand() % charset.length()];
+        }
+        groups.push_back(groupName);
+    }
+
+    Config* config = new Config();
+
+    vector<string> slots_str;
+    vector<TimeSlot *> slots;
+    auto cnt_slots = 0;
+    auto cnt_days = 0;
+    for (auto day : days) {
+        for (auto slot_idx = 0; slot_idx < base_slots_start.size(); ++slot_idx) {
+            slots_str.push_back(day + " " + base_slots_start[slot_idx] + "-" + base_slots_end[slot_idx]);
+            TimeSlot* new_slot = new TimeSlot();
+            new_slot->idx = cnt_slots;
+            new_slot->name = day + " " + base_slots_start[slot_idx] + "-" + base_slots_end[slot_idx];
+            new_slot->hours = base_slots_start[slot_idx] + "-" + base_slots_end[slot_idx];
+            new_slot->day = cnt_days;
+            new_slot->slotOfDay = slot_idx;
+            slots.push_back(new_slot);
+            cnt_slots++;
+        }
+        cnt_days++;
+    }
+    config->days = days;
+    config->slots = slots_str;
+    config->nbWeeks = num_weeks;
+    config->nbDays = days.size();
+    config->nbSlotsByDay = slots_str.size();
+    config->nbPros = pros_str.size();
+    config->maxInter = n_max_pros_interv;
+
+    Dimension* dimensions = new Dimension(pros_str.size(), groups.size(), 1, slots.size());
+
+    int** dispo = new int*[dimensions->numPros];
+    for (int i = 0; i < dimensions->numPros; ++i) {
+        dispo[i] = new int[slots.size()];
+        for (int j = 0; j < dimensions->numSlots; ++j) {
+            auto rng = rand() % 2;
+            dispo[i][j] = rng;
+        }
+    }
+    vector<Professional *> pros;
+    auto cnt_pro = 0;
+    for (auto& pro : pros_str) {
+        Professional* new_pro = new Professional();
+        new_pro->idx = cnt_pro;
+        new_pro->name = pro;
+        for (int i = 0; i < dimensions->numSlots; ++i) {
+            auto randFloat = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+            cout << " randFloat " << randFloat << endl;
+            if (randFloat <= slotCompatProb) {
+                new_pro->slots.push_back(slots[i]);
+            }
+        }
+        pros.push_back(new_pro);
+        cnt_pro++;
+    }
+
+    Data* data = new Data();
+    data->dimensions = *dimensions;
+    data->config = *config;
+    data->slots = slots;
+    data->professionals = pros;
+    return data;
+};
+
 // Printers
 ostream& operator<<(ostream& os, const Data& data) {
     os << "Data(" << endl;
