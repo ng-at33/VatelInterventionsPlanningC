@@ -21,7 +21,7 @@ ostream& HeurNode::print(ostream& os) const {
     for (auto& slot : slots) {
         os << " " << cntSlot << " : ";
         for (auto& slotCnt : slot) {
-            os << "(" << slotCnt.first << ", " << slotCnt.second << ") ";
+            os << "(" << (*slotCnt.first).name << ", " << (*slotCnt.second).name << ") ";
         }
         os << endl;
         cntSlot++;
@@ -31,12 +31,54 @@ ostream& HeurNode::print(ostream& os) const {
 };
 
 HeurNode* firstFit(Data& data, HeurNode* node) {
-
-}
+};
 
 HeurNode* firstFit(Data& data) {
     auto* firstNode = new HeurNode(data);
-    cout << "firstNode " << *firstNode << endl;
+
+    vector<vector<bool>> nbIntervByGrSl(data.dimensions.numGroups,
+        vector<bool> (data.dimensions.numSlots, false));
+    vector<vector<bool>> nbIntervByPrSl(data.dimensions.numPros,
+        vector<bool> (data.dimensions.numSlots, false));
+    vector<vector<int>> nbIntervByPrDa(data.dimensions.numPros,
+        vector<int> (data.config.nbDays, 0));
+    vector<int> nbIntervByPr(data.dimensions.numPros, 0);
+    vector<int> nbIntervByGr(data.dimensions.numGroups, 0);
+    vector<int> nbIntervBySl(data.dimensions.numSlots, 0);
+
+    // Filling empty node
+    // Sorting slots by least pros available
+    auto slots = data.slots;
+    std::sort(slots.begin(), slots.end(),
+        [] (TimeSlot* ts1, TimeSlot* ts2) {
+            return ts1->pros.size() < ts2->pros.size();
+        });
+
+    // Iterating over sorted slots
+    for (auto& slot : slots) {
+        // Sorting pros by least compatible
+        auto pros = data.professionals;
+        std::sort(pros.begin(), pros.end(),
+            [] (Professional* pro1, Professional* pro2) {
+                return pro1->slots.size() < pro2->slots.size();
+            });
+        cout << *slot << endl;
+        for (auto itPros = pros.begin();
+                itPros != pros.end() && itPros != pros.begin() + 3; itPros++) {
+            // TODO : search in groups compatible with pro (languages)
+            int chosenGroupIdx = max_element(nbIntervByGr.begin(),
+                nbIntervByGr.end()) - nbIntervByGr.begin();
+            cout << chosenGroupIdx << endl;
+            cout << data.groups.size() << endl;
+            cout << *data.groups[chosenGroupIdx] << endl;
+            // Creating chosen <Professional*, StudenGroup*> pair
+            pair<Professional*, StudentGroup*> pairPrGr = make_pair(*itPros,
+                data.groups[chosenGroupIdx]);
+            cout << " slot idx " << slot->idx << endl;
+            firstNode->slots[slot->idx].insert(pairPrGr);
+        }
+    }
+    cout << "firstNode" << *firstNode << endl;
     return firstNode;
-}
+};
 

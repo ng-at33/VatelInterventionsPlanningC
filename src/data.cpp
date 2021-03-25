@@ -22,7 +22,13 @@ TimeSlot::TimeSlot(int idx, std::string name, std::string hours,
     int day, int slotOfDay) :
     idx(idx), name(name), hours(hours), day(day), slotOfDay(slotOfDay)
     {};
-    
+
+StudentGroup::StudentGroup(){};
+
+StudentGroup::StudentGroup(int idx, std::string name) :
+    idx(idx), name(name)
+    {};
+
 Professional::Professional(){};
 
 Professional::Professional(int idx, std::string name,
@@ -245,18 +251,18 @@ Data* generateData(int numPros, int numGroups, float slotCompatProb) {
         for (int i = 0; i < strLength; i++) {
             proName[i] = charset[rand() % charset.length()];
         }
-        pros_str.push_back(proName);
+        pros_str.push_back("pro_" + proName);
     }
 
     string groupName;
     strLength = 6;
     groupName.resize(strLength);
-    vector<string> groups {};
+    vector<string> groups_str {};
     for (int grpI; grpI < numGroups; grpI++) {
         for (int i = 0; i < strLength; i++) {
             groupName[i] = charset[rand() % charset.length()];
         }
-        groups.push_back(groupName);
+        groups_str.push_back("group_" + groupName);
     }
 
     Config* config = new Config();
@@ -287,7 +293,7 @@ Data* generateData(int numPros, int numGroups, float slotCompatProb) {
     config->nbPros = pros_str.size();
     config->maxInter = n_max_pros_interv;
 
-    Dimension* dimensions = new Dimension(pros_str.size(), groups.size(), 1, slots.size());
+    Dimension* dimensions = new Dimension(pros_str.size(), groups_str.size(), 1, slots.size());
 
     int** dispo = new int*[dimensions->numPros];
     for (int i = 0; i < dimensions->numPros; ++i) {
@@ -307,17 +313,29 @@ Data* generateData(int numPros, int numGroups, float slotCompatProb) {
             auto randFloat = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
             if (randFloat <= slotCompatProb) {
                 new_pro->slots.push_back(slots[i]);
+                slots[i]->pros.push_back(new_pro);
             }
         }
         pros.push_back(new_pro);
         cnt_pro++;
     }
+    vector<StudentGroup *> groups;
+    auto cnt_group = 0;
+    for (auto& group : groups_str) {
+        StudentGroup* new_group = new StudentGroup();
+        new_group->idx = cnt_group;
+        new_group->name = group;
+        groups.push_back(new_group);
+        cnt_group++;
+    }
+
 
     Data* data = new Data();
     data->dimensions = *dimensions;
     data->config = *config;
     data->slots = slots;
     data->professionals = pros;
+    data->groups = groups;
     return data;
 };
 
@@ -367,6 +385,12 @@ ostream& TimeSlot::print(ostream& os) const {
     os << ", day : " << day;
     os << ", slotOfDay : " << slotOfDay;
     os << ")" << endl;
+    return os;
+};
+
+ostream& StudentGroup::print(ostream& os) const {
+    os << "StudentGroup(idx : " << idx; 
+    os << ", name : " << name << ")" << endl;
     return os;
 };
 

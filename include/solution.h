@@ -14,6 +14,7 @@
 
 #include "data.h"
 #include "model.h"
+#include "heuristic.h"
 
 // Structure to hold the information about one intervention
 struct Assignation {
@@ -52,6 +53,8 @@ inline std::ostream& operator<<(std::ostream& os, const Solution& sol) {
 
 // Build a Solution from variables values
 Solution* buildSolution(Data& data, VatelModel& model);
+// Build a solution from heuristic node
+Solution* buildSolution(Data& data, HeurNode& model);
 
 // Produce a SolutionProfiling to validate and also evaluate the quality of a solution 
 // SolutionProfiling* evaluteSolution(Data& data, Solution& sol);

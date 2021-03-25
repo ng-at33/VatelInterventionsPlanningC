@@ -37,6 +37,24 @@ Solution* buildSolution(Data& data, VatelModel& model) {
     return solution;
 };
 
+Solution* buildSolution(Data& data, HeurNode& node) {
+    Solution* solution = new Solution();
+    std::vector<Assignation *> assignations {};
+    auto slotIdx = 0;
+    for (auto& slot: node.slots) {
+        for (auto& pair: slot) {
+            Assignation* assignation = new Assignation();
+            assignation->pro = pair.first;
+            assignation->slot = data.slots[slotIdx];
+            cout << "ADDED" << endl;
+            assignations.push_back(assignation);
+        }
+        slotIdx++;
+    }
+    solution->assignations = assignations;
+    return solution;
+};
+
 ostream& Assignation::print(ostream& os) const {
     os << "Assignation(";
     os << pro->name << " @ ";

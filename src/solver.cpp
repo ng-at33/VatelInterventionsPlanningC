@@ -55,7 +55,8 @@ Solution* AlgorithmMIP::solve(Data& data)
 
 Solution* AlgorithmHeuristic::solve(Data& data)
 {
-    auto* sol = firstFit(data);
-    return NULL;
+    auto* firstNode = firstFit(data);
+    Solution* solution = buildSolution(data, *firstNode);
+    return solution;
 }
 

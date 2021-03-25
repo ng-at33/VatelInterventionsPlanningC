@@ -66,6 +66,7 @@ struct TimeSlot {
     std::string hours;
     int day;
     int slotOfDay;
+    std::vector<const Professional *> pros;
     std::ostream& print(std::ostream& os = std::cout) const;
     TimeSlot();
     TimeSlot(int idx, std::string name, std::string hours,
@@ -75,6 +76,20 @@ struct TimeSlot {
 // Override cout
 inline std::ostream& operator<<(std::ostream& os, const TimeSlot& ts) {
     return ts.print(os);
+};
+
+// Contain the information of a single student group
+struct StudentGroup {
+    int idx;
+    std::string name;
+    StudentGroup();
+    StudentGroup(int idx, std::string name);
+    std::ostream& print(std::ostream& os = std::cout) const;
+};
+
+// Overrides cout
+inline std::ostream& operator<<(std::ostream& os, const StudentGroup& sg) {
+    return sg.print(os);
 };
 
 // Contain the information of a single professional
