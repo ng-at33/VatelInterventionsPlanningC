@@ -128,5 +128,20 @@ bool validateSolution(Data& data, Solution& sol) {
             }
         }
     }
+    // Checking that all students groups are not scheduled more than once per time slot
+    for (auto& slot : data.slots) {
+        vector<StudentGroup *> sgInSlot {};
+        for (auto& af : sol.assignations) {
+            if (af->slot == slot) {
+                if (find(sgInSlot.begin(), sgInSlot.end(), af->group) !=
+                        sgInSlot.end()) {
+                    cout << "ERROR : " << (*af->group).name << " found assigned in slot "
+                        << *slot << " more than once" << endl;
+                    isSolValid = false;
+                }
+                sgInSlot.push_back(af->group);
+            }
+        }
+    }
     return isSolValid;
 };

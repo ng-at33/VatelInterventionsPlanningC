@@ -63,10 +63,9 @@ HeurNode* firstFit(Data& data) {
             [] (Professional* pro1, Professional* pro2) {
                 return pro1->slots.size() < pro2->slots.size();
             });
-        cout << *slot << endl;
         for (auto itPros = pros.begin(); itPros != pros.end(); itPros++) {
-            if (nbIntervBySl[slot->idx] >= 3 ||
-                    nbIntervByPr[(*itPros)->idx] >= 3) break;
+            if (nbIntervBySl[slot->idx] >= 3) break;
+            if (nbIntervByPr[(*itPros)->idx] >= 3) continue;
             StudentGroup* group;
             // auto chosenGroupVal = -1;
             // TODO : search in groups compatible with pro (languages)
@@ -78,14 +77,12 @@ HeurNode* firstFit(Data& data) {
                     break;
                 }
             }
-            if (group == NULL ||
-                    isIntervByPrSl[(*itPros)->idx][slot->idx]) {
+            if (group == NULL) {
                 continue;
             }
             // Creating chosen <Professional*, StudenGroup*> pair
             pair<Professional*, StudentGroup*> pairPrGr = make_pair(*itPros,
                 group);
-            cout << " slot idx " << slot->idx << endl;
             firstNode->slots[slot->idx].insert(pairPrGr);
             isIntervByGrSl[group->idx][slot->idx] = true;
             isIntervByPrSl[(*itPros)->idx][slot->idx] = true;
