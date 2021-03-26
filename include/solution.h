@@ -19,6 +19,7 @@
 // Structure to hold the information about one intervention
 struct Assignation {
     Professional* pro;
+    StudentGroup* group;
     TimeSlot* slot;
     std::ostream& print(std::ostream& os = std::cout) const;
 };

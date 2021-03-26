@@ -45,8 +45,8 @@ Solution* buildSolution(Data& data, HeurNode& node) {
         for (auto& pair: slot) {
             Assignation* assignation = new Assignation();
             assignation->pro = pair.first;
+            assignation->group = pair.second;
             assignation->slot = data.slots[slotIdx];
-            cout << "ADDED" << endl;
             assignations.push_back(assignation);
         }
         slotIdx++;
@@ -57,7 +57,7 @@ Solution* buildSolution(Data& data, HeurNode& node) {
 
 ostream& Assignation::print(ostream& os) const {
     os << "Assignation(";
-    os << pro->name << " @ ";
+    os << pro->name << " - " << group->name << " @ ";
     os << slot->name;
     os << ")" << endl;
     return os;

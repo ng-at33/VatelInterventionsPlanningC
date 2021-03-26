@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
     Data* data = generateData(50, 20, 0.4);
     // cout << *data << endl;
     AlgorithmStrategy algo;
-    // 0 : MIP, 1 : Heuristic
+    // 0 : MIP (Obsolete), 1 : Heuristic
     algo.setAlgorithm(1);
     Solution* sol = algo.solve(*data);
     sol->print(cout);

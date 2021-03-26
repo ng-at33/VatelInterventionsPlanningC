@@ -36,9 +36,9 @@ HeurNode* firstFit(Data& data, HeurNode* node) {
 HeurNode* firstFit(Data& data) {
     auto* firstNode = new HeurNode(data);
 
-    vector<vector<bool>> nbIntervByGrSl(data.dimensions.numGroups,
+    vector<vector<bool>> isIntervByGrSl(data.dimensions.numGroups,
         vector<bool> (data.dimensions.numSlots, false));
-    vector<vector<bool>> nbIntervByPrSl(data.dimensions.numPros,
+    vector<vector<bool>> isIntervByPrSl(data.dimensions.numPros,
         vector<bool> (data.dimensions.numSlots, false));
     vector<vector<int>> nbIntervByPrDa(data.dimensions.numPros,
         vector<int> (data.config.nbDays, 0));
@@ -66,16 +66,23 @@ HeurNode* firstFit(Data& data) {
         for (auto itPros = pros.begin();
                 itPros != pros.end() && itPros != pros.begin() + 3; itPros++) {
             // TODO : search in groups compatible with pro (languages)
-            int chosenGroupIdx = max_element(nbIntervByGr.begin(),
+            int chosenGroupIdx = min_element(nbIntervByGr.begin(),
                 nbIntervByGr.end()) - nbIntervByGr.begin();
             cout << chosenGroupIdx << endl;
             cout << data.groups.size() << endl;
             cout << *data.groups[chosenGroupIdx] << endl;
+            auto group = data.groups[chosenGroupIdx];
             // Creating chosen <Professional*, StudenGroup*> pair
             pair<Professional*, StudentGroup*> pairPrGr = make_pair(*itPros,
-                data.groups[chosenGroupIdx]);
+                group);
             cout << " slot idx " << slot->idx << endl;
             firstNode->slots[slot->idx].insert(pairPrGr);
+            isIntervByGrSl[chosenGroupIdx][slot->idx] = true;
+            isIntervByPrSl[(*itPros)->idx][slot->idx] = true;
+            nbIntervByPrDa[(*itPros)->idx][slot->day]++;
+            nbIntervByPr[(*itPros)->idx]++;
+            nbIntervByGr[chosenGroupIdx]++;
+            nbIntervBySl[slot->idx]++;
         }
     }
     cout << "firstNode" << *firstNode << endl;
