@@ -273,7 +273,6 @@ Data* generateData(int numPros, int numGroups, float slotCompatProb) {
     auto cnt_days = 0;
     for (auto day : days) {
         for (auto slot_idx = 0; slot_idx < base_slots_start.size(); ++slot_idx) {
-            slots_str.push_back(day + " " + base_slots_start[slot_idx] + "-" + base_slots_end[slot_idx]);
             TimeSlot* new_slot = new TimeSlot();
             new_slot->idx = cnt_slots;
             new_slot->name = day + " " + base_slots_start[slot_idx] + "-" + base_slots_end[slot_idx];
@@ -284,6 +283,10 @@ Data* generateData(int numPros, int numGroups, float slotCompatProb) {
             cnt_slots++;
         }
         cnt_days++;
+    }
+
+    for (auto slot_idx = 0; slot_idx < base_slots_start.size(); ++slot_idx) {
+        slots_str.push_back(base_slots_start[slot_idx] + "-" + base_slots_end[slot_idx]);
     }
     config->days = days;
     config->slots = slots_str;
