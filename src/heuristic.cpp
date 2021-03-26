@@ -56,6 +56,7 @@ HeurNode* firstFit(Data& data) {
 
     // Iterating over sorted slots
     for (auto& slot : slots) {
+        if (nbIntervBySl[slot->idx] >= 3) continue;
         // Sorting pros by least compatible
         auto pros = data.professionals;
         std::sort(pros.begin(), pros.end(),
@@ -63,25 +64,34 @@ HeurNode* firstFit(Data& data) {
                 return pro1->slots.size() < pro2->slots.size();
             });
         cout << *slot << endl;
-        for (auto itPros = pros.begin();
-                itPros != pros.end() && itPros != pros.begin() + 3; itPros++) {
+        for (auto itPros = pros.begin(); itPros != pros.end(); itPros++) {
+            if (nbIntervBySl[slot->idx] >= 3 ||
+                    nbIntervByPr[(*itPros)->idx] >= 3) break;
+            StudentGroup* group;
+            // auto chosenGroupVal = -1;
             // TODO : search in groups compatible with pro (languages)
-            int chosenGroupIdx = min_element(nbIntervByGr.begin(),
-                nbIntervByGr.end()) - nbIntervByGr.begin();
-            cout << chosenGroupIdx << endl;
-            cout << data.groups.size() << endl;
-            cout << *data.groups[chosenGroupIdx] << endl;
-            auto group = data.groups[chosenGroupIdx];
+            for (auto itGrp = data.groups.begin();
+                    itGrp != data.groups.end(); itGrp++) {
+                if (!isIntervByGrSl[(*itGrp)->idx][slot->idx] &&
+                        !isIntervByPrSl[(*itPros)->idx][slot->idx]) {
+                    group = *itGrp;
+                    break;
+                }
+            }
+            if (group == NULL ||
+                    isIntervByPrSl[(*itPros)->idx][slot->idx]) {
+                continue;
+            }
             // Creating chosen <Professional*, StudenGroup*> pair
             pair<Professional*, StudentGroup*> pairPrGr = make_pair(*itPros,
                 group);
             cout << " slot idx " << slot->idx << endl;
             firstNode->slots[slot->idx].insert(pairPrGr);
-            isIntervByGrSl[chosenGroupIdx][slot->idx] = true;
+            isIntervByGrSl[group->idx][slot->idx] = true;
             isIntervByPrSl[(*itPros)->idx][slot->idx] = true;
             nbIntervByPrDa[(*itPros)->idx][slot->day]++;
             nbIntervByPr[(*itPros)->idx]++;
-            nbIntervByGr[chosenGroupIdx]++;
+            nbIntervByGr[group->idx]++;
             nbIntervBySl[slot->idx]++;
         }
     }
