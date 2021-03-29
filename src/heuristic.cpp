@@ -66,6 +66,8 @@ HeurNode* firstFit(Data& data) {
         for (auto itPros = pros.begin(); itPros != pros.end(); itPros++) {
             if (nbIntervBySl[slot->idx] >= 3) break;
             if (nbIntervByPr[(*itPros)->idx] >= 3) continue;
+            if (find((*itPros)->slots.begin(), (*itPros)->slots.end(), slot) ==
+                (*itPros)->slots.end()) continue;
             StudentGroup* group;
             // auto chosenGroupVal = -1;
             // TODO : search in groups compatible with pro (languages)
