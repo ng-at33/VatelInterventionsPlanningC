@@ -42,9 +42,8 @@ VatelModel* buildModel(Data& data, MPSolver& solver) {
     }
     // Upper bound on each pro
     for (auto& pro : data.professionals) {
-        MPConstraint* const new_c = 
-            solver.MakeRowConstraint(0, data.config.maxInter,
-                "ub_pro_p" + to_string(pro->idx));
+        MPConstraint* const new_c = solver.MakeRowConstraint(0, data.config.maxInter,
+            "ub_pro_p" + to_string(pro->idx));
         for (auto& slot : pro->slots) {
             auto xVar = xVarMap.find(make_tuple(pro->idx, slot->idx));
             new_c->SetCoefficient(xVar->second, 1);

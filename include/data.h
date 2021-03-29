@@ -29,8 +29,7 @@ struct Dimension {
 
     Dimension(){};
     Dimension(int numPros, int numGroups, int numLanguages, int numSlots) :
-        numPros(numPros), numGroups(numGroups), numLanguages(numLanguages),
-        numSlots(numSlots)
+        numPros(numPros), numGroups(numGroups), numLanguages(numLanguages), numSlots(numSlots)
         {};
 };
 
@@ -49,8 +48,8 @@ struct Config {
     int nbPros;
     int maxInter;
     Config();
-    Config(std::vector<std::string> days, std::vector<std::string> slots,
-        int nbWeeks, int nbDays, int nbSlotsByDay, int nbPros, int maxInter);
+    Config(std::vector<std::string> days, std::vector<std::string> slots, int nbWeeks, int nbDays,
+        int nbSlotsByDay, int nbPros, int maxInter);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 
@@ -69,8 +68,7 @@ struct TimeSlot {
     std::vector<const Professional *> pros;
     std::ostream& print(std::ostream& os = std::cout) const;
     TimeSlot();
-    TimeSlot(int idx, std::string name, std::string hours,
-        int day, int slotOfDay);
+    TimeSlot(int idx, std::string name, std::string hours, int day, int slotOfDay);
 };
 
 // Override cout
@@ -115,8 +113,7 @@ struct Data {
     std::vector<StudentGroup *> groups;
     std::vector<TimeSlot *>     slots;
     Data();
-    Data(Dimension dimensions, Config config,
-        std::vector<Professional *> professionals,
+    Data(Dimension dimensions, Config config, std::vector<Professional *> professionals,
         std::vector<StudentGroup *> groups, std::vector<TimeSlot *> slots);
 };
 
@@ -126,8 +123,7 @@ std::ostream& operator<<(std::ostream& os, const Data& data);
 // XLS reading functions
 Dimension* readXLSDimensions(libxl::Sheet* sheet);
 Config* readXLSConfig(libxl::Sheet* sheet);
-std::vector<Professional *>* readXLSProfessionals(Data* data,
-    libxl::Sheet* sheet);
+std::vector<Professional *>* readXLSProfessionals(Data* data, libxl::Sheet* sheet);
 std::vector<StudentGroup *>* readXLSGroups(libxl::Sheet* sheet);
 std::vector<TimeSlot *>* readXLSSlots(libxl::Sheet* sheet);
 Data* readXLS(std::string& filename);

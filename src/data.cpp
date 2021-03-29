@@ -18,8 +18,7 @@ using namespace libxl;
 // Constructors
 TimeSlot::TimeSlot(){}
 
-TimeSlot::TimeSlot(int idx, std::string name, std::string hours,
-    int day, int slotOfDay) :
+TimeSlot::TimeSlot(int idx, std::string name, std::string hours, int day, int slotOfDay) :
     idx(idx), name(name), hours(hours), day(day), slotOfDay(slotOfDay)
     {};
 
@@ -31,26 +30,24 @@ StudentGroup::StudentGroup(int idx, std::string name) :
 
 Professional::Professional(){};
 
-Professional::Professional(int idx, std::string name,
-    std::vector<TimeSlot *> slots) :
+Professional::Professional(int idx, std::string name, std::vector<TimeSlot *> slots) :
     idx(idx), name(name), slots(slots)
     {};
 
 Data::Data(){};
 
-Data::Data(Dimension dimensions, Config config,
-    std::vector<Professional *> professionals,
+Data::Data(Dimension dimensions, Config config, std::vector<Professional *> professionals,
     std::vector<StudentGroup *> groups, std::vector<TimeSlot *> slots) :
-    dimensions(dimensions), config(config), professionals(professionals),
-    groups(groups), slots(slots)
+    dimensions(dimensions), config(config), professionals(professionals), groups(groups),
+    slots(slots)
     {};
 
 Config::Config(){};
 
-Config::Config(vector<string> days, vector<string> slots, int nbWeeks,
-    int nbDays, int nbSlotsByDay, int nbPros, int maxInter) :
-    days(days), slots(slots), nbWeeks(nbWeeks), nbDays(nbDays),
-    nbSlotsByDay(nbSlotsByDay), nbPros(nbPros), maxInter(maxInter)
+Config::Config(vector<string> days, vector<string> slots, int nbWeeks, int nbDays, int nbSlotsByDay,
+    int nbPros, int maxInter) :
+    days(days), slots(slots), nbWeeks(nbWeeks), nbDays(nbDays), nbSlotsByDay(nbSlotsByDay),
+    nbPros(nbPros), maxInter(maxInter)
     {};
 
 Dimension* readXLSDimensions(Sheet* sheet) {
@@ -128,8 +125,7 @@ Config* readXLSConfig(Sheet* sheet) {
     }
     auto nbPros = 0;
     std::vector<string> slotsVec(slots.begin(), slots.end());
-    Config* config = new Config(days, slotsVec, nbWeeks, nbDays, nbSlotsByDay,
-        nbPros, 3);
+    Config* config = new Config(days, slotsVec, nbWeeks, nbDays, nbSlotsByDay, nbPros, 3);
     return config;
 };
 
@@ -174,8 +170,7 @@ vector<TimeSlot *>* readXLSSlots(Sheet* sheet) {
     return slots;
 };
 
-vector<Professional *>* readXLSProfessionals(Data* data, 
-        Sheet* sheet) {
+vector<Professional *>* readXLSProfessionals(Data* data, Sheet* sheet) {
     vector<Professional *>* pros = new vector<Professional *>();
     auto colSlotOff = 1;
     auto colPros = 0;
@@ -332,7 +327,6 @@ Data* generateData(int numPros, int numGroups, float slotCompatProb) {
         cnt_group++;
     }
 
-
     Data* data = new Data();
     data->dimensions = *dimensions;
     data->config = *config;
@@ -344,10 +338,7 @@ Data* generateData(int numPros, int numGroups, float slotCompatProb) {
 
 // Printers
 ostream& operator<<(ostream& os, const Data& data) {
-    os << "Data(" << endl;
-    // os << data.config << endl;
-    os << data.config << endl;
-    os << data.dimensions << endl;
+    os << "Data(" << endl << data.config << endl << data.dimensions << endl;
     os << "Professionals" << endl;
     for (auto& pro : data.professionals) pro->print(os);
     os << "Slots" << endl;
@@ -357,50 +348,36 @@ ostream& operator<<(ostream& os, const Data& data) {
 };
 
 ostream& Dimension::print(ostream& os) const {
-    os << "Dimension(";
-    os << "numPros : " << numPros << endl;
-    os << "numGroups : " << numGroups << endl;
-    os << "numLanguages : " << numLanguages << endl;
-    os << "numSlots : " << numSlots << endl;
-    os << ")" << endl;
+    os << "Dimension(" << "numPros : " << numPros << endl << "numGroups : " << numGroups << endl;
+    os << "numLanguages : " << numLanguages << endl << "numSlots : " << numSlots << endl << ")";
+    os << endl;
     return os;
 };
 
 ostream& Config::print(ostream& os) const {
-    os << "Config(" << endl;
-    os << "days " << endl;
+    os << "Config(" << endl << "days " << endl;
     for (auto& day : days) os << day << "," << endl;
     os << "slots " << endl;
     for (auto& slot : slots) os << slot << "," << endl;
-    os << "nb_weeks : " << nbWeeks << endl;
-    os << "nb_days : " << nbDays << endl;
-    os << "nb_base_slots : " << nbSlotsByDay << endl;
-    os << "nb_pros : " << nbPros << endl;
-    os << "max_inter : " << maxInter;
+    os << "nb_weeks : " << nbWeeks << endl << "nb_days : " << nbDays << endl << "nb_base_slots : "
+        << nbSlotsByDay << endl << "nb_pros : " << nbPros << endl << "max_inter : " << maxInter;
     os << ")" << endl;
     return os;
 };
 
 ostream& TimeSlot::print(ostream& os) const {
-    os << "TimeSlot(idx : " << idx; 
-    os << ", name : " << name;
-    os << ", time interval : (" << hours << ")";
-    os << ", day : " << day;
-    os << ", slotOfDay : " << slotOfDay;
-    os << ")" << endl;
+    os << "TimeSlot(idx : " << idx << ", name : " << name << ", time interval : (" << hours << ")";
+    os << ", day : " << day << ", slotOfDay : " << slotOfDay << ")" << endl;
     return os;
 };
 
 ostream& StudentGroup::print(ostream& os) const {
-    os << "StudentGroup(idx : " << idx; 
-    os << ", name : " << name << ")" << endl;
+    os << "StudentGroup(idx : " << idx << ", name : " << name << ")" << endl;
     return os;
 };
 
 ostream& Professional::print(ostream& os) const {
-    os << "Professional(idx : " << idx; 
-    os << ", name : " << name;
-    os << ", slots " << endl;
+    os << "Professional(idx : " << idx << ", name : " << name << ", slots " << endl;
     for (auto& slot : slots) slot->print(os);
     os << ")" << endl;
     return os;

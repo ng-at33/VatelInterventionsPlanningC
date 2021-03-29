@@ -81,8 +81,7 @@ HeurNode* firstFit(Data& data) {
                 continue;
             }
             // Creating chosen <Professional*, StudenGroup*> pair
-            pair<Professional*, StudentGroup*> pairPrGr = make_pair(*itPros,
-                group);
+            pair<Professional*, StudentGroup*> pairPrGr = make_pair(*itPros, group);
             firstNode->slots[slot->idx].insert(pairPrGr);
             isIntervByGrSl[group->idx][slot->idx] = true;
             isIntervByPrSl[(*itPros)->idx][slot->idx] = true;

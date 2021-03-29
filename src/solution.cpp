@@ -23,8 +23,7 @@ Solution* buildSolution(Data& data, VatelModel& model) {
     for (auto& xVarPair : model.xVarMap) {
         auto& xVarIdx = xVarPair.first;
         auto& xVar = xVarPair.second;
-        if (xVar->solution_value() == 1.0)
-        {
+        if (xVar->solution_value() == 1.0) {
             auto proIdx = get<0>(xVarIdx);
             auto slotIdx = get<1>(xVarIdx);
             Assignation* assignation = new Assignation();
@@ -56,10 +55,7 @@ Solution* buildSolution(Data& data, HeurNode& node) {
 };
 
 ostream& Assignation::print(ostream& os) const {
-    os << "Assignation(";
-    os << pro->name << " - " << group->name << " @ ";
-    os << slot->name;
-    os << ")" << endl;
+    os << "Assignation(" << pro->name << " - " << group->name << " @ " << slot->name << ")" << endl;
     return os;
 };
 
@@ -87,8 +83,7 @@ void Solution::writeXLS(Data& data) {
     // Writing slots
     for (auto iSlot = 0; iSlot < data.config.slots.size(); iSlot++) {
         auto slotStr = data.config.slots[iSlot];
-        sheet->writeStr(iSlot + rowSlotOffset, startSlotCol,
-            slotStr.c_str());
+        sheet->writeStr(iSlot + rowSlotOffset, startSlotCol, slotStr.c_str());
     }
     auto rowAssOff = 1 + rowOff;
     // Writing assignations
@@ -113,14 +108,37 @@ void Solution::writeXLS(Data& data) {
 bool validateSolution(Data& data, Solution& sol) {
     auto isSolValid = true;
     Assignation* assignation = new Assignation();
+    vector<int> nbAssByPr(data.dimensions.numPros, 0);
+    vector<int> nbAssBySl(data.dimensions.numSlots, 0);
+    // Computing number of interventions by professional and slot
+    for (auto& af : sol.assignations) {
+        // Checking that the professional was available on this time slot
+        if (find(af->pro->slots.begin(), af->pro->slots.end(), af->slot) == af->pro->slots.end()) {
+            cout << "ERROR: " << af->pro->name << " not available on time slot " <<
+                af->slot->name << endl;
+        }
+        nbAssByPr[af->pro->idx]++;
+        nbAssBySl[af->slot->idx]++;
+    }
+    // Checking that no professional has exceeded its max number of assignations
+    for (auto& pr : data.professionals) {
+        if (nbAssByPr[pr->idx] >= 4) {
+            cout << "ERROR: " << pr->name << " found assigned more " << "than 3 times" << endl;
+        }
+    }
+    // Checking that no slot has exceeded its max number of assignations
+    for (auto& sl : data.slots) {
+        if (nbAssBySl[sl->idx] >= 4) {
+            cout << "ERROR: " << sl->name << " found assigned more " << "than 3 times" << endl;
+        }
+    }
     // Checking that all professionals are not scheduled more than once per time slot
     for (auto& slot : data.slots) {
         vector<Professional *> prosInSlot {};
         for (auto& af : sol.assignations) {
             if (af->slot == slot) {
-                if (find(prosInSlot.begin(), prosInSlot.end(), af->pro) != 
-                        prosInSlot.end()) {
-                    cout << "ERROR : " << (*af->pro).name << " found assigned in slot "
+                if (find(prosInSlot.begin(), prosInSlot.end(), af->pro) != prosInSlot.end()) {
+                    cout << "ERROR: " << (*af->pro).name << " found assigned in slot "
                         << *slot << " more than once" << endl;
                     isSolValid = false;
                 }
@@ -133,9 +151,8 @@ bool validateSolution(Data& data, Solution& sol) {
         vector<StudentGroup *> sgInSlot {};
         for (auto& af : sol.assignations) {
             if (af->slot == slot) {
-                if (find(sgInSlot.begin(), sgInSlot.end(), af->group) !=
-                        sgInSlot.end()) {
-                    cout << "ERROR : " << (*af->group).name << " found assigned in slot "
+                if (find(sgInSlot.begin(), sgInSlot.end(), af->group) != sgInSlot.end()) {
+                    cout << "ERROR: " << (*af->group).name << " found assigned in slot "
                         << *slot << " more than once" << endl;
                     isSolValid = false;
                 }
