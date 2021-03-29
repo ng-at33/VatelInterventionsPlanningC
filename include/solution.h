@@ -1,7 +1,7 @@
 /* 
  * Developped by Alexis TOULLAT (alexis.toullat@at-consulting.fr)
  * solution.h: define and builds a structure holding a solution,
- * as well as functions to display it
+ * as well as functions to evaluation its quality and display it
  */
 
 #pragma once
