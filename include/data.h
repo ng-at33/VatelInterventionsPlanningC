@@ -48,7 +48,7 @@ struct Config {
     int nbPros;
     int maxInter;
     Config();
-    Config(std::vector<std::string> days, std::vector<std::string> slots, int nbWeeks, int nbDays,
+    Config(std::vector<std::string>& days, std::vector<std::string>& slots, int nbWeeks, int nbDays,
         int nbSlotsByDay, int nbPros, int maxInter);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
@@ -96,7 +96,7 @@ struct Professional {
     std::string name;
     std::vector<TimeSlot *> slots;
     Professional();
-    Professional(int idx, std::string name, std::vector<TimeSlot *> slots);
+    Professional(int idx, std::string name, std::vector<TimeSlot *>& slots);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 
@@ -113,8 +113,8 @@ struct Data {
     std::vector<StudentGroup *> groups;
     std::vector<TimeSlot *>     slots;
     Data();
-    Data(Dimension dimensions, Config config, std::vector<Professional *> professionals,
-        std::vector<StudentGroup *> groups, std::vector<TimeSlot *> slots);
+    Data(Dimension dimensions, Config config, std::vector<Professional *>& professionals,
+        std::vector<StudentGroup *>& groups, std::vector<TimeSlot *>& slots);
 };
 
 // Overrides cout

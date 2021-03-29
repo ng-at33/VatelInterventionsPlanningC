@@ -17,9 +17,10 @@ using namespace std;
 using namespace libxl;
 using namespace operations_research;
 
+Solution::Solution(vector<Assignation *>& assignations) : assignations(assignations) {};
+
 Solution* buildSolution(Data& data, VatelModel& model) {
-    Solution* solution = new Solution();
-    std::vector<Assignation *> assignations {};
+    vector<Assignation *> assignations {};
     for (auto& xVarPair : model.xVarMap) {
         auto& xVarIdx = xVarPair.first;
         auto& xVar = xVarPair.second;
@@ -32,13 +33,12 @@ Solution* buildSolution(Data& data, VatelModel& model) {
             assignations.push_back(assignation);
         }
     }
-    solution->assignations = assignations;
+    Solution* solution = new Solution(assignations);
     return solution;
 };
 
 Solution* buildSolution(Data& data, HeurNode& node) {
-    Solution* solution = new Solution();
-    std::vector<Assignation *> assignations {};
+    vector<Assignation *> assignations {};
     auto slotIdx = 0;
     for (auto& slot: node.slots) {
         for (auto& pair: slot) {
@@ -50,7 +50,7 @@ Solution* buildSolution(Data& data, HeurNode& node) {
         }
         slotIdx++;
     }
-    solution->assignations = assignations;
+    Solution* solution = new Solution(assignations);
     return solution;
 };
 

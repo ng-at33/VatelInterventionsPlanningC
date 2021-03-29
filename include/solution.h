@@ -16,7 +16,16 @@
 #include "model.h"
 #include "heuristic.h"
 
-// Structure to hold the information about one intervention
+// Hold the result of the evulation of a solution
+struct SolutionEvaluation {
+    int numAssign;
+    float avgAssignBySlot;
+    float avgAssignByDay;
+    float avgAssignByPro;
+    float avgAssignByGroup;
+};
+
+// Hold the information about one intervention
 struct Assignation {
     Professional* pro;
     StudentGroup* group;
@@ -29,9 +38,10 @@ inline std::ostream& operator<<(std::ostream& os, const Assignation& as) {
     return as.print(os);
 };
 
-// Structure to hold and display a Solution of the problem
+// Hold and display a Solution of the problem
 struct Solution {
     std::vector<Assignation *> assignations;
+    Solution(std::vector<Assignation *>& assignations);
     std::ostream& print(std::ostream& os = std::cout) const;
     void writeXLS(Data& data); // Write solution to XLSfile
 };
@@ -41,22 +51,13 @@ inline std::ostream& operator<<(std::ostream& os, const Solution& sol) {
     return sol.print(os);
 };
 
-// // Structure to hold and display a Solution of the problem
-// struct SolutionProfiling {
-//     std::vector<Assignation *> assignations;
-//     std::ostream& print(std::ostream& os = std::cout) const;
-// };
-
-// // Overrides cout
-// inline std::ostream& operator<<(std::ostream& os, const Solution& sol) {
-//     return sol.print(os);
-// };
-
+// TODO: define a generic data structure to hold algorithms solutions
 // Build a Solution from variables values
 Solution* buildSolution(Data& data, VatelModel& model);
 // Build a solution from heuristic node
 Solution* buildSolution(Data& data, HeurNode& model);
-
+// Return the evaluation of the quality of a solution
+SolutionEvaluation* evaluate(Data& data);
 // Produce a SolutionProfiling to validate and also evaluate the quality of a solution 
 // SolutionProfiling* evaluteSolution(Data& data, Solution& sol);
 

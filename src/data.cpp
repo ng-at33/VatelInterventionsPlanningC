@@ -24,28 +24,26 @@ TimeSlot::TimeSlot(int idx, std::string name, std::string hours, int day, int sl
 
 StudentGroup::StudentGroup(){};
 
-StudentGroup::StudentGroup(int idx, std::string name) :
-    idx(idx), name(name)
-    {};
+StudentGroup::StudentGroup(int idx, std::string name) : idx(idx), name(name) {};
 
 Professional::Professional(){};
 
-Professional::Professional(int idx, std::string name, std::vector<TimeSlot *> slots) :
+Professional::Professional(int idx, std::string name, std::vector<TimeSlot *>& slots) :
     idx(idx), name(name), slots(slots)
     {};
 
 Data::Data(){};
 
-Data::Data(Dimension dimensions, Config config, std::vector<Professional *> professionals,
-    std::vector<StudentGroup *> groups, std::vector<TimeSlot *> slots) :
+Data::Data(Dimension dimensions, Config config, std::vector<Professional *>& professionals,
+    std::vector<StudentGroup *>& groups, std::vector<TimeSlot *>& slots) :
     dimensions(dimensions), config(config), professionals(professionals), groups(groups),
     slots(slots)
     {};
 
-Config::Config(){};
+Config::Config() {};
 
-Config::Config(vector<string> days, vector<string> slots, int nbWeeks, int nbDays, int nbSlotsByDay,
-    int nbPros, int maxInter) :
+Config::Config(vector<string> &days, vector<string>& slots, int nbWeeks, int nbDays,
+    int nbSlotsByDay, int nbPros, int maxInter) :
     days(days), slots(slots), nbWeeks(nbWeeks), nbDays(nbDays), nbSlotsByDay(nbSlotsByDay),
     nbPros(nbPros), maxInter(maxInter)
     {};
