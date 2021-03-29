@@ -236,11 +236,13 @@ Data* generateData(int numPros, int numGroups, float slotCompatProb) {
     vector<string> base_slots_start{ "9h", "10h30", "14h", "15h30" };
     vector<string> base_slots_end{ "10h30", "12h", "15h30", "17h" };
 
+    // Initializing random number generation
     srand(time(NULL));
     static string charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
     string proName;
     int strLength = 10;
     proName.resize(strLength);
+    // Generating names for professionals
     vector<string> pros_str {};
     for (int proI; proI < numPros; proI++) {
         for (int i = 0; i < strLength; i++) {
@@ -252,6 +254,7 @@ Data* generateData(int numPros, int numGroups, float slotCompatProb) {
     string groupName;
     strLength = 6;
     groupName.resize(strLength);
+    // Generating names for students groups
     vector<string> groups_str {};
     for (int grpI; grpI < numGroups; grpI++) {
         for (int i = 0; i < strLength; i++) {
@@ -266,6 +269,7 @@ Data* generateData(int numPros, int numGroups, float slotCompatProb) {
     vector<TimeSlot *> slots;
     auto cnt_slots = 0;
     auto cnt_days = 0;
+    // Generating time slots
     for (auto day : days) {
         for (auto slot_idx = 0; slot_idx < base_slots_start.size(); ++slot_idx) {
             TimeSlot* new_slot = new TimeSlot();
@@ -283,6 +287,7 @@ Data* generateData(int numPros, int numGroups, float slotCompatProb) {
     for (auto slot_idx = 0; slot_idx < base_slots_start.size(); ++slot_idx) {
         slots_str.push_back(base_slots_start[slot_idx] + "-" + base_slots_end[slot_idx]);
     }
+    // Initializing config
     config->days = days;
     config->slots = slots_str;
     config->nbWeeks = num_weeks;
@@ -294,6 +299,7 @@ Data* generateData(int numPros, int numGroups, float slotCompatProb) {
     Dimension* dimensions = new Dimension(pros_str.size(), groups_str.size(), 1, slots.size());
 
     int** dispo = new int*[dimensions->numPros];
+    // Generating random availabilities for professionals
     for (int i = 0; i < dimensions->numPros; ++i) {
         dispo[i] = new int[slots.size()];
         for (int j = 0; j < dimensions->numSlots; ++j) {
@@ -303,6 +309,7 @@ Data* generateData(int numPros, int numGroups, float slotCompatProb) {
     }
     vector<Professional *> pros;
     auto cnt_pro = 0;
+    // Initializing professionals info
     for (auto& pro : pros_str) {
         Professional* new_pro = new Professional();
         new_pro->idx = cnt_pro;
@@ -319,6 +326,7 @@ Data* generateData(int numPros, int numGroups, float slotCompatProb) {
     }
     vector<StudentGroup *> groups;
     auto cnt_group = 0;
+    // Initializing students groups info
     for (auto& group : groups_str) {
         StudentGroup* new_group = new StudentGroup();
         new_group->idx = cnt_group;
@@ -327,6 +335,7 @@ Data* generateData(int numPros, int numGroups, float slotCompatProb) {
         cnt_group++;
     }
 
+    // Constructing Data struct info
     Data* data = new Data();
     data->dimensions = *dimensions;
     data->config = *config;

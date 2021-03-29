@@ -11,6 +11,7 @@
 
 #include "data.h"
 
+// Fully hold a partial or complete heuristic solution
 struct HeurNode {
     static int NODE_COUNTER;
     int id;
