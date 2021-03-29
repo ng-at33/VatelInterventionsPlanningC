@@ -17,7 +17,7 @@ struct HeurNode {
     int id;
     float cost;
     std::vector<std::set<std::pair<Professional*, StudentGroup*>>> slots; // Represent assigned <pro, student> pairs, indexed by slots
-    HeurNode(Data& data); // Create an empty node
+    HeurNode(Data* data); // Create an empty node
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 
@@ -26,5 +26,5 @@ inline std::ostream& operator<<(std::ostream& os, const HeurNode& as) {
     return as.print(os);
 };
 
-HeurNode* firstFit(Data& data, HeurNode* node); // Complete node using first fit
-HeurNode* firstFit(Data& data); // Create a solution using first fit
+HeurNode* firstFit(Data* data, HeurNode* node); // Complete node using first fit
+HeurNode* firstFit(Data* data); // Create a solution using first fit

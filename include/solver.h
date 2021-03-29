@@ -9,19 +9,19 @@
 // Structure holding the Strategy pattern algorithm
 class Algorithm {
 public:
-    virtual Solution* solve(Data& data) = 0;
+    virtual Solution* solve(Data* data) = 0;
 };
 
 // Sub class of Algorithm that launches the GLOP solver
 class AlgorithmMIP: public Algorithm {
 public:
-    Solution* solve(Data& data);
+    Solution* solve(Data* data);
 };
 
 // Sub class of Algorithm that solves the problem using a heuristic
 class AlgorithmHeuristic: public Algorithm {
 public:
-    Solution* solve(Data& data);
+    Solution* solve(Data* data);
 };
 
 // Strategy pattern for the solving algorithm
@@ -31,7 +31,7 @@ public:
     AlgorithmStrategy() { algo_ = NULL; };
     ~AlgorithmStrategy() { algo_ = NULL; };
     void setAlgorithm(int type);
-    Solution* solve(Data& data);
+    Solution* solve(Data* data);
 private:
     Algorithm* algo_;
 };

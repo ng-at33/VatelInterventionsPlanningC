@@ -10,8 +10,8 @@ using namespace std;
 
 int HeurNode::NODE_COUNTER(0);
 
-HeurNode::HeurNode(Data& data) : id(NODE_COUNTER++), cost(0),
-    slots(vector<set<pair<Professional*, StudentGroup*>>>(data.dimensions.numSlots)) {
+HeurNode::HeurNode(Data* data) : id(NODE_COUNTER++), cost(0),
+    slots(vector<set<pair<Professional*, StudentGroup*>>>(data->dimensions.numSlots)) {
     NODE_COUNTER++;
 };
 
@@ -30,25 +30,25 @@ ostream& HeurNode::print(ostream& os) const {
     return os;
 };
 
-HeurNode* firstFit(Data& data, HeurNode* node) {
+HeurNode* firstFit(Data* data, HeurNode* node) {
 };
 
-HeurNode* firstFit(Data& data) {
+HeurNode* firstFit(Data* data) {
     auto* firstNode = new HeurNode(data);
 
-    vector<vector<bool>> isIntervByGrSl(data.dimensions.numGroups,
-        vector<bool> (data.dimensions.numSlots, false));
-    vector<vector<bool>> isIntervByPrSl(data.dimensions.numPros,
-        vector<bool> (data.dimensions.numSlots, false));
-    vector<vector<int>> nbIntervByPrDa(data.dimensions.numPros,
-        vector<int> (data.config.nbDays, 0));
-    vector<int> nbIntervByPr(data.dimensions.numPros, 0);
-    vector<int> nbIntervByGr(data.dimensions.numGroups, 0);
-    vector<int> nbIntervBySl(data.dimensions.numSlots, 0);
+    vector<vector<bool>> isIntervByGrSl(data->dimensions.numGroups,
+        vector<bool> (data->dimensions.numSlots, false));
+    vector<vector<bool>> isIntervByPrSl(data->dimensions.numPros,
+        vector<bool> (data->dimensions.numSlots, false));
+    vector<vector<int>> nbIntervByPrDa(data->dimensions.numPros,
+        vector<int> (data->config.nbDays, 0));
+    vector<int> nbIntervByPr(data->dimensions.numPros, 0);
+    vector<int> nbIntervByGr(data->dimensions.numGroups, 0);
+    vector<int> nbIntervBySl(data->dimensions.numSlots, 0);
 
     // Filling empty node
     // Sorting slots by least pros available
-    auto slots = data.slots;
+    auto slots = data->slots;
     std::sort(slots.begin(), slots.end(),
         [] (TimeSlot* ts1, TimeSlot* ts2) {
             return ts1->pros.size() < ts2->pros.size();
@@ -58,7 +58,7 @@ HeurNode* firstFit(Data& data) {
     for (auto& slot : slots) {
         if (nbIntervBySl[slot->idx] >= 3) continue;
         // Sorting pros by least compatible
-        auto pros = data.professionals;
+        auto pros = data->professionals;
         std::sort(pros.begin(), pros.end(),
             [] (Professional* pro1, Professional* pro2) {
                 return pro1->slots.size() < pro2->slots.size();
@@ -71,8 +71,8 @@ HeurNode* firstFit(Data& data) {
             StudentGroup* group;
             // auto chosenGroupVal = -1;
             // TODO : search in groups compatible with pro (languages)
-            for (auto itGrp = data.groups.begin();
-                    itGrp != data.groups.end(); itGrp++) {
+            for (auto itGrp = data->groups.begin();
+                    itGrp != data->groups.end(); itGrp++) {
                 if (!isIntervByGrSl[(*itGrp)->idx][slot->idx] &&
                         !isIntervByPrSl[(*itPros)->idx][slot->idx]) {
                     group = *itGrp;

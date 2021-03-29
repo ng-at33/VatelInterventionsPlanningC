@@ -13,7 +13,7 @@
 using namespace std;
 using namespace operations_research;
 
-VatelModel* buildModel(Data& data, MPSolver& solver) {
+VatelModel* buildModel(Data* data, MPSolver& solver) {
     LOG(INFO) << "Creating model ! " << std::endl;
     // Defining constants
     const double infinity = solver.infinity();
@@ -22,7 +22,7 @@ VatelModel* buildModel(Data& data, MPSolver& solver) {
     objective->SetMaximization();
     // Variables
     map<tuple<int, int>, MPVariable*> xVarMap {};
-    for (auto& pro : data.professionals) {
+    for (auto& pro : data->professionals) {
         for (auto& slot : pro->slots) {
             MPVariable* const new_x = solver.MakeBoolVar("x_p" +
                 std::to_string(pro->idx) + "t" + std::to_string(slot->idx));
@@ -32,17 +32,17 @@ VatelModel* buildModel(Data& data, MPSolver& solver) {
     }
     // Constraints
     // Upper bound on each slot
-    for (auto& slot : data.slots) {
+    for (auto& slot : data->slots) {
         MPConstraint* const new_c = 
             solver.MakeRowConstraint(0, 2, "ub_slot_t" + to_string(slot->idx));
-        for (auto& pro : data.professionals) {
+        for (auto& pro : data->professionals) {
             auto xVar = xVarMap.find(make_tuple(pro->idx, slot->idx));
             new_c->SetCoefficient(xVar->second, 1);
         }
     }
     // Upper bound on each pro
-    for (auto& pro : data.professionals) {
-        MPConstraint* const new_c = solver.MakeRowConstraint(0, data.config.maxInter,
+    for (auto& pro : data->professionals) {
+        MPConstraint* const new_c = solver.MakeRowConstraint(0, data->config.maxInter,
             "ub_pro_p" + to_string(pro->idx));
         for (auto& slot : pro->slots) {
             auto xVar = xVarMap.find(make_tuple(pro->idx, slot->idx));

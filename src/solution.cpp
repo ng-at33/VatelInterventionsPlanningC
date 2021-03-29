@@ -17,19 +17,22 @@ using namespace std;
 using namespace libxl;
 using namespace operations_research;
 
+Assignation::Assignation(Professional* pro, StudentGroup* group, TimeSlot* slot) :
+    pro(pro), group(group),  slot(slot)
+    {};
+
 Solution::Solution(vector<Assignation *>& assignations) : assignations(assignations) {};
 
-Solution* buildSolution(Data& data, VatelModel& model) {
+Solution* buildSolution(Data* data, VatelModel* model) {
     vector<Assignation *> assignations {};
-    for (auto& xVarPair : model.xVarMap) {
+    for (auto& xVarPair : model->xVarMap) {
         auto& xVarIdx = xVarPair.first;
         auto& xVar = xVarPair.second;
         if (xVar->solution_value() == 1.0) {
             auto proIdx = get<0>(xVarIdx);
             auto slotIdx = get<1>(xVarIdx);
-            Assignation* assignation = new Assignation();
-            assignation->pro = data.professionals[proIdx];
-            assignation->slot = data.slots[slotIdx];
+            Assignation* assignation = new Assignation(data->professionals[proIdx], data->groups[0],
+                data->slots[slotIdx]);
             assignations.push_back(assignation);
         }
     }
@@ -37,15 +40,12 @@ Solution* buildSolution(Data& data, VatelModel& model) {
     return solution;
 };
 
-Solution* buildSolution(Data& data, HeurNode& node) {
+Solution* buildSolution(Data* data, HeurNode* node) {
     vector<Assignation *> assignations {};
     auto slotIdx = 0;
-    for (auto& slot: node.slots) {
+    for (auto& slot: node->slots) {
         for (auto& pair: slot) {
-            Assignation* assignation = new Assignation();
-            assignation->pro = pair.first;
-            assignation->group = pair.second;
-            assignation->slot = data.slots[slotIdx];
+            Assignation* assignation = new Assignation(pair.first, pair.second, data->slots[slotIdx]);
             assignations.push_back(assignation);
         }
         slotIdx++;
@@ -66,7 +66,7 @@ ostream& Solution::print(ostream& os) const {
     return os;
 };
 
-void Solution::writeXLS(Data& data) {
+void Solution::writeXLS(Data* data) {
     Book* book = xlCreateXMLBook();
     Sheet* sheet = book->addSheet("Planning");
 
@@ -74,21 +74,21 @@ void Solution::writeXLS(Data& data) {
     auto startDateCol = 1;
     auto startSlotRow = 0 + rowOff;
     // Writing days
-    for (auto iDay = 0; iDay < data.config.days.size(); iDay++) {
-        auto dayStr = data.config.days[iDay];
+    for (auto iDay = 0; iDay < data->config.days.size(); iDay++) {
+        auto dayStr = data->config.days[iDay];
         sheet->writeStr(startSlotRow, startDateCol + iDay, dayStr.c_str());
     }
     auto startSlotCol = 0;
     auto rowSlotOffset = 1 + rowOff;
     // Writing slots
-    for (auto iSlot = 0; iSlot < data.config.slots.size(); iSlot++) {
-        auto slotStr = data.config.slots[iSlot];
+    for (auto iSlot = 0; iSlot < data->config.slots.size(); iSlot++) {
+        auto slotStr = data->config.slots[iSlot];
         sheet->writeStr(iSlot + rowSlotOffset, startSlotCol, slotStr.c_str());
     }
     auto rowAssOff = 1 + rowOff;
     // Writing assignations
-    for (auto d = 0; d < data.config.nbDays; d++) {
-        for (auto s = 0; s < data.config.nbSlotsByDay; s++) {
+    for (auto d = 0; d < data->config.nbDays; d++) {
+        for (auto s = 0; s < data->config.nbSlotsByDay; s++) {
             auto row = s + rowAssOff;
             auto col = startDateCol + d;
             string cellContent = "";
@@ -105,13 +105,12 @@ void Solution::writeXLS(Data& data) {
     book->release();
 }
 
-bool validateSolution(Data& data, Solution& sol) {
+bool validateSolution(Data* data, Solution* sol) {
     auto isSolValid = true;
-    Assignation* assignation = new Assignation();
-    vector<int> nbAssByPr(data.dimensions.numPros, 0);
-    vector<int> nbAssBySl(data.dimensions.numSlots, 0);
+    vector<int> nbAssByPr(data->dimensions.numPros, 0);
+    vector<int> nbAssBySl(data->dimensions.numSlots, 0);
     // Computing number of interventions by professional and slot
-    for (auto& af : sol.assignations) {
+    for (auto& af : sol->assignations) {
         // Checking that the professional was available on this time slot
         if (find(af->pro->slots.begin(), af->pro->slots.end(), af->slot) == af->pro->slots.end()) {
             cout << "ERROR: " << af->pro->name << " not available on time slot " <<
@@ -121,21 +120,21 @@ bool validateSolution(Data& data, Solution& sol) {
         nbAssBySl[af->slot->idx]++;
     }
     // Checking that no professional has exceeded its max number of assignations
-    for (auto& pr : data.professionals) {
+    for (auto& pr : data->professionals) {
         if (nbAssByPr[pr->idx] >= 4) {
             cout << "ERROR: " << pr->name << " found assigned more " << "than 3 times" << endl;
         }
     }
     // Checking that no slot has exceeded its max number of assignations
-    for (auto& sl : data.slots) {
+    for (auto& sl : data->slots) {
         if (nbAssBySl[sl->idx] >= 4) {
             cout << "ERROR: " << sl->name << " found assigned more " << "than 3 times" << endl;
         }
     }
     // Checking that all professionals are not scheduled more than once per time slot
-    for (auto& slot : data.slots) {
+    for (auto& slot : data->slots) {
         vector<Professional *> prosInSlot {};
-        for (auto& af : sol.assignations) {
+        for (auto& af : sol->assignations) {
             if (af->slot == slot) {
                 if (find(prosInSlot.begin(), prosInSlot.end(), af->pro) != prosInSlot.end()) {
                     cout << "ERROR: " << (*af->pro).name << " found assigned in slot "
@@ -147,9 +146,9 @@ bool validateSolution(Data& data, Solution& sol) {
         }
     }
     // Checking that all students groups are not scheduled more than once per time slot
-    for (auto& slot : data.slots) {
+    for (auto& slot : data->slots) {
         vector<StudentGroup *> sgInSlot {};
-        for (auto& af : sol.assignations) {
+        for (auto& af : sol->assignations) {
             if (af->slot == slot) {
                 if (find(sgInSlot.begin(), sgInSlot.end(), af->group) != sgInSlot.end()) {
                     cout << "ERROR: " << (*af->group).name << " found assigned in slot "
@@ -161,4 +160,52 @@ bool validateSolution(Data& data, Solution& sol) {
         }
     }
     return isSolValid;
+};
+
+ostream& SolutionEvaluation::print(ostream& os) const {
+    os << "SolutionEvaluation(Number of assignations : " << numAssign << endl;
+    os << "Standard deviation of the number of assignations by slot " << stdevAssignBySlot << endl;
+    os << "Standard deviation of the assignations by day " << stdevAssignByDay << endl;
+    os << "Standard deviation of the assignations by professional " << stdevAssignByPro << endl;
+    os << "Standard deviation of the assignations by group " << stdevAssignByGroup << endl;
+    return os;
+};
+
+float computeSDVec(vector<float>& v) {
+    float sum = accumulate(begin(v), end(v), 0.0);
+    float m = sum / v.size();
+    float accum = 0.0;
+    for_each (begin(v), end(v), [&](const float d) {
+        accum += (d - m) * (d - m);
+    });
+    float stdev = sqrt(accum / (v.size()-1));
+    return stdev;
+}
+
+SolutionEvaluation* evaluate(Data* data, Solution* sol) {
+    int numAssign = sol->assignations.size();
+
+    vector<float> numAssignBySlot(data->dimensions.numSlots, 0.0);
+    vector<float> numAssignByDay(data->config.nbDays, 0.0);
+    vector<float> numAssignByPro(data->dimensions.numPros, 0.0);
+    vector<float> numAssignByGroup(data->dimensions.numGroups, 0.0);
+    for (auto& as : sol->assignations) {
+        numAssignBySlot[as->slot->idx]++;
+        numAssignByDay[as->slot->day]++;
+        numAssignByPro[as->pro->idx]++;
+        numAssignByGroup[as->group->idx]++;
+    }
+    float stdevAssignBySlot = computeSDVec(numAssignBySlot);
+    float stdevAssignByDay = computeSDVec(numAssignByDay);
+    float stdevAssignByPro = computeSDVec(numAssignByPro);
+    float stdevAssignByGroup = computeSDVec(numAssignByGroup);
+
+    SolutionEvaluation* solEval = new SolutionEvaluation();
+    solEval->numAssign = numAssign;
+    solEval->stdevAssignBySlot = stdevAssignBySlot;
+    solEval->stdevAssignByDay = stdevAssignByDay;
+    solEval->stdevAssignByPro = stdevAssignByPro;
+    solEval->stdevAssignByGroup = stdevAssignByGroup;
+    
+    return solEval;
 };

@@ -18,4 +18,4 @@ struct VatelModel {
 };
 
 // Build and return a VatelModel
-VatelModel* buildModel(Data& data, operations_research::MPSolver& solver);
+VatelModel* buildModel(Data* data, operations_research::MPSolver& solver);

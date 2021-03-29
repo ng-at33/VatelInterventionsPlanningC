@@ -26,12 +26,12 @@ void AlgorithmStrategy::setAlgorithm(int type)
         algo_ = new AlgorithmMIP();
 }
 
-Solution* AlgorithmStrategy::solve(Data& data)
+Solution* AlgorithmStrategy::solve(Data* data)
 {
     return algo_->solve(data);
 }
 
-Solution* AlgorithmMIP::solve(Data& data)
+Solution* AlgorithmMIP::solve(Data* data)
 {
     MPSolver solver("Vatel rostering", MPSolver::GLOP_LINEAR_PROGRAMMING);
     VatelModel* vatelModel = buildModel(data, solver);
@@ -48,15 +48,15 @@ Solution* AlgorithmMIP::solve(Data& data)
     }
     else {
         LOG(INFO) << "Success, objective value : " << solver.Objective().Value() << endl;
-        solution = buildSolution(data, *vatelModel);
+        solution = buildSolution(data, vatelModel);
     }
     return solution;
 }
 
-Solution* AlgorithmHeuristic::solve(Data& data)
+Solution* AlgorithmHeuristic::solve(Data* data)
 {
     auto* firstNode = firstFit(data);
-    Solution* solution = buildSolution(data, *firstNode);
+    Solution* solution = buildSolution(data, firstNode);
     return solution;
 }
 
