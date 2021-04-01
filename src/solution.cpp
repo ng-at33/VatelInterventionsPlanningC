@@ -95,7 +95,7 @@ void Solution::writeXLS(Data* data) {
             // Filtering affecations that are on this day/slot
             for (auto& af : this->assignations) {
                 if (af->slot->day == d && af->slot->slotOfDay == s) {
-                    cellContent += "\n" + af->pro->name;
+                    cellContent += af->group->name + " - " + af->pro->name + "\n";
                 }
             }
             sheet->writeStr(row, col, cellContent.c_str());

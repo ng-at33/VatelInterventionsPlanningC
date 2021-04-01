@@ -80,8 +80,7 @@ Dimension* readXLSDimensions(Sheet* sheet) {
     }
     auto numGroups = 4;
     auto numLanguages = 0;
-    Dimension* dimensions = new Dimension(numPros, numGroups, numLanguages,
-        numSlots);
+    Dimension* dimensions = new Dimension(numPros, numGroups, numLanguages, numSlots);
     return dimensions;
 };
 
@@ -192,8 +191,7 @@ vector<Professional *>* readXLSProfessionals(Data* data, Sheet* sheet) {
                     slots.push_back(slot);
                 }
             }
-            Professional* pro = new Professional(rowIter, string(proName),
-                slots);
+            Professional* pro = new Professional(rowIter, string(proName), slots);
             pros->push_back(pro);
         }
         rowIter++;
@@ -203,6 +201,22 @@ vector<Professional *>* readXLSProfessionals(Data* data, Sheet* sheet) {
 
 vector<StudentGroup *>* readXLSGroups(Sheet* sheet) {
     vector<StudentGroup *>* groups = new vector<StudentGroup *>();
+    auto colGroups = 0;
+    auto rowOffset = 1;
+    auto rowIter = 0;
+    bool iterateGroups = true;
+    // Iterating on professionals names until "Nombre"
+    while (iterateGroups) {
+        auto cellType = sheet->cellType(rowIter + rowOffset, colGroups);
+        if (cellType == CELLTYPE_STRING) {
+            auto groupName = string(sheet->readStr(rowIter + rowOffset, colGroups));
+            StudentGroup* group = new StudentGroup(rowIter, string(groupName));
+            groups->push_back(group);
+        } else {
+            iterateGroups = false;
+        }
+        rowIter++;
+    }
     return groups;
 };
 
@@ -217,6 +231,7 @@ Data* readXLS(string& filename) {
             data->config = *readXLSConfig(sheet);
             data->slots = *readXLSSlots(sheet);
             data->professionals = *readXLSProfessionals(data, sheet);
+            Sheet* sheet = book->getSheet(2);
             data->groups = *readXLSGroups(sheet);
         }
     }
@@ -348,6 +363,8 @@ ostream& operator<<(ostream& os, const Data& data) {
     os << "Data(" << endl << data.config << endl << data.dimensions << endl;
     os << "Professionals" << endl;
     for (auto& pro : data.professionals) pro->print(os);
+    os << "Students groups" << endl;
+    for (auto& group : data.groups) group->print(os);
     os << "Slots" << endl;
     for (auto& slot : data.slots) slot->print(os);
     os << ")" << endl;
