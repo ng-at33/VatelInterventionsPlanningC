@@ -16,6 +16,12 @@ struct HeurNode {
     static int NODE_COUNTER;
     int id;
     float cost;
+    std::vector<std::vector<bool> > isIntervByGrSl; // Numer of interventions by <Group, Slot>
+    std::vector<std::vector<bool> > isIntervByPrSl; // Numer of interventions by <Professional, Slot>
+    std::vector<std::vector<int> > nbIntervByPrDa; // Numer of interventions by <Professional, Day>
+    std::vector<int> nbIntervByPr; // Numer of interventions by <Professional>
+    std::vector<int> nbIntervByGr; // Numer of interventions by <Group>
+    std::vector<int> nbIntervBySl; // Numer of interventions by <Slot>
     std::vector<std::set<std::pair<Professional*, StudentGroup*>>> slots; // Represent assigned <pro, student> pairs, indexed by slots
     HeurNode(Data* data); // Create an empty node
     std::ostream& print(std::ostream& os = std::cout) const;
