@@ -14,7 +14,7 @@ int HeurNode::NODE_COUNTER(0);
 HeurNode::HeurNode(Data* data, float cost, vector<vector<bool> >& isIntervByGrSl,  // Create an fully filled node
         vector<vector<bool> >& isIntervByPrSl, vector<vector<int> >& nbIntervByPrDa,
         vector<int>& nbIntervByPr, vector<int>& nbIntervByGr, vector<int>& nbIntervBySl,
-        vector<int>& nbIntervByDa, vector<std::set<std::pair<Professional*, StudentGroup*>>>& slots)
+        vector<int>& nbIntervByDa, vector<std::set<std::pair<Professional*, StudentGroup*> > >& slots)
         : id(NODE_COUNTER++), cost(cost), isIntervByGrSl(isIntervByGrSl),
         isIntervByPrSl(isIntervByPrSl), nbIntervByPrDa(nbIntervByPrDa), nbIntervByPr(nbIntervByPr),
         nbIntervByGr(nbIntervByGr), nbIntervBySl(nbIntervBySl), nbIntervByDa(nbIntervByDa),
@@ -40,7 +40,6 @@ ostream& HeurNode::print(ostream& os) const {
 float evaluate(vector<int>& nbIntervByPr, vector<int>& nbIntervByGr, vector<int>& nbIntervBySl,
         vector<int>& nbIntervByDa) {
     float fitness = 0.0;
-
     fitness += computeSDVec(nbIntervByPr);
     fitness += computeSDVec(nbIntervByGr);
     fitness += computeSDVec(nbIntervBySl);
@@ -57,7 +56,7 @@ HeurNode* firstFit(Data* data) {
     vector<int> nbIntervByGr(data->dimensions.numGroups, 0);
     vector<int> nbIntervBySl(data->dimensions.numSlots, 0);
     vector<int> nbIntervByDa(data->config.nbDays, 0);
-    vector<set<pair<Professional*, StudentGroup*>>> slots(data->dimensions.numSlots);
+    vector<set<pair<Professional*, StudentGroup*> > > slots(data->dimensions.numSlots);
     // Filling empty node
     // Sorting slots by least pros available
     auto slots_tmp = data->slots;
