@@ -72,9 +72,7 @@ struct TimeSlot {
 };
 
 // Override cout
-inline std::ostream& operator<<(std::ostream& os, const TimeSlot& ts) {
-    return ts.print(os);
-};
+inline std::ostream& operator<<(std::ostream& os, const TimeSlot& ts) { return ts.print(os); };
 
 // Contain the information of a single student group
 struct StudentGroup {
@@ -86,9 +84,7 @@ struct StudentGroup {
 };
 
 // Overrides cout
-inline std::ostream& operator<<(std::ostream& os, const StudentGroup& sg) {
-    return sg.print(os);
-};
+inline std::ostream& operator<<(std::ostream& os, const StudentGroup& sg) { return sg.print(os); };
 
 // Contain the information of a single professional
 struct Professional {
@@ -101,9 +97,7 @@ struct Professional {
 };
 
 // Overrides cout
-inline std::ostream& operator<<(std::ostream& os, const Professional& pf) {
-    return pf.print(os);
-};
+inline std::ostream& operator<<(std::ostream& os, const Professional& pf) { return pf.print(os); };
 
 // Main structure that holds the information of the problem
 struct Data {
@@ -115,10 +109,11 @@ struct Data {
     Data();
     Data(Dimension dimensions, Config config, std::vector<Professional *>& professionals,
         std::vector<StudentGroup *>& groups, std::vector<TimeSlot *>& slots);
+    std::ostream& print(std::ostream& os = std::cout) const;
 };
 
 // Overrides cout
-std::ostream& operator<<(std::ostream& os, const Data& data);
+inline std::ostream& operator<<(std::ostream& os, const Data& data) { return data.print(os); };
 
 // XLS reading functions
 Dimension* readXLSDimensions(libxl::Sheet* sheet);

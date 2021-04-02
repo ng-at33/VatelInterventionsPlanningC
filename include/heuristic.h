@@ -33,13 +33,11 @@ struct HeurNode {
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 // Overrides cout
-inline std::ostream& operator<<(std::ostream& os, const HeurNode& as) {
-    return as.print(os);
-};
+inline std::ostream& operator<<(std::ostream& os, const HeurNode& as) { return as.print(os); };
 // Returns a measure of the fitness of this node
-float evaluate(HeurNode* node);
-// Create a solution using first fit
-HeurNode* firstFit(std::vector<int>& nbIntervByPr, std::vector<int>& nbIntervByGr,
+float evaluate(std::vector<int>& nbIntervByPr, std::vector<int>& nbIntervByGr,
     std::vector<int>& nbIntervBySl, std::vector<int>& nbIntervByDa);
+// Create a solution using first fit
+HeurNode* firstFit(Data* data);
 // Make modifications on assignations to create a new, different node
 HeurNode* mutate(Data* data, HeurNode* node);

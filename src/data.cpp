@@ -359,14 +359,14 @@ Data* generateData(int numPros, int numGroups, float slotCompatProb) {
 };
 
 // Printers
-ostream& operator<<(ostream& os, const Data& data) {
-    os << "Data(" << endl << data.config << endl << data.dimensions << endl;
+ostream& Data::print(ostream& os) const {
+    os << "Data(" << endl << config << endl << dimensions << endl;
     os << "Professionals" << endl;
-    for (auto& pro : data.professionals) pro->print(os);
+    for (auto& pro : professionals) pro->print(os);
     os << "Students groups" << endl;
-    for (auto& group : data.groups) group->print(os);
+    for (auto& group : groups) group->print(os);
     os << "Slots" << endl;
-    for (auto& slot : data.slots) slot->print(os);
+    for (auto& slot : slots) slot->print(os);
     os << ")" << endl;
     return os;
 };
