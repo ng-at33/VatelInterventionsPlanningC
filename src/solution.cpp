@@ -12,6 +12,7 @@
 #include "libxl.h"
 
 #include "solution.h"
+#include "utils.h"
 
 using namespace std;
 using namespace libxl;
@@ -170,17 +171,6 @@ ostream& SolutionEvaluation::print(ostream& os) const {
     os << "Standard deviation of the assignations by group " << stdevAssignByGroup << endl;
     return os;
 };
-
-float computeSDVec(vector<float>& v) {
-    float sum = accumulate(begin(v), end(v), 0.0);
-    float m = sum / v.size();
-    float accum = 0.0;
-    for_each (begin(v), end(v), [&](const float d) {
-        accum += (d - m) * (d - m);
-    });
-    float stdev = sqrt(accum / (v.size()-1));
-    return stdev;
-}
 
 SolutionEvaluation* evaluate(Data* data, Solution* sol) {
     int numAssign = sol->assignations.size();

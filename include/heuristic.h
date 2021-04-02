@@ -22,8 +22,16 @@ struct HeurNode {
     std::vector<int> nbIntervByPr; // Numer of interventions by <Professional>
     std::vector<int> nbIntervByGr; // Numer of interventions by <Group>
     std::vector<int> nbIntervBySl; // Numer of interventions by <Slot>
+    std::vector<int> nbIntervByDa; // Numer o9f interventions by <Day>
     std::vector<std::set<std::pair<Professional*, StudentGroup*>>> slots; // Represent assigned <pro, student> pairs, indexed by slots
-    HeurNode(Data* data); // Create an empty node
+    HeurNode(Data* data, float cost, std::vector<std::vector<bool> >& isIntervByGrSl,  // Create an fully filled node
+        std::vector<std::vector<bool> >& isIntervByPrSl,
+        std::vector<std::vector<int> >& nbIntervByPrDa,
+        std::vector<int>& nbIntervByPr,
+        std::vector<int>& nbIntervByGr,
+        std::vector<int>& nbIntervBySl,
+        std::vector<int>& nbIntervByDa,
+        std::vector<std::set<std::pair<Professional*, StudentGroup*>>>& slots);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 
@@ -32,5 +40,8 @@ inline std::ostream& operator<<(std::ostream& os, const HeurNode& as) {
     return as.print(os);
 };
 
-HeurNode* firstFit(Data* data, HeurNode* node); // Complete node using first fit
-HeurNode* firstFit(Data* data); // Create a solution using first fit
+HeurNode* firstFit(std::vector<int>& nbIntervByPr, std::vector<int>& nbIntervByGr, // Create a solution using first fit
+    std::vector<int>& nbIntervBySl, std::vector<int>& nbIntervByDa);
+
+float evaluate(HeurNode* node); // Returns a measure of the fitness of this node
+HeurNode* mutate(Data* data, HeurNode* node); // Make modifications on assignations to create a new, different node
