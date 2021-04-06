@@ -56,6 +56,8 @@ Solution* AlgorithmMIP::solve(Data* data)
 Solution* AlgorithmHeuristic::solve(Data* data)
 {
     auto* firstNode = firstFit(data);
+    vector<HeurNode*> nodes { firstNode };
+    vector<HeurNode*> newNodes = iterate(data, nodes);
     Solution* solution = buildSolution(data, firstNode);
     return solution;
 }
