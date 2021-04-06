@@ -18,7 +18,7 @@ struct HeurNode {
     float cost;
     std::vector<std::vector<bool> > isIntervByGrSl; // True if intervention on <Group, Slot>
     std::vector<std::vector<bool> > isIntervByPrSl; // True if intervention on <Professional, Slot>
-    std::vector<std::vector<int> > nbIntervByPrDa; // Numer of interventions by <Professional, Day>
+    std::vector<std::vector<int> > nbIntervByPrDa; // Number of interventions by <Professional, Day>
     std::vector<int> nbIntervByPr; // Numer of interventions by <Professional>
     std::vector<int> nbIntervByGr; // Numer of interventions by <Group>
     std::vector<int> nbIntervBySl; // Numer of interventions by <Slot>
@@ -42,8 +42,8 @@ struct HeurNode {
 // Overrides cout
 inline std::ostream& operator<<(std::ostream& os, const HeurNode& as) { return as.print(os); };
 // Returns a measure of the fitness of this node
-float evaluate(std::vector<int>& nbIntervByPr, std::vector<int>& nbIntervByGr,
-    std::vector<int>& nbIntervBySl, std::vector<int>& nbIntervByDa);
+float evaluate(Data* data, std::vector<bool>& isIntervByGrSl, std::vector<int>& nbIntervByPr,
+    std::vector<int>& nbIntervByGr, std::vector<int>& nbIntervBySl, std::vector<int>& nbIntervByDa);
 // Create a solution using first fit
 HeurNode* firstFit(Data* data);
 // Iterate to select and generate swaps of nodes
