@@ -142,89 +142,75 @@ HeurNode* firstFit(Data* data) {
 
 vector<HeurNode*> HeurNode::generateSwaps(Data* data) {
     std::vector<HeurNode*> swappedNodes;
-    int slotIdx = 0;
-    for (auto& slotVec : slots) {
+    auto slotVec = this->slots.begin();
+    for (int slotIdx = 0; slotVec != this->slots.end(); slotVec++, slotIdx++) {
         TimeSlot* slot = data->slots[slotIdx];
-        for (auto& pair : slotVec) {
-            int oslotIdx = 0;
-            for (auto& oslotVec : slots) {
-                if (slotVec == oslotVec) {
-                    oslotIdx++;
-                    continue;
-                }
-                TimeSlot* oslot = data->slots[oslotIdx];
-                for (auto& opair : oslotVec) {
-                    if (opair == pair) continue;
-                    // Swap assignations if possible by creating a new node
-                    // Checking if professionals can be swapped
-                    if (pair.first != opair.first) {
-                        if (isProSwappable(data, oslotIdx, pair.first)) continue;
-                        if (isProSwappable(data, slotIdx, opair.first)) continue;
+        auto pair = slotVec->begin();
+        for (int pairI = 0; pair != slotVec->end(); pair++, pairI++) {
+            auto oslotVec = this->slots.begin();
+            for (int oslotIdx = 0; oslotVec != this->slots.end(); oslotVec++, oslotIdx++) {
+                if (slotIdx != oslotIdx) {
+                    TimeSlot* oslot = data->slots[oslotIdx];
+                    auto opair = oslotVec->begin();
+                    for (int opairI = 0; opair != oslotVec->end(); opair++, opairI++) {
+                        if (*opair == *pair) continue;
+                        // Swap assignations if possible by creating a new node
+                        // Checking if professionals can be swapped
+                        if (pair->first != opair->first) {
+                            if (!isProSwappable(data, oslotIdx, pair->first)) continue;
+                            if (!isProSwappable(data, slotIdx, opair->first)) continue;
+                        }
+                        // Checking if groups can be swapped
+                        if (pair->second != opair->second) {
+                            if (!isGroupSwappable(oslotIdx, pair->second)) continue;
+                            if (!isGroupSwappable(slotIdx, opair->second)) continue;
+                        }
+                        // Create new node with swapped pros and groups
+                        vector<vector<bool> > isIntervByGrSl(this->isIntervByGrSl);
+                        vector<vector<bool> > isIntervByPrSl(this->isIntervByPrSl);
+                        vector<vector<int> > nbIntervByPrDa(this->nbIntervByPrDa);
+                        vector<int> nbIntervByPr(this->nbIntervByPr);
+                        vector<int> nbIntervByGr(this->nbIntervByGr);
+                        vector<int> nbIntervBySl(this->nbIntervBySl);
+                        vector<int> nbIntervByDa(this->nbIntervByDa);
+                        vector<set<std::pair<Professional*, StudentGroup*> > > slots(this->slots);
+                        set<std::pair<Professional*, StudentGroup*> > assignations(this->assignations);
+                        isIntervByGrSl[pair->second->idx][slotIdx] = false;
+                        isIntervByGrSl[opair->second->idx][oslotIdx] = false;
+                        isIntervByGrSl[pair->second->idx][oslotIdx] = true;
+                        isIntervByGrSl[opair->second->idx][slotIdx] = true;
+                        isIntervByPrSl[pair->first->idx][slotIdx] = false;
+                        isIntervByPrSl[opair->first->idx][oslotIdx] = false;
+                        isIntervByPrSl[pair->first->idx][oslotIdx] = true;
+                        isIntervByPrSl[opair->first->idx][slotIdx] = true;
+                        nbIntervByPrDa[pair->first->idx][slot->day]--;
+                        nbIntervByPrDa[opair->first->idx][oslot->day]--;
+                        nbIntervByPrDa[pair->first->idx][oslot->day]++;
+                        nbIntervByPrDa[opair->first->idx][slot->day]++;
+                        auto assign1 = find_if(slots[slotIdx].begin(), slots[slotIdx].end(),
+                            [&] (std::pair<Professional*, StudentGroup*> tmpPair) {
+                                return tmpPair.first == pair->first;
+                            });
+                        auto assign2 = find_if(slots[oslotIdx].begin(), slots[oslotIdx].end(),
+                            [&] (std::pair<Professional*, StudentGroup*> tmpPair) {
+                                return tmpPair.first == opair->first;
+                            });
+                        slots[slotIdx].insert(*assign2);
+                        slots[oslotIdx].insert(*assign1);
+                        slots[slotIdx].erase(assign1);
+                        slots[oslotIdx].erase(assign2);
+                        float cost = evaluate(data, isIntervByGrSl, nbIntervByPr, nbIntervByGr,
+                            nbIntervBySl, nbIntervByDa);
+                        HeurNode* swappedNode = new HeurNode(data, cost, isIntervByGrSl, isIntervByPrSl,
+                            nbIntervByPrDa, nbIntervByPr, nbIntervByGr, nbIntervBySl, nbIntervByDa,
+                            slots, assignations);
+                        swappedNodes.push_back(swappedNode);
                     }
-                    // Checking if groups can be swapped
-                    if (pair.second != opair.second) {
-                        if (isGroupSwappable(oslotIdx, pair.second)) continue;
-                        if (isGroupSwappable(slotIdx, opair.second)) continue;
-                    }
-                    // Create new node with swapped pros and groups
-                    vector<vector<bool> > isIntervByGrSl(this->isIntervByGrSl);
-                    vector<vector<bool> > isIntervByPrSl(this->isIntervByPrSl);
-                    vector<vector<int> > nbIntervByPrDa(this->nbIntervByPrDa);
-                    vector<int> nbIntervByPr(this->nbIntervByPr);
-                    vector<int> nbIntervByGr(this->nbIntervByGr);
-                    vector<int> nbIntervBySl(this->nbIntervBySl);
-                    vector<int> nbIntervByDa(this->nbIntervByDa);
-                    vector<set<std::pair<Professional*, StudentGroup*> > > slots(this->slots);
-                    set<std::pair<Professional*, StudentGroup*> > assignations(this->assignations);
-                    isIntervByGrSl[pair.second->idx][slotIdx] = false;
-                    isIntervByGrSl[opair.second->idx][oslotIdx] = false;
-                    isIntervByGrSl[pair.second->idx][oslotIdx] = true;
-                    isIntervByGrSl[opair.second->idx][slotIdx] = true;
-                    isIntervByPrSl[pair.first->idx][slotIdx] = false;
-                    isIntervByPrSl[opair.first->idx][oslotIdx] = false;
-                    isIntervByPrSl[pair.first->idx][oslotIdx] = true;
-                    isIntervByPrSl[opair.first->idx][slotIdx] = true;
-                    nbIntervByPrDa[pair.first->idx][slot->day]--;
-                    nbIntervByPrDa[opair.first->idx][oslot->day]--;
-                    nbIntervByPrDa[pair.first->idx][oslot->day]++;
-                    nbIntervByPrDa[opair.first->idx][slot->day]++;
-                    // TODO : swap assignations
-                    auto assign1 = find_if(slots[slotIdx].begin(), slots[slotIdx].end(),
-                        [&] (std::pair<Professional*, StudentGroup*> tmpPair) {
-                            return tmpPair.first == pair.first;
-                        });
-                    auto assign2 = find_if(slots[oslotIdx].begin(), slots[oslotIdx].end(),
-                        [&] (std::pair<Professional*, StudentGroup*> tmpPair) {
-                            return tmpPair.first == opair.first;
-                        });
-                    slots[slotIdx].insert(*assign2);
-                    slots[oslotIdx].insert(*assign1);
-                    slots[slotIdx].erase(assign1);
-                    slots[oslotIdx].erase(assign2);
-                    float cost = evaluate(data, isIntervByGrSl, nbIntervByPr, nbIntervByGr,
-                        nbIntervBySl, nbIntervByDa);
-                    HeurNode* swappedNode = new HeurNode(data, cost, isIntervByGrSl, isIntervByPrSl,
-                        nbIntervByPrDa, nbIntervByPr, nbIntervByGr, nbIntervBySl, nbIntervByDa,
-                        slots, assignations);
-                    cout << *swappedNode << endl;
-                    swappedNodes.push_back(swappedNode);
                 }
-                oslotIdx++;
             }
         }
-        slotIdx++;
     }
     return swappedNodes;
-}
-
-bool HeurNode::isProInSlot(int slotIdx, Professional* pro) {
-    for (auto& pair : slots[slotIdx]) { if (pair.first == pro) return true; }
-    return false;
-}
-
-bool HeurNode::isGroupInSlot(int slotIdx, StudentGroup* group) {
-    for (auto& pair : slots[slotIdx]) { if (pair.second == group) return true; }
-    return false;
 }
 
 bool HeurNode::isProSwappable(Data* data, int slotIdx, Professional* pro) {
@@ -233,25 +219,25 @@ bool HeurNode::isProSwappable(Data* data, int slotIdx, Professional* pro) {
     int proIdx = pro->idx;
     if (nbIntervByPr[proIdx] >= 3) return false;
     if (nbIntervByPrDa[day][proIdx] >= 3) return false;
-    if (isProInSlot(slotIdx, pro)) return false;
+    if (isIntervByPrSl[pro->idx][slotIdx]) return false;
     return true;
 }
 
 bool HeurNode::isGroupSwappable(int slotIdx, StudentGroup* group) {
-    if (isGroupInSlot(slotIdx, group)) return false;
+    if (isIntervByGrSl[group->idx][slotIdx]) return false;
     return true;
 }
 
 std::vector<HeurNode*> iterate(Data* data, std::vector<HeurNode*> nodes) {
     std::vector<HeurNode*> newNodes;
-    for (auto node : nodes) {
-        cout << " old cost " << node->cost << endl;
+    // Generating swaps of all nodes
+    for (auto& node : nodes) {
         vector<HeurNode*> swaps = node->generateSwaps(data);
         sort(swaps.begin(), swaps.end(),
             [] (HeurNode* node1, HeurNode* node2) {
-                return node1->cost > node2->cost;
+                return node1->cost < node2->cost;
             });
-        for (auto& swap : swaps) cout << " cost " << swap->cost << endl;
+        newNodes.insert(newNodes.end(), swaps.begin(), swaps.end());
     }
     return newNodes;
 }

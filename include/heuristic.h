@@ -33,8 +33,6 @@ struct HeurNode {
         std::vector<std::set<std::pair<Professional*, StudentGroup*> > >& slots,
         std::set<std::pair<Professional*, StudentGroup*> >& assignations);
     std::vector<HeurNode*> generateSwaps(Data* data); // Generate all nodes with interventions swapped
-    bool isProInSlot(int slotIdx, Professional* pro); // Returns true if professional is assigned in slot with idx slotIdx
-    bool isGroupInSlot(int slotIdx, StudentGroup* group); // Returns true if students group is assigned in slot with idx slotIdx
     bool isProSwappable(Data* data, int slotIdx, Professional* pro);  // Returns true if professional can be swapped to slot with idx slotIdx
     bool isGroupSwappable(int slotIdx, StudentGroup* group);  // Returns true if students group can be swapped to slot with idx slotIdx
     std::ostream& print(std::ostream& os = std::cout) const;
