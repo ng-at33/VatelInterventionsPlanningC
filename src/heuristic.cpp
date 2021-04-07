@@ -196,7 +196,6 @@ vector<HeurNode*> HeurNode::generateSwaps(Data* data) {
 }
 
 vector<HeurNode*> HeurNode::generateMutationsAssignations(Data* data) {
-    bool br = false;
     std::vector<HeurNode*> swappedNodes;
     auto slotVec = this->slots.begin();
     for (int slotIdx = 0; slotVec != this->slots.end(); slotVec++, slotIdx++) {
