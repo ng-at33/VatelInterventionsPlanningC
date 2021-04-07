@@ -273,6 +273,7 @@ std::vector<HeurNode*> iterate(Data* data, std::vector<HeurNode*>& nodes) {
         // Showing cost of new nodes
         newNodes.insert(newNodes.end(), swaps.begin(), swaps.end());
     }
+    // Sorting new nodes by cost
     sort(newNodes.begin(), newNodes.end(),
         [] (HeurNode* node1, HeurNode* node2) {
             return node1->cost < node2->cost;
@@ -280,6 +281,7 @@ std::vector<HeurNode*> iterate(Data* data, std::vector<HeurNode*>& nodes) {
     for (auto& newNode : newNodes) {
         cout << " cost " << newNode->cost << endl;
     }
+    // Keeping only first 100 best nodes 
     vector<HeurNode*> nodesIteration(newNodes.begin(), newNodes.begin() + min(100ul, newNodes.size()));
     return nodesIteration;
 }
