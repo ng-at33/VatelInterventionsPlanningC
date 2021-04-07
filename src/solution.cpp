@@ -107,7 +107,19 @@ void Solution::writeXLS(Data* data) {
 }
 
 bool validateSolution(Data* data, Solution* sol) {
+
     auto isSolValid = true;
+    set<pair<Professional*, StudentGroup*> > assignations; // Used to check if a <pro,group> is not assigned more than once
+    for (auto& af : sol->assignations) {
+        for (auto& oaf : sol->assignations) {
+            if (af != oaf) {
+                if (af->pro == oaf->pro && af->group == oaf->group) {
+                    cout << "ERROR: " << af->pro->name << " and " << af->group->name
+                        << " assigned on slots " << *af->slot << " and " << *oaf->slot << endl;
+                }
+            }
+        }
+    }
     vector<int> nbAssByPr(data->dimensions.numPros, 0);
     vector<int> nbAssBySl(data->dimensions.numSlots, 0);
     // Computing number of interventions by professional and slot
@@ -174,7 +186,6 @@ ostream& SolutionEvaluation::print(ostream& os) const {
 
 SolutionEvaluation* evaluate(Data* data, Solution* sol) {
     int numAssign = sol->assignations.size();
-
     vector<float> numAssignBySlot(data->dimensions.numSlots, 0.0);
     vector<float> numAssignByDay(data->config.nbDays, 0.0);
     vector<float> numAssignByPro(data->dimensions.numPros, 0.0);
