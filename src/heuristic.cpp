@@ -114,7 +114,6 @@ HeurNode* firstFit(Data* data) {
             nbIntervByDa[slot->day]++;
         }
     }
-
     float cost = evaluate(data, nbIntervByPr, nbIntervByGr, nbIntervBySl, nbIntervByDa);
     auto* firstNode = new HeurNode(data, cost, isIntervByGrSl, isIntervByPrSl, nbIntervByPrDa,
         nbIntervByPr, nbIntervByGr, nbIntervBySl, nbIntervByDa, slots, assignations);
@@ -227,6 +226,10 @@ vector<HeurNode*> HeurNode::generateMutationsAssignations(Data* data) {
                     isIntervByPrSl[pair->first->idx][oslotIdx] = true;
                     nbIntervByPrDa[pair->first->idx][slot->day]--;
                     nbIntervByPrDa[pair->first->idx][oslot->day]++;
+                    nbIntervBySl[slotIdx]--;
+                    nbIntervBySl[oslotIdx]++;
+                    nbIntervByDa[slot->day]--;
+                    nbIntervByDa[oslot->day]++;
                     auto assign1 = find_if(slots[slotIdx].begin(), slots[slotIdx].end(),
                         [&] (std::pair<Professional*, StudentGroup*> tmpPair) {
                             return tmpPair.first == pair->first;
@@ -281,6 +284,6 @@ std::vector<HeurNode*> iterate(Data* data, std::vector<HeurNode*>& nodes) {
         cout << " cost " << newNode->cost << endl;
     }
     // Keeping only first 100 best nodes 
-    vector<HeurNode*> nodesIteration(newNodes.begin(), newNodes.begin() + min(100ul, newNodes.size()));
+    vector<HeurNode*> nodesIteration(newNodes.begin(), newNodes.begin() + min(10ul, newNodes.size()));
     return nodesIteration;
 }

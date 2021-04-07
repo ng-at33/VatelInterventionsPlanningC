@@ -57,7 +57,7 @@ Solution* AlgorithmHeuristic::solve(Data* data)
 {
     HeurNode* firstNode = firstFit(data);
     vector<HeurNode*> nodes { firstNode };
-    for (auto i = 0; i < 10; i++) {
+    for (auto i = 0; i < 100; i++) {
         cout << " iteration " << i << endl;
         nodes = iterate(data, nodes);
     }
