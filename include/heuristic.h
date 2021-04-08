@@ -19,10 +19,10 @@ struct HeurNode {
     std::vector<std::vector<bool> > isIntervByGrSl; // True if intervention on <Group, Slot>
     std::vector<std::vector<bool> > isIntervByPrSl; // True if intervention on <Professional, Slot>
     std::vector<std::vector<int> > nbIntervByPrDa; // Number of interventions by <Professional, Day>
-    std::vector<int> nbIntervByPr; // Numer of interventions by <Professional>
-    std::vector<int> nbIntervByGr; // Numer of interventions by <Group>
-    std::vector<int> nbIntervBySl; // Numer of interventions by <Slot>
-    std::vector<int> nbIntervByDa; // Numer of interventions by <Day>
+    std::vector<int> nbIntervByPr; // Number of interventions by <Professional>
+    std::vector<int> nbIntervByGr; // Number of interventions by <Group>
+    std::vector<int> nbIntervBySl; // Number of interventions by <Slot>
+    std::vector<int> nbIntervByDa; // Number of interventions by <Day>
     std::vector<std::set<std::pair<Professional*, StudentGroup*> > > slots; // Represent assigned <pro, student> pairs, indexed by slots
     std::set<std::pair<Professional*, StudentGroup*> > assignations; // Contain pairs of assigned <pro, students> to look for already assigned pairs
     HeurNode(float cost, std::vector<std::vector<bool> >& isIntervByGrSl,  // Create a fully filled node
@@ -40,7 +40,7 @@ struct HeurNode {
     bool isProGroupAssignable(Professional* pro, StudentGroup* group);  // Returns true if pro can be assigned to student group
     std::ostream& print(std::ostream& os = std::cout) const;
 };
-// Overrides cout
+// Override cout
 inline std::ostream& operator<<(std::ostream& os, const HeurNode& as) { return as.print(os); };
 // Returns a measure of the fitness of this node
 float evaluate(std::vector<int>& nbIntervByPr,
