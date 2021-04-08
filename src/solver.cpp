@@ -55,14 +55,8 @@ Solution* AlgorithmMIP::solve(Data* data)
 
 Solution* AlgorithmHeuristic::solve(Data* data)
 {
-    HeurNode* firstNode = firstFit(data);
-    vector<HeurNode*> nodes { firstNode };
-    for (auto i = 0; i < 100; i++) {
-        cout << " iteration " << i << endl;
-        nodes = iterate(data, nodes);
-    }
-    cout << " nodes size " << nodes.size() << endl;
-    Solution* solution = buildSolution(data, nodes[0]);
+    HeurNode* bestNode = pseudoGenetic(data);
+    Solution* solution = buildSolution(data, bestNode);
     return solution;
 }
 

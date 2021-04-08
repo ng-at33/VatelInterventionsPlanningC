@@ -19,8 +19,8 @@ using namespace std;
 
 int main(int argc, char** argv) {
     string fn = "data/doodle_new.xlsx";
-    Data* data = readXLS(fn);
-    // Data* data = generateData(50, 20, 01.0);
+    // Data* data = readXLS(fn);
+    Data* data = generateData(100, 2, 1.0);
     cout << *data << endl;
     AlgorithmStrategy algo;
     // 0 : MIP (Obsolete), 1 : Heuristic

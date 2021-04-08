@@ -250,7 +250,8 @@ Data* generateData(int numPros, int numGroups, float slotCompatProb) {
     vector<string> base_slots_end{ "10h30", "12h", "15h30", "17h" };
 
     // Initializing random number generation
-    srand(time(NULL));
+    srand(123);
+    // srand(time(NULL));
     static string charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
     string proName;
     int strLength = 10;
