@@ -7,7 +7,9 @@ This work deals with the planning of professional interventions within a managem
 More doc on the algorithm used coming soon...
 
 TODO:
-- implement other type of mutations: change a professional or students group in a node. This is the next prority since there are students groups that have no assignations
 - improve code readability by separating node creation in functions
-- improve performance by not generating every mutation of a node but instead heuristically choose more strategic ones (try to remove assignations from crowded slots for example)
+- improve performance by not generating every mutation of a node but instead heuristically choose more strategic ones (try to remove assignations from crowded slots for example). Actually the algorithm gives good results on real data which is more important, but for data instances where professionals are available on more slots it can be cery slow (> 5 minutes instead of 1 second)
+- implement other type of mutations: change a professional in a node for example.
 - put constants in a separate declaration file
+- read parameters in file/command line rather than hard coding them
+- change some variable's names to give the code more intelligibility: use prefix p for pointers and r for references, change "autos" to clearly use references or values
