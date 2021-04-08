@@ -359,7 +359,8 @@ HeurNode* pseudoGenetic(Data* data) {
         nodes = iterate(data, nodes);
         if (nodes.empty()) {
             cout << "ERROR: no nodes generated" << endl;
-            exit(1);
+            nodes = { firstNode };
+            break;
         }
         cout << nodes.front()->cost << " / " << incumbent << endl;
         // if (iteration == 100) isIterate = false;
