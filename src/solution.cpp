@@ -107,7 +107,6 @@ void Solution::writeXLS(Data* data) {
 }
 
 bool validateSolution(Data* data, Solution* sol) {
-
     auto isSolValid = true;
     set<pair<Professional*, StudentGroup*> > assignations; // Used to check if a <pro,group> is not assigned more than once
     for (auto& af : sol->assignations) {

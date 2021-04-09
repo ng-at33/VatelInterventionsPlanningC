@@ -141,7 +141,7 @@ vector<TimeSlot *>* readXLSSlots(Sheet* sheet) {
     const char* cur_hour = "";
     string cur_month = "";
     string cur_day = "";
-    auto cur_d = 0;
+    auto cur_d = -1;
     auto slotOfDay = 0;
     while (iterateSlots) {
         auto colIdx = colIter + colOffset;
@@ -154,14 +154,15 @@ vector<TimeSlot *>* readXLSSlots(Sheet* sheet) {
             if (auto month = sheet->readStr(row_month, colIdx)) {
                 cur_month = month;
             }
+            bool incDay = false;
             if (auto day = sheet->readStr(row_day, colIdx)) {
                 cur_day = day;
-                cur_d++;
                 slotOfDay = 0;
+                cur_d++;
             } else {
                 slotOfDay++;
             }
-            auto slotName = cur_month + " " + cur_day + " " + hour;
+            auto slotName = cur_month + " " + cur_day + " " + cur_hour;
             TimeSlot* slot = new TimeSlot(colIter, slotName, cur_hour, cur_d, slotOfDay);
             slots->push_back(slot);
         }
