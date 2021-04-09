@@ -170,6 +170,7 @@ vector<HeurNode*> HeurNode::generateMutationsAssignations(Data* data) {
                     if (isIntervPrSlAlready(isIntervByPrSl, pair->first, oslot)) continue;
                     if (isIntervGrSlAlready(isIntervByGrSl, pair->second, oslot)) continue;
                     if (isNbIntervSlReached(nbIntervBySl, oslot)) continue;
+                    // Create new node with assignation moved from slot to oslot
                     HeurNode* swappedNode = new HeurNode(this);
                     swappedNode->isIntervByGrSl[pair->second->idx][slotIdx] = false;
                     swappedNode->isIntervByGrSl[pair->second->idx][oslotIdx] = true;
@@ -202,11 +203,9 @@ vector<HeurNode*> HeurNode::generateMutationsGroups(Data* data) {
         for (int pairI = 0; pair != slotVec->end(); pair++, pairI++) {
             for (auto& group : data->groups) {
                 if (pair->second != group) {
-                    // Swap assignations if possible by creating a new node
-                    // Checking if groups can be swapped
                     if (isIntervGrSlAlready(isIntervByGrSl, group, slot)) continue;
                     if (!isProGroupAssignable(pair->first, group)) continue;
-                    // Create new node with swapped pros and groups
+                    // Create new node with group changed
                     HeurNode* swappedNode = new HeurNode(this);
                     swappedNode->isIntervByGrSl[pair->second->idx][slotIdx] = false;
                     swappedNode->isIntervByGrSl[group->idx][slotIdx] = true;

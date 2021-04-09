@@ -36,11 +36,11 @@ struct HeurNode {
     bool isGroupAssignable(StudentGroup* group, TimeSlot* slot);  // Returns true if students group can be assigned to slot with idx slotIdx
     bool isProGroupAssignable(Professional* pro, StudentGroup* group);  // Returns true if pro can be assigned to student group
     std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsInSlot(int slotIdx, Professional* pro, StudentGroup* group); // Returns pointer to assignation with <pro, group> in slot
-    std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsGrInSlot(int slotIdx, StudentGroup* group); // Returns pointer to assignation with <pro, group> in slot
-    std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsPrInSlot(int slotIdx, Professional* pro); // Returns pointer to assignation with <pro, group> in slot
+    std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsGrInSlot(int slotIdx, StudentGroup* group); // Returns pointer to assignation with group in slot
+    std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsPrInSlot(int slotIdx, Professional* pro); // Returns pointer to assignation with pro in slot
     std::set<std::pair<Professional*, StudentGroup*> >::iterator findAs(Professional* pro, StudentGroup* group); // Returns pointer to assignation with <pro, group> in assignations
-    std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsGr(StudentGroup* group); // Returns pointer to assignation with <pro, group> in assignations
-    std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsPr(Professional* pro); // Returns pointer to assignation with <pro, group> in assignations
+    std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsGr(StudentGroup* group); // Returns pointer to assignation with group in assignations
+    std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsPr(Professional* pro); // Returns pointer to assignation with pro in assignations
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 // Override cout
@@ -49,10 +49,10 @@ inline std::ostream& operator<<(std::ostream& os, const HeurNode& as) { return a
 // float evaluate(std::vector<int>& nbIntervByPr,
 //     std::vector<int>& nbIntervByGr, std::vector<int>& nbIntervBySl, std::vector<int>& nbIntervByDa);
 bool isNbIntervByProReached(std::vector<int>& nbIntervByPr, Professional* pro); // Return true if number of interventions for this professional has been reached
-bool isNbIntervByPrDaReached(std::vector<std::vector<int> >& nbIntervByPrDa, Professional* pro, TimeSlot* slot); // Return true if number of interventions for this professional has been reached
-bool isIntervPrSlAlready(std::vector<std::vector<bool> >& isIntervByPrSl, Professional* pro, TimeSlot* slot); // Return true if number of interventions for this professional has been reached
-bool isNbIntervSlReached(std::vector<int>& nbIntervBySl, TimeSlot* slot); // Return true if number of interventions for this professional has been reached
-bool isIntervGrSlAlready(std::vector<std::vector<bool> >& isIntervByGrSl, StudentGroup* group, TimeSlot* slot); // Return true if number of interventions for this professional has been reached
+bool isNbIntervByPrDaReached(std::vector<std::vector<int> >& nbIntervByPrDa, Professional* pro, TimeSlot* slot); // Return true if number of interventions for this professional on this day has been reached
+bool isIntervPrSlAlready(std::vector<std::vector<bool> >& isIntervByPrSl, Professional* pro, TimeSlot* slot); // Return true if this pro has already been assigned on this slot
+bool isNbIntervSlReached(std::vector<int>& nbIntervBySl, TimeSlot* slot); // Return true if number of interventions for this slot has been reached
+bool isIntervGrSlAlready(std::vector<std::vector<bool> >& isIntervByGrSl, StudentGroup* group, TimeSlot* slot); // Return true if this group has already been assigned on this slot
 // Create a solution using first fit
 HeurNode* firstFit(Data* data);
 // Iterate to select and generate swaps of nodes
