@@ -31,9 +31,16 @@ struct HeurNode {
     std::vector<HeurNode*> generateMutationsAssignations(Data* data); // Generate all nodes with interventions swapped
     std::vector<HeurNode*> generateMutationsGroups(Data* data); // Generate all nodes with interventions swapped
     void evaluate(); // Set the cost for this node
+    bool isSlotAssignable(int slotIdx);  // Returns true if slot is assignable
     bool isProAssignable(Data* data, int slotIdx, Professional* pro);  // Returns true if professional can be assigned to slot with idx slotIdx
     bool isGroupAssignable(int slotIdx, StudentGroup* group);  // Returns true if students group can be assigned to slot with idx slotIdx
     bool isProGroupAssignable(Professional* pro, StudentGroup* group);  // Returns true if pro can be assigned to student group
+    std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsInSlot(int slotIdx, Professional* pro, StudentGroup* group); // Returns pointer to assignation with <pro, group> in slot
+    std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsGrInSlot(int slotIdx, StudentGroup* group); // Returns pointer to assignation with <pro, group> in slot
+    std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsPrInSlot(int slotIdx, Professional* pro); // Returns pointer to assignation with <pro, group> in slot
+    std::set<std::pair<Professional*, StudentGroup*> >::iterator findAs(Professional* pro, StudentGroup* group); // Returns pointer to assignation with <pro, group> in assignations
+    std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsGr(StudentGroup* group); // Returns pointer to assignation with <pro, group> in assignations
+    std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsPr(Professional* pro); // Returns pointer to assignation with <pro, group> in assignations
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 // Override cout

@@ -167,10 +167,12 @@ vector<HeurNode*> HeurNode::generateMutationsAssignations(Data* data) {
                     TimeSlot* oslot = data->slots[oslotIdx];
                     // Swap assignations if possible by creating a new node
                     // Checking if professionals can be swapped
-                    if (!isProAssignable(data, oslotIdx, pair->first)) continue;
+                    if (!pair->first->isProAvailOnSlot(oslot)) continue;
+                    if (nbIntervByPrDa[pair->first->idx][oslotIdx] >= 3) continue;
+                    if (isIntervByPrSl[pair->first->idx][oslotIdx]) continue;
                     // Checking if groups can be swapped
-                    if (!isGroupAssignable(oslotIdx, pair->second)) continue;
-                    // Create new node with swapped pros and groups                    
+                    if (isIntervByGrSl[pair->second->idx][oslotIdx]) continue;
+                    // Create new node with swapped pros and groups
                     HeurNode* swappedNode = new HeurNode(this);
                     swappedNode->isIntervByGrSl[pair->second->idx][slotIdx] = false;
                     swappedNode->isIntervByGrSl[pair->second->idx][oslotIdx] = true;
@@ -183,8 +185,8 @@ vector<HeurNode*> HeurNode::generateMutationsAssignations(Data* data) {
                     swappedNode->nbIntervByDa[slot->day]--;
                     swappedNode->nbIntervByDa[oslot->day]++;
                     auto assign = swappedNode->findAsInSlot(slotIdx, pair->first, pair->second);
-                    swappedNode->slots[oslotIdx].insert(*assign);
                     swappedNode->slots[slotIdx].erase(assign);
+                    swappedNode->slots[oslotIdx].insert(*assign);
                     swappedNode->evaluate();
                     swappedNodes.push_back(swappedNode);
                 }
@@ -204,7 +206,7 @@ vector<HeurNode*> HeurNode::generateMutationsGroups(Data* data) {
                 if (pair->second != group) {
                     // Swap assignations if possible by creating a new node
                     // Checking if groups can be swapped
-                    if (!isGroupAssignable(slotIdx, group)) continue;
+                    if (isIntervByGrSl[group->idx][slotIdx]) continue;
                     if (!isProGroupAssignable(pair->first, group)) continue;
                     // Create new node with swapped pros and groups
                     HeurNode* swappedNode = new HeurNode(this);
@@ -237,7 +239,7 @@ bool HeurNode::isProAssignable(Data* data, int slotIdx, Professional* pro) {
     TimeSlot* slot = data->slots[slotIdx];
     int day = slot->day;
     int proIdx = pro->idx;
-    if (find(pro->slots.begin(), pro->slots.end(), slot) == pro->slots.end()) return false;
+    if (!pro->isProAvailOnSlot(slot)) return false;
     if (nbIntervByPr[proIdx] >= 3) return false;
     if (nbIntervByPrDa[proIdx][day] >= 3) return false;
     if (isIntervByPrSl[pro->idx][slotIdx]) return false;
@@ -245,7 +247,6 @@ bool HeurNode::isProAssignable(Data* data, int slotIdx, Professional* pro) {
 }
 
 bool HeurNode::isGroupAssignable(int slotIdx, StudentGroup* group) {
-    if (isIntervByGrSl[group->idx][slotIdx]) return false;
     if (isIntervByGrSl[group->idx][slotIdx]) return false;
     return true;
 }

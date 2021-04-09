@@ -93,6 +93,7 @@ struct Professional {
     std::vector<TimeSlot *> slots;
     Professional();
     Professional(int idx, std::string name, std::vector<TimeSlot *>& slots);
+    bool isProAvailOnSlot(TimeSlot* slot);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 

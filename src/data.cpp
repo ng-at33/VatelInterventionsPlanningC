@@ -48,6 +48,9 @@ Config::Config(vector<string> &days, vector<string>& slots, int nbWeeks, int nbD
     nbPros(nbPros), maxInter(maxInter)
     {};
 
+bool Professional::isProAvailOnSlot(TimeSlot* slot) {
+    return find(slots.begin(), slots.end(), slot) != slots.end();
+}
 Dimension* readXLSDimensions(Sheet* sheet) {
     // Number of slots
     auto numSlots = 0;
