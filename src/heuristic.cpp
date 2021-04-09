@@ -68,7 +68,6 @@ HeurNode* firstFit(Data* data) {
 
     // Iterating over sorted slots
     for (auto& slot : slotsTmp) {
-        if (firstNode->nbIntervBySl[slot->idx] >= 3) continue;
         // Sorting pros by least compatible
         auto pros = data->professionals;
         sort(pros.begin(), pros.end(),
@@ -76,38 +75,23 @@ HeurNode* firstFit(Data* data) {
                 return pro1->slots.size() < pro2->slots.size();
             });
         for (auto itPros = pros.begin(); itPros != pros.end(); itPros++) {
-            // Check if slot has not already reached its max number of interventions
-            if (firstNode->nbIntervBySl[slot->idx] >= 3) break;
-            // Check if professional has not already reached his max number of interventions
-            if (firstNode->nbIntervByPr[(*itPros)->idx] >= 3) continue;
-            // Check if professional is available on this slot
-            if (find((*itPros)->slots.begin(), (*itPros)->slots.end(), slot) ==
-                (*itPros)->slots.end()) continue;
-            StudentGroup* group = NULL;
-            // TODO : search in groups compatible with pro (languages)
-            // Check if group and professionals are not already assigned to slot
-            for (auto itGrp = data->groups.begin();
-                    itGrp != data->groups.end(); itGrp++) {
-                if (!firstNode->isIntervByGrSl[(*itGrp)->idx][slot->idx] &&
-                        !firstNode->isIntervByPrSl[(*itPros)->idx][slot->idx]) {
-                    group = *itGrp;
-                    break;
-                }
+            for (auto itGroup = data->groups.begin(); itGroup != data->groups.end(); itGroup++) {
+                if (!firstNode->isProAssignable(data, slot->idx, *itPros)) continue;
+                if (!firstNode->isGroupAssignable(slot->idx, *itGroup)) continue;
+                if (!firstNode->isProGroupAssignable(*itPros, *itGroup)) continue;
+                if (!firstNode->isSlotAssignable(slot->idx)) continue;
+                // Creating chosen <Professional*, StudenGroup*> pair
+                pair<Professional*, StudentGroup*> pairPrGr = make_pair(*itPros, *itGroup);
+                firstNode->slots[slot->idx].insert(pairPrGr);
+                firstNode->assignations.insert(pairPrGr);
+                firstNode->isIntervByGrSl[(*itGroup)->idx][slot->idx] = true;
+                firstNode->isIntervByPrSl[(*itPros)->idx][slot->idx] = true;
+                firstNode->nbIntervByPrDa[(*itPros)->idx][slot->day]++;
+                firstNode->nbIntervByPr[(*itPros)->idx]++;
+                firstNode->nbIntervByGr[(*itGroup)->idx]++;
+                firstNode->nbIntervBySl[slot->idx]++;
+                firstNode->nbIntervByDa[slot->day]++;
             }
-            if (group == NULL) continue;
-            if (find(firstNode->assignations.begin(), firstNode->assignations.end(),
-                make_pair(*itPros, group)) != firstNode->assignations.end()) continue;
-            // Creating chosen <Professional*, StudenGroup*> pair
-            pair<Professional*, StudentGroup*> pairPrGr = make_pair(*itPros, group);
-            firstNode->slots[slot->idx].insert(pairPrGr);
-            firstNode->assignations.insert(pairPrGr);
-            firstNode->isIntervByGrSl[group->idx][slot->idx] = true;
-            firstNode->isIntervByPrSl[(*itPros)->idx][slot->idx] = true;
-            firstNode->nbIntervByPrDa[(*itPros)->idx][slot->day]++;
-            firstNode->nbIntervByPr[(*itPros)->idx]++;
-            firstNode->nbIntervByGr[group->idx]++;
-            firstNode->nbIntervBySl[slot->idx]++;
-            firstNode->nbIntervByDa[slot->day]++;
         }
     }
     firstNode->evaluate();
@@ -154,16 +138,8 @@ vector<HeurNode*> HeurNode::generateSwaps(Data* data) {
                         swappedNode->nbIntervByPrDa[opair->first->idx][oslot->day]--;
                         swappedNode->nbIntervByPrDa[pair->first->idx][oslot->day]++;
                         swappedNode->nbIntervByPrDa[opair->first->idx][slot->day]++;
-                        auto assign1 = find_if(
-                            swappedNode->slots[slotIdx].begin(), swappedNode->slots[slotIdx].end(),
-                            [&] (std::pair<Professional*, StudentGroup*> tmpPair) {
-                                return tmpPair.first == pair->first;
-                            });
-                        auto assign2 = find_if(
-                            swappedNode->slots[oslotIdx].begin(), swappedNode->slots[oslotIdx].end(),
-                            [&] (std::pair<Professional*, StudentGroup*> tmpPair) {
-                                return tmpPair.first == opair->first;
-                            });
+                        auto assign1 = swappedNode->findAsInSlot(slotIdx, pair->first, pair->second);
+                        auto assign2 = swappedNode->findAsInSlot(slotIdx, opair->first, opair->second);
                         swappedNode->slots[slotIdx].insert(*assign2);
                         swappedNode->slots[oslotIdx].insert(*assign1);
                         swappedNode->slots[slotIdx].erase(assign1);
@@ -206,13 +182,9 @@ vector<HeurNode*> HeurNode::generateMutationsAssignations(Data* data) {
                     swappedNode->nbIntervBySl[oslotIdx]++;
                     swappedNode->nbIntervByDa[slot->day]--;
                     swappedNode->nbIntervByDa[oslot->day]++;
-                    auto assign1 = find_if(
-                        swappedNode->slots[slotIdx].begin(), swappedNode->slots[slotIdx].end(),
-                        [&] (std::pair<Professional*, StudentGroup*> tmpPair) {
-                            return tmpPair.first == pair->first;
-                        });
-                    swappedNode->slots[oslotIdx].insert(*assign1);
-                    swappedNode->slots[slotIdx].erase(assign1);
+                    auto assign = swappedNode->findAsInSlot(slotIdx, pair->first, pair->second);
+                    swappedNode->slots[oslotIdx].insert(*assign);
+                    swappedNode->slots[slotIdx].erase(assign);
                     swappedNode->evaluate();
                     swappedNodes.push_back(swappedNode);
                 }
@@ -240,19 +212,11 @@ vector<HeurNode*> HeurNode::generateMutationsGroups(Data* data) {
                     swappedNode->isIntervByGrSl[group->idx][slotIdx] = true;
                     swappedNode->nbIntervByGr[pair->second->idx]--;
                     swappedNode->nbIntervByGr[group->idx]++;
-                    auto assignSlot = find_if(
-                        swappedNode->slots[slotIdx].begin(), swappedNode->slots[slotIdx].end(),
-                        [&] (std::pair<Professional*, StudentGroup*> tmpPair) {
-                            return tmpPair.first == pair->first;
-                        });
+                    auto assignSlot = swappedNode->findAsInSlot(slotIdx, pair->first, pair->second);
                     swappedNode->slots[slotIdx].erase(assignSlot);
                     std::pair<Professional*, StudentGroup*> pairPrGr = make_pair(pair->first, group);
                     swappedNode->slots[slotIdx].insert(pairPrGr);
-                    auto assignAs = find_if(
-                        swappedNode->assignations.begin(), swappedNode->assignations.end(),
-                        [&] (std::pair<Professional*, StudentGroup*> tmpPair) {
-                            return tmpPair.first == pair->first;
-                        });
+                    auto assignAs = swappedNode->findAs(pair->first, pair->second);
                     swappedNode->assignations.erase(assignAs);
                     swappedNode->assignations.insert(pairPrGr);
                     swappedNode->evaluate();
@@ -262,6 +226,11 @@ vector<HeurNode*> HeurNode::generateMutationsGroups(Data* data) {
         }
     }
     return swappedNodes;
+}
+
+bool HeurNode::isSlotAssignable(int slotIdx) {
+    if (nbIntervBySl[slotIdx] >= 3) return false;
+    return true;
 }
 
 bool HeurNode::isProAssignable(Data* data, int slotIdx, Professional* pro) {
@@ -283,9 +252,57 @@ bool HeurNode::isGroupAssignable(int slotIdx, StudentGroup* group) {
 
 bool HeurNode::isProGroupAssignable(Professional* pro, StudentGroup* group) {
     // Check if <pro, group> is not already assigned
-    if (find(assignations.begin(), assignations.end(), make_pair(pro, group)) !=
-        assignations.end()) return false;
+    auto tmpPair = make_pair(pro, group);
+    if (find(assignations.begin(), assignations.end(), tmpPair) != assignations.end()) {
+        return false;
+    }
     return true;
+}
+
+std::set<std::pair<Professional*, StudentGroup*> >::iterator HeurNode::findAsInSlot(int slotIdx,
+        Professional* pro, StudentGroup* group) {
+    return find_if(slots[slotIdx].begin(), slots[slotIdx].end(),
+        [&] (std::pair<Professional*, StudentGroup*> tmpPair) {
+            return tmpPair.first == pro && tmpPair.second == group;
+        });
+}
+
+std::set<std::pair<Professional*, StudentGroup*> >::iterator HeurNode::findAsGrInSlot(int slotIdx,
+        StudentGroup* group) {
+    return find_if(slots[slotIdx].begin(), slots[slotIdx].end(),
+        [&] (std::pair<Professional*, StudentGroup*> tmpPair) {
+            return tmpPair.second == group;
+        });
+}
+
+std::set<std::pair<Professional*, StudentGroup*> >::iterator HeurNode::findAsPrInSlot(int slotIdx,
+        Professional* pro) {
+    return find_if(slots[slotIdx].begin(), slots[slotIdx].end(),
+        [&] (std::pair<Professional*, StudentGroup*> tmpPair) {
+            return tmpPair.first == pro;
+        });
+}
+
+std::set<std::pair<Professional*, StudentGroup*> >::iterator HeurNode::findAs(Professional* pro,
+        StudentGroup* group) {
+    return find_if(assignations.begin(), assignations.end(),
+        [&] (std::pair<Professional*, StudentGroup*> tmpPair) {
+            return tmpPair.first == pro & tmpPair.second == group;
+        });
+}
+
+std::set<std::pair<Professional*, StudentGroup*> >::iterator HeurNode::findAsGr(StudentGroup* group) {
+    return find_if(assignations.begin(), assignations.end(),
+        [&] (std::pair<Professional*, StudentGroup*> tmpPair) {
+            return tmpPair.second == group;
+        });
+}
+
+std::set<std::pair<Professional*, StudentGroup*> >::iterator HeurNode::findAsPr(Professional* pro) {
+    return find_if(assignations.begin(), assignations.end(),
+        [&] (std::pair<Professional*, StudentGroup*> tmpPair) {
+            return tmpPair.first == pro;
+        });
 }
 
 std::vector<HeurNode*> iterate(Data* data, std::vector<HeurNode*>& nodes) {
@@ -329,11 +346,10 @@ HeurNode* pseudoGenetic(Data* data) {
             break;
         }
         cout << nodes.front()->cost << " / " << incumbent << endl;
-        // if (iteration == 100) isIterate = false;
         if (nodes.front()->cost >= incumbent) isIterate = false;
         incumbent = nodes.front()->cost;
         iteration++;
-        if (iteration == 100) break;
+        // if (iteration == 50) break;
     }
     cout << " nodes size " << nodes.size() << endl;
     return nodes[0];
