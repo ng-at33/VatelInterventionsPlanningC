@@ -31,9 +31,9 @@ struct HeurNode {
     std::vector<HeurNode*> generateMutationsAssignations(Data* data); // Generate all nodes with interventions swapped
     std::vector<HeurNode*> generateMutationsGroups(Data* data); // Generate all nodes with interventions swapped
     void evaluate(); // Set the cost for this node
-    bool isSlotAssignable(int slotIdx);  // Returns true if slot is assignable
-    bool isProAssignable(Data* data, int slotIdx, Professional* pro);  // Returns true if professional can be assigned to slot with idx slotIdx
-    bool isGroupAssignable(int slotIdx, StudentGroup* group);  // Returns true if students group can be assigned to slot with idx slotIdx
+    bool isSlotAssignable(TimeSlot* slot);  // Returns true if slot is assignable
+    bool isProAssignable(Data* data, TimeSlot* slot, Professional* pro);  // Returns true if professional can be assigned to slot with idx slotIdx
+    bool isGroupAssignable(StudentGroup* group, TimeSlot* slot);  // Returns true if students group can be assigned to slot with idx slotIdx
     bool isProGroupAssignable(Professional* pro, StudentGroup* group);  // Returns true if pro can be assigned to student group
     std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsInSlot(int slotIdx, Professional* pro, StudentGroup* group); // Returns pointer to assignation with <pro, group> in slot
     std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsGrInSlot(int slotIdx, StudentGroup* group); // Returns pointer to assignation with <pro, group> in slot
@@ -48,6 +48,11 @@ inline std::ostream& operator<<(std::ostream& os, const HeurNode& as) { return a
 // Returns a measure of the fitness of this node
 // float evaluate(std::vector<int>& nbIntervByPr,
 //     std::vector<int>& nbIntervByGr, std::vector<int>& nbIntervBySl, std::vector<int>& nbIntervByDa);
+bool isNbIntervByProReached(std::vector<int>& nbIntervByPr, Professional* pro); // Return true if number of interventions for this professional has been reached
+bool isNbIntervByPrDaReached(std::vector<std::vector<int> >& nbIntervByPrDa, Professional* pro, TimeSlot* slot); // Return true if number of interventions for this professional has been reached
+bool isIntervPrSlAlready(std::vector<std::vector<bool> >& isIntervByPrSl, Professional* pro, TimeSlot* slot); // Return true if number of interventions for this professional has been reached
+bool isNbIntervSlReached(std::vector<int>& nbIntervBySl, TimeSlot* slot); // Return true if number of interventions for this professional has been reached
+bool isIntervGrSlAlready(std::vector<std::vector<bool> >& isIntervByGrSl, StudentGroup* group, TimeSlot* slot); // Return true if number of interventions for this professional has been reached
 // Create a solution using first fit
 HeurNode* firstFit(Data* data);
 // Iterate to select and generate swaps of nodes
