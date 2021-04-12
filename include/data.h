@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-#include "libxl.h"
+#include <OpenXLSX.hpp>
 
 struct VatelData;
 struct Dimension;
@@ -65,7 +65,7 @@ struct TimeSlot {
     std::string hours;
     int day;
     int slotOfDay;
-    std::vector<const Professional *> pros;
+    std::vector<const Professional *> pros; // Professionals available on this time slot
     std::ostream& print(std::ostream& os = std::cout) const;
     TimeSlot();
     TimeSlot(int idx, std::string name, std::string hours, int day, int slotOfDay);
@@ -78,8 +78,10 @@ inline std::ostream& operator<<(std::ostream& os, const TimeSlot& ts) { return t
 struct StudentGroup {
     int idx;
     std::string name;
+    std::vector<const Professional*> pros; // Professionals compatible with this students group
     StudentGroup();
-    StudentGroup(int idx, std::string name);
+    StudentGroup(int idx, std::string name, std::vector<const Professional*>& pros);
+    bool isProCompatible(Professional* pro);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 
@@ -90,10 +92,13 @@ inline std::ostream& operator<<(std::ostream& os, const StudentGroup& sg) { retu
 struct Professional {
     int idx;
     std::string name;
-    std::vector<TimeSlot *> slots;
+    std::vector<const TimeSlot *> slots; // Time slots when this professional is available
+    std::vector<const StudentGroup*> groups; // Groups compatible with this professional
     Professional();
-    Professional(int idx, std::string name, std::vector<TimeSlot *>& slots);
+    Professional(int idx, std::string name, std::vector<const TimeSlot *>& slots,
+        std::vector<const StudentGroup*>& groups);
     bool isProAvailOnSlot(TimeSlot* slot);
+    bool isGroupCompatible(StudentGroup* group);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 
@@ -110,6 +115,8 @@ struct Data {
     Data();
     Data(Dimension dimensions, Config config, std::vector<Professional *>& professionals,
         std::vector<StudentGroup *>& groups, std::vector<TimeSlot *>& slots);
+    Professional* getProPtrByName(std::string& proName);
+    StudentGroup* getGroupPtrByName(std::string& groupName);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 
@@ -117,12 +124,13 @@ struct Data {
 inline std::ostream& operator<<(std::ostream& os, const Data& data) { return data.print(os); };
 
 // XLS reading functions
-Dimension* readXLSDimensions(libxl::Sheet* sheet);
-Config* readXLSConfig(libxl::Sheet* sheet);
-std::vector<Professional *>* readXLSProfessionals(Data* data, libxl::Sheet* sheet);
-std::vector<StudentGroup *>* readXLSGroups(libxl::Sheet* sheet);
-std::vector<TimeSlot *>* readXLSSlots(libxl::Sheet* sheet);
+Dimension* readXLSDimensions(OpenXLSX::XLWorksheet& sheet);
+Config* readXLSConfig(OpenXLSX::XLWorksheet& sheet);
+std::vector<Professional *>* readXLSProfessionals(Data* data, OpenXLSX::XLWorksheet& sheet);
+std::vector<StudentGroup *>* readXLSGroups(OpenXLSX::XLWorksheet& sheet, Dimension& dimensions);
+std::vector<TimeSlot *>* readXLSSlots(OpenXLSX::XLWorksheet& sheet);
+void readXLSCompatibilities(Data* data, OpenXLSX::XLWorksheet& sheet);
 Data* readXLS(std::string& filename);
 
 // Generate a random data set with the given number of professionals and students groups
-Data* generateData(int numPros, int numGroups, float slotCompatProb);
+Data* generateData(int numPros, int numGroups, float slotCompatProb, float proGroupCompatProb);

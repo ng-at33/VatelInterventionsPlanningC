@@ -18,7 +18,7 @@ int HeurNode::NODE_COUNTER(0);
 HeurNode::HeurNode(Data* data)
         : id(NODE_COUNTER++), cost(0.0), isIntervByGrSl(data->dimensions.numGroups, vector<bool>(data->dimensions.numSlots, false)),
         isIntervByPrSl(data->dimensions.numPros, vector<bool>(data->dimensions.numSlots, false)),
-        nbIntervByPrDa(data->dimensions.numPros, vector<int>(data->config.nbDays, 0)),
+        nbIntervByPrDa(data->dimensions.numPros, vector<int>(data->config .nbDays, 0)),
         nbIntervByPr(data->dimensions.numPros, 0),
         nbIntervByGr(data->dimensions.numGroups, 0),
         nbIntervBySl(data->dimensions.numSlots, 0),
@@ -252,6 +252,7 @@ bool HeurNode::isProGroupAssignable(Professional* pro, StudentGroup* group) {
     if (find(assignations.begin(), assignations.end(), tmpPair) != assignations.end()) {
         return false;
     }
+    if (!pro->isGroupCompatible(group)) return false;
     return true;
 }
 

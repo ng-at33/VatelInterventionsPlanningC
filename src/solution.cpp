@@ -9,13 +9,14 @@
 
 #include "ortools/linear_solver/linear_solver.h"
 
-#include "libxl.h"
+#include <OpenXLSX.hpp>
+
 
 #include "solution.h"
 #include "utils.h"
 
 using namespace std;
-using namespace libxl;
+using namespace OpenXLSX;
 using namespace operations_research;
 
 Assignation::Assignation(Professional* pro, StudentGroup* group, TimeSlot* slot) :
@@ -68,8 +69,10 @@ ostream& Solution::print(ostream& os) const {
 };
 
 void Solution::writeXLS(Data* data) {
-    Book* book = xlCreateXMLBook();
-    Sheet* sheet = book->addSheet("Planning");
+    XLDocument doc;
+    doc.create("./Planning.xls");
+    doc.workbook().addWorksheet("Planning");
+    auto sheet = doc.workbook().worksheet("Planning");
 
     auto rowOff = 1;
     auto startDateCol = 1;
@@ -77,14 +80,16 @@ void Solution::writeXLS(Data* data) {
     // Writing days
     for (auto iDay = 0; iDay < data->config.days.size(); iDay++) {
         auto dayStr = data->config.days[iDay];
-        sheet->writeStr(startSlotRow, startDateCol + iDay, dayStr.c_str());
+        auto cellDay = sheet.cell(XLCellReference(startSlotRow + 1, startDateCol + iDay + 1));
+        cellDay.value() = dayStr.c_str();
     }
     auto startSlotCol = 0;
     auto rowSlotOffset = 1 + rowOff;
     // Writing slots
     for (auto iSlot = 0; iSlot < data->config.slots.size(); iSlot++) {
         auto slotStr = data->config.slots[iSlot];
-        sheet->writeStr(iSlot + rowSlotOffset, startSlotCol, slotStr.c_str());
+        auto cellSlot = sheet.cell(XLCellReference(iSlot + rowSlotOffset + 1, startSlotCol + 1));
+        cellSlot.value() = slotStr.c_str();
     }
     auto rowAssOff = 1 + rowOff;
     // Writing assignations
@@ -99,11 +104,12 @@ void Solution::writeXLS(Data* data) {
                     cellContent += af->group->name + " - " + af->pro->name + "\n";
                 }
             }
-            sheet->writeStr(row, col, cellContent.c_str());
+            auto cellAssign = sheet.cell(XLCellReference(row + 1, col + 1));
+            cellAssign.value() = cellContent.c_str();
         }
     }
-    book->save("planning.xls");
-    book->release();
+    doc.save();
+    doc.close();
 }
 
 bool validateSolution(Data* data, Solution* sol) {
@@ -127,6 +133,11 @@ bool validateSolution(Data* data, Solution* sol) {
         if (find(af->pro->slots.begin(), af->pro->slots.end(), af->slot) == af->pro->slots.end()) {
             cout << "ERROR: " << af->pro->name << " not available on time slot " <<
                 af->slot->name << endl;
+        }
+        // Checking that the professional and the students group are compatible
+        if (find(af->pro->groups.begin(), af->pro->groups.end(), af->group) == af->pro->groups.end()) {
+            cout << "ERROR: " << af->pro->name << " and " << af->group->name <<
+                " are not compatible" << endl;
         }
         nbAssByPr[af->pro->idx]++;
         nbAssBySl[af->slot->idx]++;
