@@ -74,7 +74,7 @@ void Solution::writeXLS(Data* data) {
     doc.workbook().addWorksheet("Planning");
     auto sheet = doc.workbook().worksheet("Planning");
 
-    auto rowOff = 1;
+    auto rowOff = 0;
     auto startDateCol = 1;
     auto startSlotRow = 0 + rowOff;
     // Writing days
