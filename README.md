@@ -7,7 +7,7 @@ This work deals with the planning of professional interventions within a managem
 More doc on the algorithm used coming soon...
 
 TODO:
-- priority: add which <pro, group> have already been assigned in input data
+- improve solution quality: add new assignations
 - improve performance by not generating every mutation of a node but instead heuristically choose more strategic ones (try to remove assignations from crowded slots for example). Actually the algorithm gives good results on real data which is more important, but for data instances where professionals are available on more slots it can be cery slow (>5 minutes instead of <1 second)
 - improve performance: start with a better first node by sorting groups ?
 - implement other type of mutations: change a professional in a node for example

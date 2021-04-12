@@ -22,13 +22,13 @@ OUTPUT	:= output
 SRC		:= src
 
 # define include directory
-INCLUDE	:= include ../libxl-mac-3.9.3.0/include_cpp
+INCLUDE	:= include ../OpenXLSX/library/
 
 # define lib directory
 LIB		:= lib
 
 # define dynamic libraries to use
-DYLIB	:= ortools xl
+DYLIB	:= ortools OpenXLSX-shared
 
 ifeq ($(OS),Windows_NT)
 MAIN	:= main.exe
