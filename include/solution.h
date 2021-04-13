@@ -55,11 +55,20 @@ bool validateSolution(Data* data, Solution* sol);
 
 // Hold the result of the evulation of a solution
 struct SolutionEvaluation {
+    Data* pData;
     int numAssign;
+    std::vector<int> numAssignBySlot;
+    std::vector<int> numAssignByDay;
+    std::vector<int> numAssignByPro;
+    std::vector<int> numAssignByGroup;
     float stdevAssignBySlot;
     float stdevAssignByDay;
     float stdevAssignByPro;
     float stdevAssignByGroup;
+    SolutionEvaluation(Data* pData, int numAssign, std::vector<int>& rNumAssignBySlot,
+        std::vector<int>& rNumAssignByDay, std::vector<int>& rNumAssignByPro,
+        std::vector<int>& rNumAssignByGroup, float stdevAssignBySlot, float stdevAssignByDay,
+        float stdevAssignByPro, float stdevAssignByGroup);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 

@@ -188,21 +188,35 @@ bool validateSolution(Data* pData, Solution* pSol) {
     return isSolValid;
 };
 
+SolutionEvaluation::SolutionEvaluation(Data* pData, int numAssign, std::vector<int>& rNumAssignBySlot,
+        std::vector<int>& rNumAssignByDay, std::vector<int>& rNumAssignByPro,
+        std::vector<int>& rNumAssignByGroup, float stdevAssignBySlot, float stdevAssignByDay,
+        float stdevAssignByPro, float stdevAssignByGroup) : pData(pData), numAssign(numAssign),
+        numAssignBySlot(rNumAssignBySlot), numAssignByDay(rNumAssignByDay),
+        numAssignByPro(rNumAssignByPro), numAssignByGroup(rNumAssignByGroup),
+        stdevAssignBySlot(stdevAssignBySlot), stdevAssignByDay(stdevAssignByDay),
+        stdevAssignByPro(stdevAssignByPro), stdevAssignByGroup(stdevAssignByGroup) {}
+
 ostream& SolutionEvaluation::print(ostream& os) const {
     os << "SolutionEvaluation(Number of assignations : " << numAssign << endl;
     os << "Standard deviation of the number of assignations by slot " << stdevAssignBySlot << endl;
     os << "Standard deviation of the assignations by day " << stdevAssignByDay << endl;
     os << "Standard deviation of the assignations by professional " << stdevAssignByPro << endl;
     os << "Standard deviation of the assignations by group " << stdevAssignByGroup << endl;
+    os << "Number of assignations by pro :" << endl;
+    for (auto const& rPro : pData->professionals) {
+        os << "    " << rPro->name << " : " << numAssignByPro[rPro->idx] << " / "
+            << rPro->slots.size() << endl;
+    }
     return os;
 };
 
 SolutionEvaluation* evaluate(Data* pData, Solution* pSol) {
     int numAssign = pSol->assignations.size();
-    vector<float> numAssignBySlot(pData->dimensions.numSlots, 0.0);
-    vector<float> numAssignByDay(pData->config.nbDays, 0.0);
-    vector<float> numAssignByPro(pData->dimensions.numPros, 0.0);
-    vector<float> numAssignByGroup(pData->dimensions.numGroups, 0.0);
+    vector<int> numAssignBySlot(pData->dimensions.numSlots, 0);
+    vector<int> numAssignByDay(pData->config.nbDays, 0);
+    vector<int> numAssignByPro(pData->dimensions.numPros, 0);
+    vector<int> numAssignByGroup(pData->dimensions.numGroups, 0);
     for (auto const& rAssign : pSol->assignations) {
         numAssignBySlot[rAssign->slot->idx]++;
         numAssignByDay[rAssign->slot->day]++;
@@ -213,13 +227,9 @@ SolutionEvaluation* evaluate(Data* pData, Solution* pSol) {
     float stdevAssignByDay = computeSDVec(numAssignByDay);
     float stdevAssignByPro = computeSDVec(numAssignByPro);
     float stdevAssignByGroup = computeSDVec(numAssignByGroup);
-
-    SolutionEvaluation* pSolEval = new SolutionEvaluation();
-    pSolEval->numAssign = numAssign;
-    pSolEval->stdevAssignBySlot = stdevAssignBySlot;
-    pSolEval->stdevAssignByDay = stdevAssignByDay;
-    pSolEval->stdevAssignByPro = stdevAssignByPro;
-    pSolEval->stdevAssignByGroup = stdevAssignByGroup;
+    SolutionEvaluation* pSolEval = new SolutionEvaluation(pData, numAssign, numAssignBySlot,
+        numAssignByDay, numAssignByPro, numAssignByGroup, stdevAssignBySlot, stdevAssignByDay,
+        stdevAssignByPro, stdevAssignByGroup);
     
     return pSolEval;
 };
