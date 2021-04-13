@@ -10,6 +10,7 @@
 #include <OpenXLSX.hpp>
 
 
+#include "constants.h"
 #include "solution.h"
 #include "utils.h"
 
@@ -147,14 +148,16 @@ bool validateSolution(Data* pData, Solution* pSol) {
     }
     // Checking that no professional has exceeded its max number of assignations
     for (auto const& rPro : pData->professionals) {
-        if (nbAssByPr[rPro->idx] >= 4) {
-            cout << "ERROR: " << rPro->name << " found assigned more " << "than 3 times" << endl;
+        if (nbAssByPr[rPro->idx] > G_MAX_NUMBER_INTERV_PRO) {
+            cout << "ERROR: " << rPro->name << " found assigned more " << "than " 
+                << G_MAX_NUMBER_INTERV_PRO << " times" << endl;
         }
     }
     // Checking that no slot has exceeded its max number of assignations
     for (auto const& rSlot : pData->slots) {
-        if (nbAssBySl[rSlot->idx] >= 4) {
-            cout << "ERROR: " << rSlot->name << " found assigned more " << "than 3 times" << endl;
+        if (nbAssBySl[rSlot->idx] > 3) {
+            cout << "ERROR: " << rSlot->name << " found assigned more " << "than "
+                << G_MAX_NUMBER_INTERV_SLOT << " times" << endl;
         }
     }
     // Checking that all professionals are not scheduled more than once per time slot

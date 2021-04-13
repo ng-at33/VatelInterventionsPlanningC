@@ -7,6 +7,7 @@
 #include <set>
 #include <utility>
 
+#include "constants.h"
 #include "data.h"
 #include "heuristic.h"
 #include "utils.h"
@@ -302,11 +303,11 @@ std::set<std::pair<Professional*, StudentGroup*> >::iterator HeurNode::findAsPr(
 }
 
 bool isNbIntervByProReached(vector<int>& rNbIntervByPr, Professional* pPro) {
-    return rNbIntervByPr[pPro->idx] >= 3;
+    return rNbIntervByPr[pPro->idx] >= G_MAX_NUMBER_INTERV_PRO;
 }
 
 bool isNbIntervByPrDaReached(vector<vector<int> >& rNbIntervByPrDa, Professional* pPro, TimeSlot* pSlot) {
-    return rNbIntervByPrDa[pPro->idx][pSlot->day] >= 3;
+    return rNbIntervByPrDa[pPro->idx][pSlot->day] >= G_MAX_NUMBER_INTERV_PRO_DAY;
 }
 
 bool isIntervPrSlAlready(vector<vector<bool> >& rIsIntervByPrSl, Professional* pPro, TimeSlot* pSlot) {
@@ -314,7 +315,7 @@ bool isIntervPrSlAlready(vector<vector<bool> >& rIsIntervByPrSl, Professional* p
 }
 
 bool isNbIntervSlReached(vector<int>& rNbIntervBySl, TimeSlot* pSlot) {
-    return rNbIntervBySl[pSlot->idx] >= 3;
+    return rNbIntervBySl[pSlot->idx] >= G_MAX_NUMBER_INTERV_SLOT;
 }
 
 bool isIntervGrSlAlready(vector<vector<bool> >& rIsIntervByGrSl, StudentGroup* pGroup, TimeSlot* pSlot) {

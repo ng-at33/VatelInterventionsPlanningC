@@ -45,9 +45,9 @@ Data::Data(Dimension& rDimensions, Config& rConfig, std::vector<Professional *>&
 Config::Config() {};
 
 Config::Config(vector<string> &days, vector<string>& slots, int nbWeeks, int nbDays,
-    int nbSlotsByDay, int nbPros, int maxInter) :
+    int nbSlotsByDay, int nbPros) :
     days(days), slots(slots), nbWeeks(nbWeeks), nbDays(nbDays), nbSlotsByDay(nbSlotsByDay),
-    nbPros(nbPros), maxInter(maxInter)
+    nbPros(nbPros)
     {};
 
 bool StudentGroup::isProCompatible(Professional* pPro) {
@@ -134,7 +134,7 @@ Config* readXLSConfig(XLWorksheet& rSheet) {
     }
     auto nbPros = 0;
     std::vector<string> slotsVec(slots.begin(), slots.end());
-    Config* pConfig = new Config(days, slotsVec, nbWeeks, nbDays, nbSlotsByDay, nbPros, 3);
+    Config* pConfig = new Config(days, slotsVec, nbWeeks, nbDays, nbSlotsByDay, nbPros);
     return pConfig;
 };
 
@@ -372,7 +372,6 @@ Data* generateData(int numPros, int numGroups, float slotCompatProb, float proGr
     config->nbDays = days.size();
     config->nbSlotsByDay = slots_str.size();
     config->nbPros = pros_str.size();
-    config->maxInter = nMaxProInterv;
 
     Dimension* dimensions = new Dimension(pros_str.size(), groups_str.size(), 1, slots.size());
 
@@ -483,7 +482,7 @@ ostream& Config::print(ostream& os) const {
     os << "slots " << endl;
     for (auto& slot : slots) os << slot << "," << endl;
     os << "nb_weeks : " << nbWeeks << endl << "nb_days : " << nbDays << endl << "nb_base_slots : "
-        << nbSlotsByDay << endl << "nb_pros : " << nbPros << endl << "max_inter : " << maxInter;
+        << nbSlotsByDay << endl << "nb_pros : " << nbPros << endl;
     os << ")" << endl;
     return os;
 };

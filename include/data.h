@@ -44,10 +44,9 @@ struct Config {
     int nbDays;
     int nbSlotsByDay;
     int nbPros;
-    int maxInter;
     Config();
     Config(std::vector<std::string>& days, std::vector<std::string>& rSlots, int nbWeeks, int nbDays,
-        int nbSlotsByDay, int nbPros, int maxInter);
+        int nbSlotsByDay, int nbPros);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 
