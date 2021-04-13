@@ -27,7 +27,6 @@ Solution* AlgorithmStrategy::solve(Data* data)
     return algo_->solve(data);
 }
 
-
 Solution* AlgorithmHeuristic::solve(Data* data)
 {
     HeurNode* bestNode = pseudoGenetic(data);
