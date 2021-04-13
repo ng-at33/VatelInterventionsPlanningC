@@ -7,11 +7,7 @@
 #include <fstream>
 #include <string>
 
-#include "ortools/linear_solver/linear_solver.h"
-#include "ortools/linear_solver/model_exporter.h"
-
 #include "data.h"
-#include "model.h"
 #include "solution.h"
 #include "solver.h"
 

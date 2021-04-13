@@ -25,23 +25,6 @@ Assignation::Assignation(Professional* pro, StudentGroup* group, TimeSlot* slot)
 
 Solution::Solution(vector<Assignation *>& assignations) : assignations(assignations) {};
 
-Solution* buildSolution(Data* data, VatelModel* model) {
-    vector<Assignation *> assignations {};
-    for (auto& xVarPair : model->xVarMap) {
-        auto& xVarIdx = xVarPair.first;
-        auto& xVar = xVarPair.second;
-        if (xVar->solution_value() == 1.0) {
-            auto proIdx = get<0>(xVarIdx);
-            auto slotIdx = get<1>(xVarIdx);
-            Assignation* assignation = new Assignation(data->professionals[proIdx], data->groups[0],
-                data->slots[slotIdx]);
-            assignations.push_back(assignation);
-        }
-    }
-    Solution* solution = new Solution(assignations);
-    return solution;
-};
-
 Solution* buildSolution(Data* data, HeurNode* node) {
     vector<Assignation *> assignations {};
     auto slotIdx = 0;
@@ -84,7 +67,7 @@ void Solution::writeSlots(Data* data, XLWorksheet& sheet, int rowOff) {
     auto startSlotCol = 0;
     auto rowSlotOffset = 1 + rowOff;
     // Writing slots
-    for (auto iSlot = 0; iSlot < data->config.slots.size(); iSlot++) {
+    for (unsigned long iSlot = 0; iSlot < data->config.slots.size(); iSlot++) {
         auto slotStr = data->config.slots[iSlot];
         auto cellSlot = sheet.cell(XLCellReference(iSlot + rowSlotOffset + 1, startSlotCol + 1));
         cellSlot.value() = slotStr.c_str();

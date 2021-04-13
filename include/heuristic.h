@@ -32,7 +32,7 @@ struct HeurNode {
     std::vector<HeurNode*> generateMutationsGroups(Data* data); // Generate all nodes with interventions swapped
     void evaluate(); // Set the cost for this node
     bool isSlotAssignable(TimeSlot* slot);  // Returns true if slot is assignable
-    bool isProAssignable(Data* data, TimeSlot* slot, Professional* pro);  // Returns true if professional can be assigned to slot with idx slotIdx
+    bool isProAssignable(TimeSlot* slot, Professional* pro);  // Returns true if professional can be assigned to slot with idx slotIdx
     bool isGroupAssignable(StudentGroup* group, TimeSlot* slot);  // Returns true if students group can be assigned to slot with idx slotIdx
     bool isProGroupAssignable(Professional* pro, StudentGroup* group);  // Returns true if pro can be assigned to student group
     std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsInSlot(int slotIdx, Professional* pro, StudentGroup* group); // Returns pointer to assignation with <pro, group> in slot

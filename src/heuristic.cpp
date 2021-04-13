@@ -76,7 +76,7 @@ HeurNode* firstFit(Data* data) {
             });
         for (auto itPros = pros.begin(); itPros != pros.end(); itPros++) {
             for (auto itGroup = data->groups.begin(); itGroup != data->groups.end(); itGroup++) {
-                if (!firstNode->isProAssignable(data, slot, *itPros)) continue;
+                if (!firstNode->isProAssignable(slot, *itPros)) continue;
                 if (!firstNode->isGroupAssignable(*itGroup, slot)) continue;
                 if (!firstNode->isProGroupAssignable(*itPros, *itGroup)) continue;
                 if (!firstNode->isSlotAssignable(slot)) continue;
@@ -116,8 +116,8 @@ vector<HeurNode*> HeurNode::generateSwaps(Data* data) {
                         // Swap assignations if possible by creating a new node
                         // Checking if professionals can be swapped
                         if (pair->first != opair->first) {
-                            if (!isProAssignable(data, oslot, pair->first)) continue;
-                            if (!isProAssignable(data, slot, opair->first)) continue;
+                            if (!isProAssignable(oslot, pair->first)) continue;
+                            if (!isProAssignable(slot, opair->first)) continue;
                         }
                         // Checking if groups can be swapped
                         if (pair->second != opair->second) {
@@ -227,8 +227,7 @@ vector<HeurNode*> HeurNode::generateMutationsGroups(Data* data) {
     return swappedNodes;
 }
 
-bool HeurNode::isProAssignable(Data* data, TimeSlot* slot, Professional* pro) {
-    int day = slot->day;
+bool HeurNode::isProAssignable(TimeSlot* slot, Professional* pro) {
     if (!pro->isProAvailOnSlot(slot)) return false;
     if (isNbIntervByProReached(nbIntervByPr, pro)) return false;
     if (isNbIntervByPrDaReached(nbIntervByPrDa, pro, slot)) return false;

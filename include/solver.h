@@ -10,6 +10,7 @@
 class Algorithm {
 public:
     virtual Solution* solve(Data* data) = 0;
+    virtual ~Algorithm() = default;
 };
 
 // Sub class of Algorithm that launches the GLOP solver
@@ -29,7 +30,6 @@ class AlgorithmStrategy {
 public:
     enum AlgoType { MIP, Heuristic };
     AlgorithmStrategy() { algo_ = NULL; };
-    ~AlgorithmStrategy() { algo_ = NULL; };
     void setAlgorithm(int type);
     Solution* solve(Data* data);
 private:

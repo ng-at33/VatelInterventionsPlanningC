@@ -13,7 +13,6 @@
 #include "ortools/linear_solver/linear_solver.h"
 
 #include "data.h"
-#include "model.h"
 #include "heuristic.h"
 
 // Hold the information about one intervention
@@ -48,8 +47,6 @@ inline std::ostream& operator<<(std::ostream& os, const Solution& sol) {
 };
 
 // TODO: define a generic data structure to hold algorithms solutions
-// Build a Solution from variables values
-Solution* buildSolution(Data* data, VatelModel* model);
 // Build a solution from heuristic node
 Solution* buildSolution(Data* data, HeurNode* model);
 // Produce a SolutionProfiling to validate and also evaluate the quality of a solution 
