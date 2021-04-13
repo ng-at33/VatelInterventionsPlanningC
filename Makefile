@@ -28,7 +28,7 @@ INCLUDE	:= include ../OpenXLSX/library/
 LIB		:= lib
 
 # define dynamic libraries to use
-DYLIB	:= ortools OpenXLSX-shared
+DYLIB	:= OpenXLSX-shared
 
 ifeq ($(OS),Windows_NT)
 MAIN	:= main.exe

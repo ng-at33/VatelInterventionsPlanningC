@@ -6,7 +6,10 @@ This work deals with the planning of professional interventions within a managem
 
 More doc on the algorithm used coming soon...
 
-TODO (more or less in priority order):
+## Dependent libraries
+- OpenXLSX
+
+## TODO (more or less in priority order):
 - add colors in solution display
 - improve performance by not generating every mutation of a node but instead heuristically choose more strategic ones (try to remove assignations from crowded slots for example). Actually the algorithm gives good results on real data which is more important, but for data instances where professionals are available on more slots it can be cery slow (>5 minutes instead of <1 second)
 - read parameters in file/command line rather than hard coding them
