@@ -13,5 +13,4 @@ TODO (more or less in priority order):
 - implement other type of mutations: change a professional in a node for example
 - put constants in a separate declaration file
 - read parameters in file/command line rather than hard coding them
-- change some variable's names to give the code more intelligibility: use prefix p for pointers and r for references, change "autos" to clearly use references or values
 - use different searching functions (findAsGr, findAsPr) to improve performance

@@ -20,25 +20,23 @@ struct Assignation {
     Professional* pro;
     StudentGroup* group;
     TimeSlot* slot;
-    Assignation(Professional* pro, StudentGroup* group, TimeSlot* slot);
+    Assignation(Professional* pPro, StudentGroup* pGroup, TimeSlot* pSlot);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 
 // Overrides cout
-inline std::ostream& operator<<(std::ostream& os, const Assignation& as) {
-    return as.print(os);
-};
+inline std::ostream& operator<<(std::ostream& os, const Assignation& rAssign) { return rAssign.print(os); };
 
 // Hold and display a Solution of the problem
 struct Solution {
     std::vector<Assignation *> assignations;
     Solution(std::vector<Assignation *>& assignations);
     std::ostream& print(std::ostream& os = std::cout) const;
-    void writeDays(Data* data, OpenXLSX::XLWorksheet& sheet, int rowOffset, int startDateCol, int startDay, int endDay);
-    void writeSlots(Data* data, OpenXLSX::XLWorksheet& sheet, int rowOffset);
-    void writeAssignations(Data* data, OpenXLSX::XLWorksheet& sheet, int rowOff, int startDateCol,
+    void writeDays(Data* pData, OpenXLSX::XLWorksheet& rSheet, int rowOffset, int startDateCol, int startDay, int endDay);
+    void writeSlots(Data* pData, OpenXLSX::XLWorksheet& rSheet, int rowOffset);
+    void writeAssignations(Data* pData, OpenXLSX::XLWorksheet& rSheet, int rowOff, int startDateCol,
         int startDay, int endDay);
-    void writeXLS(Data* data); // Write solution to XLSfile
+    void writeXLS(Data* pData); // Write solution to XLSfile
 };
 
 // Overrides cout

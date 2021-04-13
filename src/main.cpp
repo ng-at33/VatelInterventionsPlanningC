@@ -15,17 +15,17 @@ using namespace std;
 
 int main(int argc, char** argv) {
     string fn = "data/doodle_new.xlsx";
-    Data* data = readXLS(fn);
-    // Data* data = generateData(50, 10, 1.0, 0.5);
-    cout << *data << endl;
+    Data* pData = readXLS(fn);
+    // Data* pData = generateData(50, 100, 1.0, 0.5);
+    cout << *pData << endl;
     AlgorithmStrategy algo;
     // 0 : MIP (Obsolete), 1 : Heuristic
     algo.setAlgorithm(1);
-    Solution* sol = algo.solve(data);
-    sol->print(cout);
-    auto isSolValid = validateSolution(data, sol);
-    SolutionEvaluation* solEval = evaluate(data, sol);
-    sol->writeXLS(data);
+    Solution* pSol = algo.solve(pData);
+    pSol->print(cout);
+    auto isSolValid = validateSolution(pData, pSol);
+    SolutionEvaluation* solEval = evaluate(pData, pSol);
+    pSol->writeXLS(pData);
     cout << *solEval << endl;
 
     return EXIT_SUCCESS;

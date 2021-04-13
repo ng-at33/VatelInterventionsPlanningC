@@ -6,15 +6,12 @@
 #include <iostream>
 #include <fstream>
 
-#include "ortools/linear_solver/linear_solver.h"
-
 #include "data.h"
 #include "heuristic.h"
 #include "solution.h"
 #include "solver.h"
 
 using namespace std;
-using namespace operations_research;
 
 void AlgorithmStrategy::setAlgorithm(int type)
 {
@@ -22,15 +19,15 @@ void AlgorithmStrategy::setAlgorithm(int type)
         algo_ = new AlgorithmHeuristic();
 }
 
-Solution* AlgorithmStrategy::solve(Data* data)
+Solution* AlgorithmStrategy::solve(Data* pData)
 {
-    return algo_->solve(data);
+    return algo_->solve(pData);
 }
 
-Solution* AlgorithmHeuristic::solve(Data* data)
+Solution* AlgorithmHeuristic::solve(Data* pData)
 {
-    HeurNode* bestNode = pseudoGenetic(data);
-    Solution* solution = buildSolution(data, bestNode);
-    return solution;
+    HeurNode* pBestNode = pseudoGenetic(pData);
+    Solution* pSolution = buildSolution(pData, pBestNode);
+    return pSolution;
 }
 

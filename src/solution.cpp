@@ -7,8 +7,6 @@
 #include <string>
 #include <vector>
 
-#include "ortools/linear_solver/linear_solver.h"
-
 #include <OpenXLSX.hpp>
 
 
@@ -17,26 +15,25 @@
 
 using namespace std;
 using namespace OpenXLSX;
-using namespace operations_research;
 
-Assignation::Assignation(Professional* pro, StudentGroup* group, TimeSlot* slot) :
-    pro(pro), group(group),  slot(slot)
+Assignation::Assignation(Professional* pPro, StudentGroup* pGroup, TimeSlot* pSlot) :
+    pro(pPro), group(pGroup),  slot(pSlot)
     {};
 
-Solution::Solution(vector<Assignation *>& assignations) : assignations(assignations) {};
+Solution::Solution(vector<Assignation *>& rAssignations) : assignations(rAssignations) {};
 
-Solution* buildSolution(Data* data, HeurNode* node) {
+Solution* buildSolution(Data* pData, HeurNode* node) {
     vector<Assignation *> assignations {};
     auto slotIdx = 0;
-    for (auto& slot: node->slots) {
-        for (auto& pair: slot) {
-            Assignation* assignation = new Assignation(pair.first, pair.second, data->slots[slotIdx]);
+    for (auto const& rSlot: node->slots) {
+        for (auto const& rPair: rSlot) {
+            Assignation* assignation = new Assignation(rPair.first, rPair.second, pData->slots[slotIdx]);
             assignations.push_back(assignation);
         }
         slotIdx++;
     }
-    Solution* solution = new Solution(assignations);
-    return solution;
+    Solution* pSolution = new Solution(assignations);
+    return pSolution;
 };
 
 ostream& Assignation::print(ostream& os) const {
@@ -51,51 +48,51 @@ ostream& Solution::print(ostream& os) const {
     return os;
 };
 
-void Solution::writeDays(Data* data, XLWorksheet& sheet, int rowOff, int startDateCol, int startDay,
-        int endDay) {
+void Solution::writeDays(Data* pData, XLWorksheet& rSheet, int rowOff, int startDateCol,
+        int startDay, int endDay) {
     auto startSlotRow = 0 + rowOff;
     // Writing days
     for (auto iDay = 0; iDay < endDay - startDay + 1; iDay++) {
         auto dayIdx = iDay + startDay;
-        auto dayStr = data->config.days[dayIdx];
-        auto cellDay = sheet.cell(XLCellReference(startSlotRow + 1, startDateCol + iDay + 1));
+        auto dayStr = pData->config.days[dayIdx];
+        auto cellDay = rSheet.cell(XLCellReference(startSlotRow + 1, startDateCol + iDay + 1));
         cellDay.value() = dayStr.c_str();
     }
 }
 
-void Solution::writeSlots(Data* data, XLWorksheet& sheet, int rowOff) {
+void Solution::writeSlots(Data* pData, XLWorksheet& rSheet, int rowOff) {
     auto startSlotCol = 0;
     auto rowSlotOffset = 1 + rowOff;
     // Writing slots
-    for (unsigned long iSlot = 0; iSlot < data->config.slots.size(); iSlot++) {
-        auto slotStr = data->config.slots[iSlot];
-        auto cellSlot = sheet.cell(XLCellReference(iSlot + rowSlotOffset + 1, startSlotCol + 1));
+    for (unsigned long iSlot = 0; iSlot < pData->config.slots.size(); iSlot++) {
+        auto slotStr = pData->config.slots[iSlot];
+        auto cellSlot = rSheet.cell(XLCellReference(iSlot + rowSlotOffset + 1, startSlotCol + 1));
         cellSlot.value() = slotStr.c_str();
     }
 }
 
-void Solution::writeAssignations(Data* data, XLWorksheet& sheet, int rowOff, int startDateCol,
+void Solution::writeAssignations(Data* pData, XLWorksheet& rSheet, int rowOff, int startDateCol,
         int startDay, int endDay) {
     auto rowAssOff = 1 + rowOff;
     // Writing assignations
     for (auto d = startDay; d < endDay + 1; d++) {
-        for (auto s = 0; s < data->config.nbSlotsByDay; s++) {
+        for (auto s = 0; s < pData->config.nbSlotsByDay; s++) {
             auto row = s + rowAssOff;
             auto col = startDateCol + d - startDay;
             string cellContent = "";
             // Filtering affecations that are on this day/slot
-            for (auto& af : this->assignations) {
-                if (af->slot->day == d && af->slot->slotOfDay == s) {
-                    cellContent += af->group->name + " - " + af->pro->name + "\n";
+            for (auto& rAssign : this->assignations) {
+                if (rAssign->slot->day == d && rAssign->slot->slotOfDay == s) {
+                    cellContent += rAssign->group->name + " - " + rAssign->pro->name + "\n";
                 }
             }
-            auto cellAssign = sheet.cell(XLCellReference(row + 1, col + 1));
+            auto cellAssign = rSheet.cell(XLCellReference(row + 1, col + 1));
             cellAssign.value() = cellContent.c_str();
         }
     }
 }
 
-void Solution::writeXLS(Data* data) {
+void Solution::writeXLS(Data* pData) {
     XLDocument doc;
     doc.create("./Planning.xls");
     doc.workbook().addWorksheet("Planning");
@@ -104,87 +101,87 @@ void Solution::writeXLS(Data* data) {
     auto endDay = 4;
     auto rowOff = 0;
     auto startDateCol = 1;
-    writeDays(data, sheet, rowOff, startDateCol, startDay, endDay);
-    writeSlots(data, sheet, rowOff);
-    writeAssignations(data, sheet, rowOff, startDateCol, startDay, endDay);
+    writeDays(pData, sheet, rowOff, startDateCol, startDay, endDay);
+    writeSlots(pData, sheet, rowOff);
+    writeAssignations(pData, sheet, rowOff, startDateCol, startDay, endDay);
     rowOff = 6;
     startDay = 5;
-    endDay = data->config.nbDays;
-    writeDays(data, sheet, rowOff, startDateCol, startDay, endDay);
-    writeSlots(data, sheet, rowOff);
-    writeSlots(data, sheet, rowOff);
-    writeAssignations(data, sheet, rowOff, startDateCol, startDay, endDay);
+    endDay = pData->config.nbDays;
+    writeDays(pData, sheet, rowOff, startDateCol, startDay, endDay);
+    writeSlots(pData, sheet, rowOff);
+    writeAssignations(pData, sheet, rowOff, startDateCol, startDay, endDay);
     doc.save();
     doc.close();
 }
 
-bool validateSolution(Data* data, Solution* sol) {
+bool validateSolution(Data* pData, Solution* pSol) {
     auto isSolValid = true;
     set<pair<Professional*, StudentGroup*> > assignations; // Used to check if a <pro,group> is not assigned more than once
-    for (auto& af : sol->assignations) {
-        for (auto& oaf : sol->assignations) {
-            if (af != oaf) {
-                if (af->pro == oaf->pro && af->group == oaf->group) {
-                    cout << "ERROR: " << af->pro->name << " and " << af->group->name
-                        << " assigned on slots " << *af->slot << " and " << *oaf->slot << endl;
+    for (auto const& rAssign : pSol->assignations) {
+        for (auto const& rOAssign : pSol->assignations) {
+            if (rAssign != rOAssign) {
+                if (rAssign->pro == rOAssign->pro && rAssign->group == rOAssign->group) {
+                    cout << "ERROR: " << rAssign->pro->name << " and " << rAssign->group->name
+                        << " assigned on slots " << *rAssign->slot << " and " << *rOAssign->slot << endl;
                 }
             }
         }
     }
-    vector<int> nbAssByPr(data->dimensions.numPros, 0);
-    vector<int> nbAssBySl(data->dimensions.numSlots, 0);
+    vector<int> nbAssByPr(pData->dimensions.numPros, 0);
+    vector<int> nbAssBySl(pData->dimensions.numSlots, 0);
     // Computing number of interventions by professional and slot
-    for (auto& af : sol->assignations) {
+    for (auto const& rAssign : pSol->assignations) {
         // Checking that the professional was available on this time slot
-        if (find(af->pro->slots.begin(), af->pro->slots.end(), af->slot) == af->pro->slots.end()) {
-            cout << "ERROR: " << af->pro->name << " not available on time slot " <<
-                af->slot->name << endl;
+        if (find(rAssign->pro->slots.begin(), rAssign->pro->slots.end(), rAssign->slot) == rAssign->pro->slots.end()) {
+            cout << "ERROR: " << rAssign->pro->name << " not available on time slot " <<
+                rAssign->slot->name << endl;
         }
         // Checking that the professional and the students group are compatible
-        if (find(af->pro->groups.begin(), af->pro->groups.end(), af->group) == af->pro->groups.end()) {
-            cout << "ERROR: " << af->pro->name << " and " << af->group->name <<
+        if (find(rAssign->pro->groups.begin(), rAssign->pro->groups.end(), rAssign->group)
+                == rAssign->pro->groups.end()) {
+            cout << "ERROR: " << rAssign->pro->name << " and " << rAssign->group->name <<
                 " are not compatible" << endl;
         }
-        nbAssByPr[af->pro->idx]++;
-        nbAssBySl[af->slot->idx]++;
+        nbAssByPr[rAssign->pro->idx]++;
+        nbAssBySl[rAssign->slot->idx]++;
     }
     // Checking that no professional has exceeded its max number of assignations
-    for (auto& pr : data->professionals) {
-        if (nbAssByPr[pr->idx] >= 4) {
-            cout << "ERROR: " << pr->name << " found assigned more " << "than 3 times" << endl;
+    for (auto const& rPro : pData->professionals) {
+        if (nbAssByPr[rPro->idx] >= 4) {
+            cout << "ERROR: " << rPro->name << " found assigned more " << "than 3 times" << endl;
         }
     }
     // Checking that no slot has exceeded its max number of assignations
-    for (auto& sl : data->slots) {
-        if (nbAssBySl[sl->idx] >= 4) {
-            cout << "ERROR: " << sl->name << " found assigned more " << "than 3 times" << endl;
+    for (auto const& rSlot : pData->slots) {
+        if (nbAssBySl[rSlot->idx] >= 4) {
+            cout << "ERROR: " << rSlot->name << " found assigned more " << "than 3 times" << endl;
         }
     }
     // Checking that all professionals are not scheduled more than once per time slot
-    for (auto& slot : data->slots) {
+    for (auto const& rSlot : pData->slots) {
         vector<Professional *> prosInSlot {};
-        for (auto& af : sol->assignations) {
-            if (af->slot == slot) {
-                if (find(prosInSlot.begin(), prosInSlot.end(), af->pro) != prosInSlot.end()) {
-                    cout << "ERROR: " << (*af->pro).name << " found assigned in slot "
-                        << *slot << " more than once" << endl;
+        for (auto const& rAssign : pSol->assignations) {
+            if (rAssign->slot == rSlot) {
+                if (find(prosInSlot.begin(), prosInSlot.end(), rAssign->pro) != prosInSlot.end()) {
+                    cout << "ERROR: " << (*rAssign->pro).name << " found assigned in slot "
+                        << *rSlot << " more than once" << endl;
                     isSolValid = false;
                 }
-                prosInSlot.push_back(af->pro);
+                prosInSlot.push_back(rAssign->pro);
             }
         }
     }
     // Checking that all students groups are not scheduled more than once per time slot
-    for (auto& slot : data->slots) {
+    for (auto const& rSlot : pData->slots) {
         vector<StudentGroup *> sgInSlot {};
-        for (auto& af : sol->assignations) {
-            if (af->slot == slot) {
-                if (find(sgInSlot.begin(), sgInSlot.end(), af->group) != sgInSlot.end()) {
-                    cout << "ERROR: " << (*af->group).name << " found assigned in slot "
-                        << *slot << " more than once" << endl;
+        for (auto const& rAssign : pSol->assignations) {
+            if (rAssign->slot == rSlot) {
+                if (find(sgInSlot.begin(), sgInSlot.end(), rAssign->group) != sgInSlot.end()) {
+                    cout << "ERROR: " << (*rAssign->group).name << " found assigned in slot "
+                        << *rSlot << " more than once" << endl;
                     isSolValid = false;
                 }
-                sgInSlot.push_back(af->group);
+                sgInSlot.push_back(rAssign->group);
             }
         }
     }
@@ -200,29 +197,29 @@ ostream& SolutionEvaluation::print(ostream& os) const {
     return os;
 };
 
-SolutionEvaluation* evaluate(Data* data, Solution* sol) {
-    int numAssign = sol->assignations.size();
-    vector<float> numAssignBySlot(data->dimensions.numSlots, 0.0);
-    vector<float> numAssignByDay(data->config.nbDays, 0.0);
-    vector<float> numAssignByPro(data->dimensions.numPros, 0.0);
-    vector<float> numAssignByGroup(data->dimensions.numGroups, 0.0);
-    for (auto& as : sol->assignations) {
-        numAssignBySlot[as->slot->idx]++;
-        numAssignByDay[as->slot->day]++;
-        numAssignByPro[as->pro->idx]++;
-        numAssignByGroup[as->group->idx]++;
+SolutionEvaluation* evaluate(Data* pData, Solution* pSol) {
+    int numAssign = pSol->assignations.size();
+    vector<float> numAssignBySlot(pData->dimensions.numSlots, 0.0);
+    vector<float> numAssignByDay(pData->config.nbDays, 0.0);
+    vector<float> numAssignByPro(pData->dimensions.numPros, 0.0);
+    vector<float> numAssignByGroup(pData->dimensions.numGroups, 0.0);
+    for (auto const& rAssign : pSol->assignations) {
+        numAssignBySlot[rAssign->slot->idx]++;
+        numAssignByDay[rAssign->slot->day]++;
+        numAssignByPro[rAssign->pro->idx]++;
+        numAssignByGroup[rAssign->group->idx]++;
     }
     float stdevAssignBySlot = computeSDVec(numAssignBySlot);
     float stdevAssignByDay = computeSDVec(numAssignByDay);
     float stdevAssignByPro = computeSDVec(numAssignByPro);
     float stdevAssignByGroup = computeSDVec(numAssignByGroup);
 
-    SolutionEvaluation* solEval = new SolutionEvaluation();
-    solEval->numAssign = numAssign;
-    solEval->stdevAssignBySlot = stdevAssignBySlot;
-    solEval->stdevAssignByDay = stdevAssignByDay;
-    solEval->stdevAssignByPro = stdevAssignByPro;
-    solEval->stdevAssignByGroup = stdevAssignByGroup;
+    SolutionEvaluation* pSolEval = new SolutionEvaluation();
+    pSolEval->numAssign = numAssign;
+    pSolEval->stdevAssignBySlot = stdevAssignBySlot;
+    pSolEval->stdevAssignByDay = stdevAssignByDay;
+    pSolEval->stdevAssignByPro = stdevAssignByPro;
+    pSolEval->stdevAssignByGroup = stdevAssignByGroup;
     
-    return solEval;
+    return pSolEval;
 };

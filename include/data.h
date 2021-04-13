@@ -34,9 +34,7 @@ struct Dimension {
 };
 
 // Override cout
-inline std::ostream& operator<<(std::ostream& os, const Dimension& dim) {
-    return dim.print(os);
-};
+inline std::ostream& operator<<(std::ostream& os, const Dimension& rDim) { return rDim.print(os); };
 
 // Contain useful information to display a Solution
 struct Config {
@@ -48,15 +46,13 @@ struct Config {
     int nbPros;
     int maxInter;
     Config();
-    Config(std::vector<std::string>& days, std::vector<std::string>& slots, int nbWeeks, int nbDays,
+    Config(std::vector<std::string>& days, std::vector<std::string>& rSlots, int nbWeeks, int nbDays,
         int nbSlotsByDay, int nbPros, int maxInter);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 
 // Override cout
-inline std::ostream& operator<<(std::ostream& os, const Config& config) {
-    return config.print(os);
-};
+inline std::ostream& operator<<(std::ostream& os, const Config& rConfig) { return rConfig.print(os); };
 
 // Contain the information relative to a time slot
 struct TimeSlot {
@@ -72,7 +68,7 @@ struct TimeSlot {
 };
 
 // Override cout
-inline std::ostream& operator<<(std::ostream& os, const TimeSlot& ts) { return ts.print(os); };
+inline std::ostream& operator<<(std::ostream& os, const TimeSlot& rSlot) { return rSlot.print(os); };
 
 // Contain the information of a single student group
 struct StudentGroup {
@@ -80,13 +76,13 @@ struct StudentGroup {
     std::string name;
     std::vector<const Professional*> pros; // Professionals compatible with this students group
     StudentGroup();
-    StudentGroup(int idx, std::string name, std::vector<const Professional*>& pros);
+    StudentGroup(int idx, std::string name, std::vector<const Professional*>& rPros);
     bool isProCompatible(Professional* pro);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 
 // Overrides cout
-inline std::ostream& operator<<(std::ostream& os, const StudentGroup& sg) { return sg.print(os); };
+inline std::ostream& operator<<(std::ostream& os, const StudentGroup& rGroup) { return rGroup.print(os); };
 
 // Contain the information of a single professional
 struct Professional {
@@ -103,7 +99,7 @@ struct Professional {
 };
 
 // Overrides cout
-inline std::ostream& operator<<(std::ostream& os, const Professional& pf) { return pf.print(os); };
+inline std::ostream& operator<<(std::ostream& os, const Professional& rPro) { return rPro.print(os); };
 
 // Main structure that holds the information of the problem
 struct Data {
@@ -113,24 +109,24 @@ struct Data {
     std::vector<StudentGroup *> groups;
     std::vector<TimeSlot *>     slots;
     Data();
-    Data(Dimension dimensions, Config config, std::vector<Professional *>& professionals,
-        std::vector<StudentGroup *>& groups, std::vector<TimeSlot *>& slots);
-    Professional* getProPtrByName(std::string& proName);
-    StudentGroup* getGroupPtrByName(std::string& groupName);
+    Data(Dimension& rDimensions, Config& rConfig, std::vector<Professional *>& rProfessionals,
+        std::vector<StudentGroup *>& rGroups, std::vector<TimeSlot *>& rSlots);
+    Professional* getProPtrByName(std::string& rProName);
+    StudentGroup* getGroupPtrByName(std::string& rGroupName);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 
 // Overrides cout
-inline std::ostream& operator<<(std::ostream& os, const Data& data) { return data.print(os); };
+inline std::ostream& operator<<(std::ostream& os, const Data& rData) { return rData.print(os); };
 
 // XLS reading functions
-Dimension* readXLSDimensions(OpenXLSX::XLWorksheet& sheet);
-Config* readXLSConfig(OpenXLSX::XLWorksheet& sheet);
-std::vector<Professional *>* readXLSProfessionals(Data* data, OpenXLSX::XLWorksheet& sheet);
-std::vector<StudentGroup *>* readXLSGroups(OpenXLSX::XLWorksheet& sheet, Dimension& dimensions);
-std::vector<TimeSlot *>* readXLSSlots(OpenXLSX::XLWorksheet& sheet);
-void readXLSCompatibilities(Data* data, OpenXLSX::XLWorksheet& sheet);
-Data* readXLS(std::string& filename);
+Dimension* readXLSDimensions(OpenXLSX::XLWorksheet& rSheet);
+Config* readXLSConfig(OpenXLSX::XLWorksheet& rSheet);
+std::vector<Professional *>* readXLSProfessionals(Data* data, OpenXLSX::XLWorksheet& rSheet);
+std::vector<StudentGroup *>* readXLSGroups(OpenXLSX::XLWorksheet& rSheet, Dimension& rDimensions);
+std::vector<TimeSlot *>* readXLSSlots(OpenXLSX::XLWorksheet& rSheet);
+void readXLSCompatibilities(Data* data, OpenXLSX::XLWorksheet& rSheet);
+Data* readXLS(std::string& rFilename);
 
 // Generate a random data set with the given number of professionals and students groups
 Data* generateData(int numPros, int numGroups, float slotCompatProb, float proGroupCompatProb);

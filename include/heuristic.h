@@ -13,7 +13,7 @@
 
 // Fully hold a partial or complete heuristic solution
 struct HeurNode {
-    static int NODE_COUNTER;
+    static int sNodeCounter;
     int id;
     float cost;
     std::vector<std::vector<bool> > isIntervByGrSl; // True if intervention on <Group, Slot>
@@ -31,31 +31,31 @@ struct HeurNode {
     std::vector<HeurNode*> generateMutationsAssignations(Data* data); // Generate all nodes with interventions swapped
     std::vector<HeurNode*> generateMutationsGroups(Data* data); // Generate all nodes with interventions swapped
     void evaluate(); // Set the cost for this node
-    bool isSlotAssignable(TimeSlot* slot);  // Returns true if slot is assignable
-    bool isProAssignable(TimeSlot* slot, Professional* pro);  // Returns true if professional can be assigned to slot with idx slotIdx
-    bool isGroupAssignable(StudentGroup* group, TimeSlot* slot);  // Returns true if students group can be assigned to slot with idx slotIdx
-    bool isProGroupAssignable(Professional* pro, StudentGroup* group);  // Returns true if pro can be assigned to student group
-    std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsInSlot(int slotIdx, Professional* pro, StudentGroup* group); // Returns pointer to assignation with <pro, group> in slot
-    std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsGrInSlot(int slotIdx, StudentGroup* group); // Returns pointer to assignation with group in slot
-    std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsPrInSlot(int slotIdx, Professional* pro); // Returns pointer to assignation with pro in slot
-    std::set<std::pair<Professional*, StudentGroup*> >::iterator findAs(Professional* pro, StudentGroup* group); // Returns pointer to assignation with <pro, group> in assignations
-    std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsGr(StudentGroup* group); // Returns pointer to assignation with group in assignations
-    std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsPr(Professional* pro); // Returns pointer to assignation with pro in assignations
+    bool isSlotAssignable(TimeSlot* pSlot);  // Returns true if slot is assignable
+    bool isProAssignable(TimeSlot* pSlot, Professional* pPro);  // Returns true if professional can be assigned to slot with idx slotIdx
+    bool isGroupAssignable(StudentGroup* pGroup, TimeSlot* pSlot);  // Returns true if students group can be assigned to slot with idx slotIdx
+    bool isProGroupAssignable(Professional* pPro, StudentGroup* pGroup);  // Returns true if pro can be assigned to student group
+    std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsInSlot(int slotIdx, Professional* pPro, StudentGroup* pGroup); // Returns pointer to assignation with <pro, group> in slot
+    std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsGrInSlot(int slotIdx, StudentGroup* pGroup); // Returns pointer to assignation with group in slot
+    std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsPrInSlot(int slotIdx, Professional* pPro); // Returns pointer to assignation with pro in slot
+    std::set<std::pair<Professional*, StudentGroup*> >::iterator findAs(Professional* pPro, StudentGroup* pGroup); // Returns pointer to assignation with <pro, group> in assignations
+    std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsGr(StudentGroup* pGroup); // Returns pointer to assignation with group in assignations
+    std::set<std::pair<Professional*, StudentGroup*> >::iterator findAsPr(Professional* pPro); // Returns pointer to assignation with pro in assignations
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 // Override cout
-inline std::ostream& operator<<(std::ostream& os, const HeurNode& as) { return as.print(os); };
+inline std::ostream& operator<<(std::ostream& os, const HeurNode& rNode) { return rNode.print(os); };
 // Returns a measure of the fitness of this node
 // float evaluate(std::vector<int>& nbIntervByPr,
 //     std::vector<int>& nbIntervByGr, std::vector<int>& nbIntervBySl, std::vector<int>& nbIntervByDa);
-bool isNbIntervByProReached(std::vector<int>& nbIntervByPr, Professional* pro); // Return true if number of interventions for this professional has been reached
-bool isNbIntervByPrDaReached(std::vector<std::vector<int> >& nbIntervByPrDa, Professional* pro, TimeSlot* slot); // Return true if number of interventions for this professional on this day has been reached
-bool isIntervPrSlAlready(std::vector<std::vector<bool> >& isIntervByPrSl, Professional* pro, TimeSlot* slot); // Return true if this pro has already been assigned on this slot
-bool isNbIntervSlReached(std::vector<int>& nbIntervBySl, TimeSlot* slot); // Return true if number of interventions for this slot has been reached
-bool isIntervGrSlAlready(std::vector<std::vector<bool> >& isIntervByGrSl, StudentGroup* group, TimeSlot* slot); // Return true if this group has already been assigned on this slot
+bool isNbIntervByProReached(std::vector<int>& nbIntervByPr, Professional* pPro); // Return true if number of interventions for this professional has been reached
+bool isNbIntervByPrDaReached(std::vector<std::vector<int> >& rNbIntervByPrDa, Professional* pPro, TimeSlot* pSlot); // Return true if number of interventions for this professional on this day has been reached
+bool isIntervPrSlAlready(std::vector<std::vector<bool> >& rIsIntervByPrSl, Professional* pPro, TimeSlot* pSlot); // Return true if this pro has already been assigned on this slot
+bool isNbIntervSlReached(std::vector<int>& rNbIntervBySl, TimeSlot* pSlot); // Return true if number of interventions for this slot has been reached
+bool isIntervGrSlAlready(std::vector<std::vector<bool> >& rIsIntervByGrSl, StudentGroup* pGroup, TimeSlot* pSlot); // Return true if this group has already been assigned on this slot
 // Create a solution using first fit
-HeurNode* firstFit(Data* data);
+HeurNode* firstFit(Data* pData);
 // Iterate to select and generate swaps of nodes
-std::vector<HeurNode*> iterate(Data* data, std::vector<HeurNode*>& nodes);
+std::vector<HeurNode*> iterate(Data* pData, std::vector<HeurNode*>& rNodes);
 // Launch the full algorithm, return the best node
-HeurNode* pseudoGenetic(Data* data);
+HeurNode* pseudoGenetic(Data* pData);
