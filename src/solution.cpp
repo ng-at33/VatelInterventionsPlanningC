@@ -68,21 +68,19 @@ ostream& Solution::print(ostream& os) const {
     return os;
 };
 
-void Solution::writeXLS(Data* data) {
-    XLDocument doc;
-    doc.create("./Planning.xls");
-    doc.workbook().addWorksheet("Planning");
-    auto sheet = doc.workbook().worksheet("Planning");
-
-    auto rowOff = 0;
-    auto startDateCol = 1;
+void Solution::writeDays(Data* data, XLWorksheet& sheet, int rowOff, int startDateCol, int startDay,
+        int endDay) {
     auto startSlotRow = 0 + rowOff;
     // Writing days
-    for (auto iDay = 0; iDay < data->config.days.size(); iDay++) {
-        auto dayStr = data->config.days[iDay];
+    for (auto iDay = 0; iDay < endDay - startDay + 1; iDay++) {
+        auto dayIdx = iDay + startDay;
+        auto dayStr = data->config.days[dayIdx];
         auto cellDay = sheet.cell(XLCellReference(startSlotRow + 1, startDateCol + iDay + 1));
         cellDay.value() = dayStr.c_str();
     }
+}
+
+void Solution::writeSlots(Data* data, XLWorksheet& sheet, int rowOff) {
     auto startSlotCol = 0;
     auto rowSlotOffset = 1 + rowOff;
     // Writing slots
@@ -91,12 +89,16 @@ void Solution::writeXLS(Data* data) {
         auto cellSlot = sheet.cell(XLCellReference(iSlot + rowSlotOffset + 1, startSlotCol + 1));
         cellSlot.value() = slotStr.c_str();
     }
+}
+
+void Solution::writeAssignations(Data* data, XLWorksheet& sheet, int rowOff, int startDateCol,
+        int startDay, int endDay) {
     auto rowAssOff = 1 + rowOff;
     // Writing assignations
-    for (auto d = 0; d < data->config.nbDays; d++) {
+    for (auto d = startDay; d < endDay + 1; d++) {
         for (auto s = 0; s < data->config.nbSlotsByDay; s++) {
             auto row = s + rowAssOff;
-            auto col = startDateCol + d;
+            auto col = startDateCol + d - startDay;
             string cellContent = "";
             // Filtering affecations that are on this day/slot
             for (auto& af : this->assignations) {
@@ -108,6 +110,27 @@ void Solution::writeXLS(Data* data) {
             cellAssign.value() = cellContent.c_str();
         }
     }
+}
+
+void Solution::writeXLS(Data* data) {
+    XLDocument doc;
+    doc.create("./Planning.xls");
+    doc.workbook().addWorksheet("Planning");
+    auto sheet = doc.workbook().worksheet("Planning");
+    auto startDay = 0;
+    auto endDay = 4;
+    auto rowOff = 0;
+    auto startDateCol = 1;
+    writeDays(data, sheet, rowOff, startDateCol, startDay, endDay);
+    writeSlots(data, sheet, rowOff);
+    writeAssignations(data, sheet, rowOff, startDateCol, startDay, endDay);
+    rowOff = 6;
+    startDay = 5;
+    endDay = data->config.nbDays;
+    writeDays(data, sheet, rowOff, startDateCol, startDay, endDay);
+    writeSlots(data, sheet, rowOff);
+    writeSlots(data, sheet, rowOff);
+    writeAssignations(data, sheet, rowOff, startDateCol, startDay, endDay);
     doc.save();
     doc.close();
 }

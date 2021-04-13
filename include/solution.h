@@ -35,6 +35,10 @@ struct Solution {
     std::vector<Assignation *> assignations;
     Solution(std::vector<Assignation *>& assignations);
     std::ostream& print(std::ostream& os = std::cout) const;
+    void writeDays(Data* data, OpenXLSX::XLWorksheet& sheet, int rowOffset, int startDateCol, int startDay, int endDay);
+    void writeSlots(Data* data, OpenXLSX::XLWorksheet& sheet, int rowOffset);
+    void writeAssignations(Data* data, OpenXLSX::XLWorksheet& sheet, int rowOff, int startDateCol,
+        int startDay, int endDay);
     void writeXLS(Data* data); // Write solution to XLSfile
 };
 
