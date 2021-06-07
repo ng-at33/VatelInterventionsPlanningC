@@ -25,11 +25,11 @@ struct HeurNode {
     std::vector<int> nbIntervByDa; // Number of interventions by <Day>
     std::vector<std::set<std::pair<Professional*, StudentGroup*> > > slots; // Represent assigned <pro, student> pairs, indexed by slots
     std::set<std::pair<Professional*, StudentGroup*> > assignations; // Contain pairs of assigned <pro, students> to look for already assigned pairs
-    HeurNode(Data* data); // Create an empty node
-    HeurNode(HeurNode* node); // Create a copy of a node
-    std::vector<HeurNode*> generateSwaps(Data* data); // Generate all nodes with interventions swapped
-    std::vector<HeurNode*> generateMutationsAssignations(Data* data); // Generate all nodes with interventions swapped
-    std::vector<HeurNode*> generateMutationsGroups(Data* data); // Generate all nodes with interventions swapped
+    HeurNode(std::unique_ptr<Data>& data); // Create an empty node
+    HeurNode(std::unique_ptr<HeurNode>& node); // Create a copy of a node
+    std::vector<std::unique_ptr<HeurNode>> generateSwaps(std::unique_ptr<Data>& data); // Generate all nodes with interventions swapped
+    std::vector<std::unique_ptr<HeurNode>> generateMutationsAssignations(std::unique_ptr<Data>& data); // Generate all nodes with interventions swapped
+    std::vector<std::unique_ptr<HeurNode>> generateMutationsGroups(std::unique_ptr<Data>& data); // Generate all nodes with interventions swapped
     void evaluate(); // Set the cost for this node
     bool isSlotAssignable(TimeSlot* pSlot);  // Returns true if slot is assignable
     bool isProAssignable(TimeSlot* pSlot, Professional* pPro);  // Returns true if professional can be assigned to slot with idx slotIdx
@@ -54,8 +54,8 @@ bool isIntervPrSlAlready(std::vector<std::vector<bool> >& rIsIntervByPrSl, Profe
 bool isNbIntervSlReached(std::vector<int>& rNbIntervBySl, TimeSlot* pSlot); // Return true if number of interventions for this slot has been reached
 bool isIntervGrSlAlready(std::vector<std::vector<bool> >& rIsIntervByGrSl, StudentGroup* pGroup, TimeSlot* pSlot); // Return true if this group has already been assigned on this slot
 // Create a solution using first fit
-HeurNode* firstFit(Data* pData);
+std::unique_ptr<HeurNode> firstFit(std::unique_ptr<Data>& pData);
 // Iterate to select and generate swaps of nodes
-std::vector<HeurNode*> iterate(Data* pData, std::vector<HeurNode*>& rNodes);
+std::vector<std::unique_ptr<HeurNode>> iterate(std::unique_ptr<Data>& pData, std::vector<std::unique_ptr<HeurNode>>& rNodes);
 // Launch the full algorithm, return the best node
-HeurNode* pseudoGenetic(Data* pData);
+std::unique_ptr<HeurNode> pseudoGenetic(std::unique_ptr<Data>& pData);

@@ -121,11 +121,11 @@ inline std::ostream& operator<<(std::ostream& os, const Data& rData) { return rD
 // XLS reading functions
 Dimension* readXLSDimensions(OpenXLSX::XLWorksheet& rSheet);
 Config* readXLSConfig(OpenXLSX::XLWorksheet& rSheet);
-std::vector<Professional *>* readXLSProfessionals(Data* data, OpenXLSX::XLWorksheet& rSheet);
+std::vector<Professional *>* readXLSProfessionals(std::unique_ptr<Data>& data, OpenXLSX::XLWorksheet& rSheet);
 std::vector<StudentGroup *>* readXLSGroups(OpenXLSX::XLWorksheet& rSheet, Dimension& rDimensions);
 std::vector<TimeSlot *>* readXLSSlots(OpenXLSX::XLWorksheet& rSheet);
-void readXLSCompatibilities(Data* data, OpenXLSX::XLWorksheet& rSheet);
-Data* readXLS(std::string& rFilename);
+void readXLSCompatibilities(std::unique_ptr<Data>& data, OpenXLSX::XLWorksheet& rSheet);
+std::unique_ptr<Data> readXLS(std::string& rFilename);
 
 // Generate a random data set with the given number of professionals and students groups
-Data* generateData(int numPros, int numGroups, float slotCompatProb, float proGroupCompatProb);
+std::unique_ptr<Data> generateData(int numPros, int numGroups, float slotCompatProb, float proGroupCompatProb);

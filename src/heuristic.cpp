@@ -16,7 +16,7 @@ using namespace std;
 
 int HeurNode::sNodeCounter(0);
 
-HeurNode::HeurNode(Data* pData)
+HeurNode::HeurNode(unique_ptr<Data>& pData)
         : id(sNodeCounter++), cost(0.0), isIntervByGrSl(pData->dimensions.numGroups, vector<bool>(pData->dimensions.numSlots, false)),
         isIntervByPrSl(pData->dimensions.numPros, vector<bool>(pData->dimensions.numSlots, false)),
         nbIntervByPrDa(pData->dimensions.numPros, vector<int>(pData->config .nbDays, 0)),
@@ -27,7 +27,7 @@ HeurNode::HeurNode(Data* pData)
         slots(pData->dimensions.numSlots, set<pair<Professional*, StudentGroup*> >()),
         assignations() {};
 
-HeurNode::HeurNode(HeurNode* pNode)
+HeurNode::HeurNode(std::unique_ptr<HeurNode>& pNode)
         : id(sNodeCounter++), cost(pNode->cost), isIntervByGrSl(pNode->isIntervByGrSl),
         isIntervByPrSl(pNode->isIntervByPrSl), nbIntervByPrDa(pNode->nbIntervByPrDa),
         nbIntervByPr(pNode->nbIntervByPr), nbIntervByGr(pNode->nbIntervByGr),
@@ -57,8 +57,8 @@ void HeurNode::evaluate() {
     cost += computeSDVec(nbIntervByDa);
 };
 
-HeurNode* firstFit(Data* pData) {
-    auto* firstNode = new HeurNode(pData);
+unique_ptr<HeurNode> firstFit(unique_ptr<Data>& pData) {
+    auto firstNode = make_unique<HeurNode>(pData);
     // Filling empty pNode
     // Sorting slots by least pros available
     auto slotsTmp = pData->slots;
@@ -100,8 +100,8 @@ HeurNode* firstFit(Data* pData) {
     return firstNode;
 };
 
-vector<HeurNode*> HeurNode::generateSwaps(Data* pData) {
-    std::vector<HeurNode*> swappedNodes;
+vector<unique_ptr<HeurNode>> HeurNode::generateSwaps(unique_ptr<Data>& pData) {
+    vector<unique_ptr<HeurNode>> swappedNodes;
     auto slotVec = this->slots.begin();
     for (int slotIdx = 0; slotVec != this->slots.end(); slotVec++, slotIdx++) {
         TimeSlot* pSlot = pData->slots[slotIdx];
@@ -126,7 +126,7 @@ vector<HeurNode*> HeurNode::generateSwaps(Data* pData) {
                             if (!isGroupAssignable(opair->second, pSlot)) continue;
                         }
                         // Create new pNode with swapped pros and groups
-                        HeurNode* swappedNode = new HeurNode(this);
+                        auto swappedNode = make_unique<HeurNode>(*this);
                         swappedNode->isIntervByGrSl[pair->second->idx][slotIdx] = false;
                         swappedNode->isIntervByGrSl[opair->second->idx][oslotIdx] = false;
                         swappedNode->isIntervByGrSl[pair->second->idx][oslotIdx] = true;
@@ -146,7 +146,7 @@ vector<HeurNode*> HeurNode::generateSwaps(Data* pData) {
                         swappedNode->slots[slotIdx].erase(assign1);
                         swappedNode->slots[oslotIdx].erase(assign2);
                         swappedNode->evaluate();
-                        swappedNodes.push_back(swappedNode);
+                        swappedNodes.push_back(std::move(swappedNode));
                     }
                 }
             }
@@ -155,8 +155,8 @@ vector<HeurNode*> HeurNode::generateSwaps(Data* pData) {
     return swappedNodes;
 }
 
-vector<HeurNode*> HeurNode::generateMutationsAssignations(Data* pData) {
-    std::vector<HeurNode*> swappedNodes;
+vector<unique_ptr<HeurNode>> HeurNode::generateMutationsAssignations(unique_ptr<Data>& pData) {
+    vector<unique_ptr<HeurNode>> swappedNodes;
     auto slotVec = this->slots.begin();
     for (int slotIdx = 0; slotVec != this->slots.end(); slotVec++, slotIdx++) {
         TimeSlot* pSlot = pData->slots[slotIdx];
@@ -172,7 +172,7 @@ vector<HeurNode*> HeurNode::generateMutationsAssignations(Data* pData) {
                     if (isIntervGrSlAlready(isIntervByGrSl, pair->second, pOslot)) continue;
                     if (isNbIntervSlReached(nbIntervBySl, pOslot)) continue;
                     // Create new pNode with assignation moved from pSlot to pOslot
-                    HeurNode* swappedNode = new HeurNode(this);
+                    auto swappedNode = make_unique<HeurNode>(*this);
                     swappedNode->isIntervByGrSl[pair->second->idx][slotIdx] = false;
                     swappedNode->isIntervByGrSl[pair->second->idx][oslotIdx] = true;
                     swappedNode->isIntervByPrSl[pair->first->idx][slotIdx] = false;
@@ -187,7 +187,7 @@ vector<HeurNode*> HeurNode::generateMutationsAssignations(Data* pData) {
                     swappedNode->slots[slotIdx].erase(assign);
                     swappedNode->slots[oslotIdx].insert(*assign);
                     swappedNode->evaluate();
-                    swappedNodes.push_back(swappedNode);
+                    swappedNodes.push_back(std::move(swappedNode));
                 }
             }
         }
@@ -195,8 +195,8 @@ vector<HeurNode*> HeurNode::generateMutationsAssignations(Data* pData) {
     return swappedNodes;
 }
 
-vector<HeurNode*> HeurNode::generateMutationsGroups(Data* pData) {
-    std::vector<HeurNode*> swappedNodes;
+vector<unique_ptr<HeurNode>> HeurNode::generateMutationsGroups(unique_ptr<Data>& pData) {
+    vector<unique_ptr<HeurNode>> swappedNodes;
     auto slotVec = this->slots.begin();
     for (int slotIdx = 0; slotVec != this->slots.end(); slotVec++, slotIdx++) {
         auto pSlot = pData->slots[slotIdx];
@@ -207,7 +207,7 @@ vector<HeurNode*> HeurNode::generateMutationsGroups(Data* pData) {
                     if (isIntervGrSlAlready(isIntervByGrSl, group, pSlot)) continue;
                     if (!isProGroupAssignable(pair->first, group)) continue;
                     // Create new pNode with group changed
-                    HeurNode* swappedNode = new HeurNode(this);
+                    auto swappedNode = make_unique<HeurNode>(*this);
                     swappedNode->isIntervByGrSl[pair->second->idx][slotIdx] = false;
                     swappedNode->isIntervByGrSl[group->idx][slotIdx] = true;
                     swappedNode->nbIntervByGr[pair->second->idx]--;
@@ -220,7 +220,7 @@ vector<HeurNode*> HeurNode::generateMutationsGroups(Data* pData) {
                     swappedNode->assignations.erase(assignAs);
                     swappedNode->assignations.insert(pairPrGr);
                     swappedNode->evaluate();
-                    swappedNodes.push_back(swappedNode);
+                    swappedNodes.push_back(std::move(swappedNode));
                 }
             }
         }
@@ -256,48 +256,48 @@ bool HeurNode::isProGroupAssignable(Professional* pPro, StudentGroup* pGroup) {
     return true;
 }
 
-std::set<std::pair<Professional*, StudentGroup*> >::iterator HeurNode::findAsInSlot(int slotIdx,
+set<pair<Professional*, StudentGroup*> >::iterator HeurNode::findAsInSlot(int slotIdx,
         Professional* pPro, StudentGroup* pGroup) {
     return find_if(slots[slotIdx].begin(), slots[slotIdx].end(),
-        [&] (std::pair<Professional*, StudentGroup*> tmpPair) {
+        [&] (pair<Professional*, StudentGroup*> tmpPair) {
             return tmpPair.first == pPro && tmpPair.second == pGroup;
         });
 }
 
-std::set<std::pair<Professional*, StudentGroup*> >::iterator HeurNode::findAsGrInSlot(int slotIdx,
+set<pair<Professional*, StudentGroup*> >::iterator HeurNode::findAsGrInSlot(int slotIdx,
         StudentGroup* pGroup) {
     return find_if(slots[slotIdx].begin(), slots[slotIdx].end(),
-        [&] (std::pair<Professional*, StudentGroup*> tmpPair) {
+        [&] (pair<Professional*, StudentGroup*> tmpPair) {
             return tmpPair.second == pGroup;
         });
 }
 
-std::set<std::pair<Professional*, StudentGroup*> >::iterator HeurNode::findAsPrInSlot(int slotIdx,
+set<pair<Professional*, StudentGroup*> >::iterator HeurNode::findAsPrInSlot(int slotIdx,
         Professional* pPro) {
     return find_if(slots[slotIdx].begin(), slots[slotIdx].end(),
-        [&] (std::pair<Professional*, StudentGroup*> tmpPair) {
+        [&] (pair<Professional*, StudentGroup*> tmpPair) {
             return tmpPair.first == pPro;
         });
 }
 
-std::set<std::pair<Professional*, StudentGroup*> >::iterator HeurNode::findAs(Professional* pPro,
+set<pair<Professional*, StudentGroup*> >::iterator HeurNode::findAs(Professional* pPro,
         StudentGroup* pGroup) {
     return find_if(assignations.begin(), assignations.end(),
-        [&] (std::pair<Professional*, StudentGroup*> tmpPair) {
+        [&] (pair<Professional*, StudentGroup*> tmpPair) {
             return tmpPair.first == pPro & tmpPair.second == pGroup;
         });
 }
 
-std::set<std::pair<Professional*, StudentGroup*> >::iterator HeurNode::findAsGr(StudentGroup* pGroup) {
+set<pair<Professional*, StudentGroup*> >::iterator HeurNode::findAsGr(StudentGroup* pGroup) {
     return find_if(assignations.begin(), assignations.end(),
-        [&] (std::pair<Professional*, StudentGroup*> tmpPair) {
+        [&] (pair<Professional*, StudentGroup*> tmpPair) {
             return tmpPair.second == pGroup;
         });
 }
 
-std::set<std::pair<Professional*, StudentGroup*> >::iterator HeurNode::findAsPr(Professional* pPro) {
+set<pair<Professional*, StudentGroup*> >::iterator HeurNode::findAsPr(Professional* pPro) {
     return find_if(assignations.begin(), assignations.end(),
-        [&] (std::pair<Professional*, StudentGroup*> tmpPair) {
+        [&] (pair<Professional*, StudentGroup*> tmpPair) {
             return tmpPair.first == pPro;
         });
 }
@@ -322,36 +322,40 @@ bool isIntervGrSlAlready(vector<vector<bool> >& rIsIntervByGrSl, StudentGroup* p
     return rIsIntervByGrSl[pGroup->idx][pSlot->idx];
 }
 
-std::vector<HeurNode*> iterate(Data* pData, std::vector<HeurNode*>& rNodes) {
-    std::vector<HeurNode*> newNodes;
+vector<unique_ptr<HeurNode>> iterate(unique_ptr<Data>& pData, vector<unique_ptr<HeurNode>>& rNodes) {
+    vector<unique_ptr<HeurNode>> newNodes;
     // Generating mutations of assignations of all nodes
     for (auto& pNode : rNodes) {
         // cout << " old cost " << pNode->cost << endl;
-        vector<HeurNode*> mutatedNodes = pNode->generateMutationsAssignations(pData);
+        vector<unique_ptr<HeurNode>> mutatedNodes = pNode->generateMutationsAssignations(pData);
         // Showing cost of new nodes
-        newNodes.insert(newNodes.end(), mutatedNodes.begin(), mutatedNodes.end());
+        newNodes.insert(newNodes.end(), std::make_move_iterator(mutatedNodes.begin()),
+            std::make_move_iterator(mutatedNodes.end()));
     }
     // // Generating mutations of groups of all nodes
     for (auto& pNode : rNodes) {
         // cout << " old cost " << pNode->cost << endl;
-        vector<HeurNode*> mutatedNodes = pNode->generateMutationsGroups(pData);
+        vector<unique_ptr<HeurNode>> mutatedNodes = pNode->generateMutationsGroups(pData);
         // Showing cost of new nodes
-        newNodes.insert(newNodes.end(), mutatedNodes.begin(), mutatedNodes.end());
+        newNodes.insert(newNodes.end(), std::make_move_iterator(mutatedNodes.begin()),
+            std::make_move_iterator(mutatedNodes.end()));
     }
     // Sorting new nodes by cost
     sort(newNodes.begin(), newNodes.end(),
-        [] (HeurNode* pNode1, HeurNode* pNode2) {
+        [] (unique_ptr<HeurNode>& pNode1, unique_ptr<HeurNode>& pNode2) {
             return pNode1->cost < pNode2->cost;
         });
     // Keeping only first 100 best nodes 
-    vector<HeurNode*> nodesIteration(newNodes.begin(), newNodes.begin() + min(1ul, newNodes.size()));
+    vector<unique_ptr<HeurNode>> nodesIteration(std::make_move_iterator(newNodes.begin()),
+        std::make_move_iterator(newNodes.begin() + min(1ul, newNodes.size())));
     return nodesIteration;
 }
 
-HeurNode* pseudoGenetic(Data* pData) {
-    HeurNode* pFirstNode = firstFit(pData);
-    vector<HeurNode*> nodes { pFirstNode };
+unique_ptr<HeurNode> pseudoGenetic(unique_ptr<Data>& pData) {
+    auto pFirstNode = firstFit(pData);
+    vector<unique_ptr<HeurNode>> nodes;
     float incumbent = pFirstNode->cost;
+    nodes.push_back(std::move(pFirstNode));
     int iteration = 0;
     bool isIterate = true;
     while (isIterate) {
@@ -359,7 +363,7 @@ HeurNode* pseudoGenetic(Data* pData) {
         nodes = iterate(pData, nodes);
         if (nodes.empty()) {
             cout << "ERROR: no nodes generated" << endl;
-            nodes = { pFirstNode };
+            nodes.push_back(std::move(pFirstNode));
             break;
         }
         cout << nodes.front()->cost << " / " << incumbent << endl;
@@ -369,5 +373,5 @@ HeurNode* pseudoGenetic(Data* pData) {
         // if (iteration == 50) break;
     }
     cout << " nodes size " << nodes.size() << endl;
-    return nodes[0];
+    return std::move(nodes[0]);
 }

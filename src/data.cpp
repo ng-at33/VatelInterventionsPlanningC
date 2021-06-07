@@ -30,7 +30,7 @@ StudentGroup::StudentGroup(int idx, std::string name, std::vector<const Professi
 Professional::Professional(){};
 
 Professional::Professional(int idx, std::string name, std::vector<const TimeSlot *>& rSlots,
-        std::vector<const StudentGroup*>& rGroups) :
+    std::vector<const StudentGroup*>& rGroups) :
     idx(idx), name(name), slots(rSlots), groups(rGroups)
     {};
 
@@ -180,7 +180,7 @@ vector<TimeSlot *>* readXLSSlots(XLWorksheet& rSheet) {
     return pSlots;
 };
 
-vector<Professional *>* readXLSProfessionals(Data* data, XLWorksheet& rSheet) {
+vector<Professional *>* readXLSProfessionals(unique_ptr<Data>& data, XLWorksheet& rSheet) {
     vector<Professional *>* pPros = new vector<Professional *>();
     auto colSlotOff = 1;
     auto colPros = 0;
@@ -238,7 +238,7 @@ vector<StudentGroup *>* readXLSGroups(XLWorksheet& rSheet, Dimension& dimensions
     return pGroups;
 };
 
-void readXLSCompatibilities(Data* data, XLWorksheet& rSheet) {
+void readXLSCompatibilities(unique_ptr<Data>& data, XLWorksheet& rSheet) {
     auto colPros = 0;
     auto rowGroups = 0;
     auto colGroupsOff = 1;
@@ -288,8 +288,8 @@ void readXLSCompatibilities(Data* data, XLWorksheet& rSheet) {
 };
 
 // IO functions
-Data* readXLS(string& rFilename) {
-    Data* pData = new Data();
+unique_ptr<Data> readXLS(string& rFilename) {
+    auto pData = make_unique<Data>();
     XLDocument doc;
     doc.open(rFilename.c_str());
     auto sheet1 = doc.workbook().worksheet("Sondage");
@@ -305,7 +305,7 @@ Data* readXLS(string& rFilename) {
     return pData;
 };
 
-Data* generateData(int numPros, int numGroups, float slotCompatProb, float proGroupCompatProb) {
+unique_ptr<Data> generateData(int numPros, int numGroups, float slotCompatProb, float proGroupCompatProb) {
     // Init DisplayConfig
     auto numWeeks = 2;
     auto nMaxProInterv = 3;
@@ -428,7 +428,7 @@ Data* generateData(int numPros, int numGroups, float slotCompatProb, float proGr
         }
     }
     // Constructing Data struct info
-    Data* pData = new Data();
+    auto pData = make_unique<Data>();
     pData->dimensions = *dimensions;
     pData->config = *config;
     pData->slots = slots;

@@ -19,15 +19,15 @@ void AlgorithmStrategy::setAlgorithm(int type)
         algo_ = new AlgorithmHeuristic();
 }
 
-Solution* AlgorithmStrategy::solve(Data* pData)
+unique_ptr<Solution> AlgorithmStrategy::solve(unique_ptr<Data>& pData)
 {
     return algo_->solve(pData);
 }
 
-Solution* AlgorithmHeuristic::solve(Data* pData)
+unique_ptr<Solution> AlgorithmHeuristic::solve(unique_ptr<Data>& pData)
 {
-    HeurNode* pBestNode = pseudoGenetic(pData);
-    Solution* pSolution = buildSolution(pData, pBestNode);
+    auto pBestNode = pseudoGenetic(pData);
+    auto pSolution = buildSolution(pData, pBestNode);
     return pSolution;
 }
 

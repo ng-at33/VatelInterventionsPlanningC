@@ -32,11 +32,11 @@ struct Solution {
     std::vector<Assignation *> assignations;
     Solution(std::vector<Assignation *>& assignations);
     std::ostream& print(std::ostream& os = std::cout) const;
-    void writeDays(Data* pData, OpenXLSX::XLWorksheet& rSheet, int rowOffset, int startDateCol, int startDay, int endDay);
-    void writeSlots(Data* pData, OpenXLSX::XLWorksheet& rSheet, int rowOffset);
-    void writeAssignations(Data* pData, OpenXLSX::XLWorksheet& rSheet, int rowOff, int startDateCol,
+    void writeDays(std::unique_ptr<Data>& pData, OpenXLSX::XLWorksheet& rSheet, int rowOffset, int startDateCol, int startDay, int endDay);
+    void writeSlots(std::unique_ptr<Data>& pData, OpenXLSX::XLWorksheet& rSheet, int rowOffset);
+    void writeAssignations(std::unique_ptr<Data>& pData, OpenXLSX::XLWorksheet& rSheet, int rowOff, int startDateCol,
         int startDay, int endDay);
-    void writeXLS(Data* pData); // Write solution to XLSfile
+    void writeXLS(std::unique_ptr<Data>& pData); // Write solution to XLSfile
 };
 
 // Overrides cout
@@ -46,16 +46,16 @@ inline std::ostream& operator<<(std::ostream& os, const Solution& sol) {
 
 // TODO: define a generic data structure to hold algorithms solutions
 // Build a solution from heuristic node
-Solution* buildSolution(Data* data, HeurNode* model);
+std::unique_ptr<Solution> buildSolution(std::unique_ptr<Data>& data, std::unique_ptr<HeurNode>& node);
 // Produce a SolutionProfiling to validate and also evaluate the quality of a solution 
 // SolutionProfiling* evaluteSolution(Data& data, Solution& sol);
 
 // Validate that a Solution is valid regarding all constraints of the problem
-bool validateSolution(Data* data, Solution* sol);
+bool validateSolution(std::unique_ptr<Data>& data, std::unique_ptr<Solution>& sol);
 
 // Hold the result of the evulation of a solution
 struct SolutionEvaluation {
-    Data* pData;
+    std::unique_ptr<Data>& pData;
     int numAssign;
     std::vector<int> numAssignBySlot;
     std::vector<int> numAssignByDay;
@@ -65,7 +65,7 @@ struct SolutionEvaluation {
     float stdevAssignByDay;
     float stdevAssignByPro;
     float stdevAssignByGroup;
-    SolutionEvaluation(Data* pData, int numAssign, std::vector<int>& rNumAssignBySlot,
+    SolutionEvaluation(std::unique_ptr<Data>& pData, int numAssign, std::vector<int>& rNumAssignBySlot,
         std::vector<int>& rNumAssignByDay, std::vector<int>& rNumAssignByPro,
         std::vector<int>& rNumAssignByGroup, float stdevAssignBySlot, float stdevAssignByDay,
         float stdevAssignByPro, float stdevAssignByGroup);
@@ -78,4 +78,4 @@ inline std::ostream& operator<<(std::ostream& os, const SolutionEvaluation& solE
 };
 
 // Return the evaluation of the quality of a solution
-SolutionEvaluation* evaluate(Data* data, Solution* sol);
+SolutionEvaluation* evaluate(std::unique_ptr<Data>& data, std::unique_ptr<Solution>& sol);

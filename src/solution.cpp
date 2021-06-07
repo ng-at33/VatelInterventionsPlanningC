@@ -23,7 +23,7 @@ Assignation::Assignation(Professional* pPro, StudentGroup* pGroup, TimeSlot* pSl
 
 Solution::Solution(vector<Assignation *>& rAssignations) : assignations(rAssignations) {};
 
-Solution* buildSolution(Data* pData, HeurNode* node) {
+unique_ptr<Solution> buildSolution(unique_ptr<Data>& pData, unique_ptr<HeurNode>& node) {
     vector<Assignation *> assignations {};
     auto slotIdx = 0;
     for (auto const& rSlot: node->slots) {
@@ -33,7 +33,7 @@ Solution* buildSolution(Data* pData, HeurNode* node) {
         }
         slotIdx++;
     }
-    Solution* pSolution = new Solution(assignations);
+    auto pSolution = make_unique<Solution>(assignations);
     return pSolution;
 };
 
@@ -49,7 +49,7 @@ ostream& Solution::print(ostream& os) const {
     return os;
 };
 
-void Solution::writeDays(Data* pData, XLWorksheet& rSheet, int rowOff, int startDateCol,
+void Solution::writeDays(unique_ptr<Data>& pData, XLWorksheet& rSheet, int rowOff, int startDateCol,
         int startDay, int endDay) {
     auto startSlotRow = 0 + rowOff;
     // Writing days
@@ -61,7 +61,7 @@ void Solution::writeDays(Data* pData, XLWorksheet& rSheet, int rowOff, int start
     }
 }
 
-void Solution::writeSlots(Data* pData, XLWorksheet& rSheet, int rowOff) {
+void Solution::writeSlots(unique_ptr<Data>& pData, XLWorksheet& rSheet, int rowOff) {
     auto startSlotCol = 0;
     auto rowSlotOffset = 1 + rowOff;
     // Writing slots
@@ -72,7 +72,7 @@ void Solution::writeSlots(Data* pData, XLWorksheet& rSheet, int rowOff) {
     }
 }
 
-void Solution::writeAssignations(Data* pData, XLWorksheet& rSheet, int rowOff, int startDateCol,
+void Solution::writeAssignations(unique_ptr<Data>& pData, XLWorksheet& rSheet, int rowOff, int startDateCol,
         int startDay, int endDay) {
     auto rowAssOff = 1 + rowOff;
     // Writing assignations
@@ -93,7 +93,7 @@ void Solution::writeAssignations(Data* pData, XLWorksheet& rSheet, int rowOff, i
     }
 }
 
-void Solution::writeXLS(Data* pData) {
+void Solution::writeXLS(unique_ptr<Data>& pData) {
     XLDocument doc;
     doc.create("./Planning.xls");
     doc.workbook().addWorksheet("Planning");
@@ -115,7 +115,7 @@ void Solution::writeXLS(Data* pData) {
     doc.close();
 }
 
-bool validateSolution(Data* pData, Solution* pSol) {
+bool validateSolution(unique_ptr<Data>& pData, unique_ptr<Solution>& pSol) {
     auto isSolValid = true;
     set<pair<Professional*, StudentGroup*> > assignations; // Used to check if a <pro,group> is not assigned more than once
     for (auto const& rAssign : pSol->assignations) {
@@ -191,9 +191,9 @@ bool validateSolution(Data* pData, Solution* pSol) {
     return isSolValid;
 };
 
-SolutionEvaluation::SolutionEvaluation(Data* pData, int numAssign, std::vector<int>& rNumAssignBySlot,
-        std::vector<int>& rNumAssignByDay, std::vector<int>& rNumAssignByPro,
-        std::vector<int>& rNumAssignByGroup, float stdevAssignBySlot, float stdevAssignByDay,
+SolutionEvaluation::SolutionEvaluation(unique_ptr<Data>& pData, int numAssign, vector<int>& rNumAssignBySlot,
+        vector<int>& rNumAssignByDay, vector<int>& rNumAssignByPro,
+        vector<int>& rNumAssignByGroup, float stdevAssignBySlot, float stdevAssignByDay,
         float stdevAssignByPro, float stdevAssignByGroup) : pData(pData), numAssign(numAssign),
         numAssignBySlot(rNumAssignBySlot), numAssignByDay(rNumAssignByDay),
         numAssignByPro(rNumAssignByPro), numAssignByGroup(rNumAssignByGroup),
@@ -214,7 +214,7 @@ ostream& SolutionEvaluation::print(ostream& os) const {
     return os;
 };
 
-SolutionEvaluation* evaluate(Data* pData, Solution* pSol) {
+SolutionEvaluation* evaluate(unique_ptr<Data>& pData, unique_ptr<Solution>& pSol) {
     int numAssign = pSol->assignations.size();
     vector<int> numAssignBySlot(pData->dimensions.numSlots, 0);
     vector<int> numAssignByDay(pData->config.nbDays, 0);
