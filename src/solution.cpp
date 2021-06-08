@@ -117,7 +117,7 @@ void Solution::writeXLS(unique_ptr<Data>& pData) {
 
 bool validateSolution(unique_ptr<Data>& pData, unique_ptr<Solution>& pSol) {
     auto isSolValid = true;
-    set<pair<Professional*, StudentGroup*> > assignations; // Used to check if a <pro,group> is not assigned more than once
+    set<pair<unique_ptr<Professional>, unique_ptr<StudentGroup>> > assignations; // Used to check if a <pro,group> is not assigned more than once
     for (auto const& rAssign : pSol->assignations) {
         for (auto const& rOAssign : pSol->assignations) {
             if (rAssign != rOAssign) {
