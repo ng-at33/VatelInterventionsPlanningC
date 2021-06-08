@@ -25,7 +25,7 @@ Solution::Solution(vector<unique_ptr<Assignation>>& rAssignations)
         : assignations(std::move(rAssignations)) {};
 
 unique_ptr<Solution> buildSolution(unique_ptr<Data>& pData, unique_ptr<HeurNode>& node) {
-                                   vector<unique_ptr<Assignation>> assignations {};
+    vector<unique_ptr<Assignation>> assignations {};
     auto slotIdx = 0;
     for (auto const& rSlot: node->slots) {
         for (auto const& rPair: rSlot) {
