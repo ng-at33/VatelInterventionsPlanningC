@@ -18,332 +18,333 @@ using namespace OpenXLSX;
 // Constructors
 TimeSlot::TimeSlot(){}
 
-TimeSlot::TimeSlot(int idx, std::string name, std::string hours, int day, int slotOfDay)
-        : idx(idx), name(name), hours(hours), day(day), slotOfDay(slotOfDay) {};
+TimeSlot::TimeSlot(int idx, std::string name, std::string hours, int day, int slot_of_day)
+        : idx(idx), name(name), hours(hours), day(day), slot_of_day(slot_of_day) {};
 
 StudentGroup::StudentGroup() {};
 
 StudentGroup::StudentGroup(int idx, std::string name,
-                           std::vector<const shared_ptr<Professional>>& rPros)
-        : idx(idx), name(name), pros(std::move(rPros)) {};
+                           std::vector<const shared_ptr<Professional>>& r_pros)
+        : idx(idx), name(name), pros(std::move(r_pros)) {};
 
 Professional::Professional() {};
 
 Professional::Professional(int idx, std::string name,
-                           std::vector<const shared_ptr<TimeSlot>>& rSlots,
-                           std::vector<const shared_ptr<StudentGroup>>& rGroups)
-        : idx(idx), name(name), slots(std::move(rSlots)), groups(std::move(rGroups)) {};
+                           std::vector<const shared_ptr<TimeSlot>>& r_slots,
+                           std::vector<const shared_ptr<StudentGroup>>& r_groups)
+        : idx(idx), name(name), slots(std::move(r_slots)), groups(std::move(r_groups)) {};
 
 Data::Data() {};
 
-Data::Data(Dimension& rDimensions, Config& rConfig,
-           std::vector<shared_ptr<Professional>>& rProfessionals,
-           std::vector<shared_ptr<StudentGroup>>& rGroups, std::vector<shared_ptr<TimeSlot>>& rSlots)
-        : dimensions(rDimensions), config(rConfig), professionals(std::move(rProfessionals)),
-          groups(std::move(rGroups)), slots(std::move(rSlots))
+Data::Data(Dimension& r_dimensions, Config& r_config,
+           std::vector<shared_ptr<Professional>>& r_professionals,
+           std::vector<shared_ptr<StudentGroup>>& r_groups, std::vector<shared_ptr<TimeSlot>>& r_slots)
+        : dimensions(r_dimensions), config(r_config), professionals(std::move(r_professionals)),
+          groups(std::move(r_groups)), slots(std::move(r_slots))
     {};
 
 Config::Config() {};
 
-Config::Config(vector<string> &days, vector<string>& slots, int nbWeeks, int nbDays,
-               int nbSlotsByDay, int nbPros)
-        : days(days), slots(slots), nbWeeks(nbWeeks), nbDays(nbDays), nbSlotsByDay(nbSlotsByDay),
-           nbPros(nbPros) {};
+Config::Config(vector<string> &days, vector<string>& slots, int nb_weeks, int nb_days,
+               int nb_slots_by_day, int nb_pros)
+        : days(days), slots(slots), nb_weeks(nb_weeks), nb_days(nb_days),
+          nb_slots_by_day(nb_slots_by_day), nb_pros(nb_pros) {};
 
-bool StudentGroup::isProCompatible(shared_ptr<Professional> pPro) {
-    return find(pros.begin(), pros.end(), pPro) != pros.end();
+bool StudentGroup::isProCompatible(shared_ptr<Professional> p_pro) {
+    return find(pros.begin(), pros.end(), p_pro) != pros.end();
 }
 
-bool Professional::isProAvailOnSlot(shared_ptr<TimeSlot> pSlot) {
-    return find(slots.begin(), slots.end(), pSlot) != slots.end();
+bool Professional::isProAvailOnSlot(shared_ptr<TimeSlot> p_slot) {
+    return find(slots.begin(), slots.end(), p_slot) != slots.end();
 }
 
-bool Professional::isGroupCompatible(shared_ptr<StudentGroup> pGroup) {
-    return find(groups.begin(), groups.end(), pGroup) != groups.end();
+bool Professional::isGroupCompatible(shared_ptr<StudentGroup> p_group) {
+    return find(groups.begin(), groups.end(), p_group) != groups.end();
 }
 
-unique_ptr<Dimension> readXLSDimensions(XLWorksheet& rSheet) {
+unique_ptr<Dimension> readXLSDimensions(XLWorksheet& r_sheet) {
     // Number of slots
-    auto numSlots = 0;
-    auto rowHours = 5;
-    auto colHourOff = 1;
-    auto iterateSlots = true;
-    while (iterateSlots) {
-        auto colIdx = numSlots + colHourOff;
-        auto hour = rSheet.cell(XLCellReference(rowHours + 1, colIdx + 1));
+    auto num_slots = 0;
+    auto row_hours = 5;
+    auto col_hour_off = 1;
+    auto iterate_slots = true;
+    while (iterate_slots) {
+        auto col_idx = num_slots + col_hour_off;
+        auto hour = r_sheet.cell(XLCellReference(row_hours + 1, col_idx + 1));
         if (hour.valueType() == XLValueType::Empty) {
-            iterateSlots = false;
+            iterate_slots = false;
         } else {
-            numSlots++;
+            num_slots++;
         }
     }
     // Number of pros
-    auto numPros = 0;
-    auto colPros = 0;
-    auto rowOffset = 6;
-    bool iteratePros = true;
-    while (iteratePros) {
-        auto rowIdx = numPros + rowOffset;
-        auto cellProName = rSheet.cell(XLCellReference(rowIdx + 1, colPros + 1));
-        auto proName = cellProName.value().get<string>();
-        if (proName.compare("Nombre") == 0) {
-            iteratePros = false;
+    auto num_pros = 0;
+    auto col_pros = 0;
+    auto row_offset = 6;
+    bool iterate_pros = true;
+    while (iterate_pros) {
+        auto row_idx = num_pros + row_offset;
+        auto cell_pro_name = r_sheet.cell(XLCellReference(row_idx + 1, col_pros + 1));
+        auto pro_name = cell_pro_name.value().get<string>();
+        if (pro_name.compare("Nombre") == 0) {
+            iterate_pros = false;
         } else {
-            numPros++;
+            num_pros++;
         }
     }
-    auto numGroups = 0;
-    auto numLanguages = 0;
-    auto pDimensions = make_unique<Dimension>(numPros, numGroups, numLanguages, numSlots);
-    return pDimensions;
+    auto num_groups = 0;
+    auto num_languages = 0;
+    auto p_dimensions = make_unique<Dimension>(num_pros, num_groups, num_languages, num_slots);
+    return p_dimensions;
 };
 
-unique_ptr<Config> readXLSConfig(XLWorksheet& rSheet) {
-    auto nbWeeks = 2;
+unique_ptr<Config> readXLSConfig(XLWorksheet& r_sheet) {
+    auto nb_weeks = 2;
     // Reading days and slot names
     vector<string> days {};
     set<string> slots {};
-    auto rowDay = 4;
-    auto rowHour = 5;
-    auto nbSlots = 0;
-    auto nbDays = 0;
-    auto nbSlotsByDay = 0;
-    auto nbSlotsByDayTmp = 0;
-    auto colOffset = 1;
-    bool iterateSlots = true;
+    auto row_day = 4;
+    auto row_hour = 5;
+    auto nb_slots = 0;
+    auto nb_days = 0;
+    auto nb_slots_by_day = 0;
+    auto nb_slots_by_dayTmp = 0;
+    auto col_offset = 1;
+    bool iterate_slots = true;
     string cur_month = "";
     string cur_day = "";
-    while (iterateSlots) {
-        auto colIdx = nbSlots + colOffset;
-        auto hour = rSheet.cell(XLCellReference(rowHour + 1, colIdx + 1));
+    while (iterate_slots) {
+        auto col_idx = nb_slots + col_offset;
+        auto hour = r_sheet.cell(XLCellReference(row_hour + 1, col_idx + 1));
         string cur_hour;
         if (hour.valueType() == XLValueType::Empty) {
-            iterateSlots = false;
+            iterate_slots = false;
         } else {
             slots.insert(string(hour.value().get<string>()));
-            auto day = rSheet.cell(XLCellReference(rowDay + 1, colIdx + 1));
+            auto day = r_sheet.cell(XLCellReference(row_day + 1, col_idx + 1));
             if (day.valueType() != XLValueType::Empty) {
                 days.push_back(day.value().get<string>());
-                nbDays++;
-                nbSlotsByDayTmp = 0;
+                nb_days++;
+                nb_slots_by_dayTmp = 0;
             }
         }
-        nbSlotsByDay = max(nbSlotsByDay, nbSlotsByDayTmp);
-        nbSlotsByDayTmp++;
-        nbSlots++;
+        nb_slots_by_day = max(nb_slots_by_day, nb_slots_by_dayTmp);
+        nb_slots_by_dayTmp++;
+        nb_slots++;
     }
-    auto nbPros = 0;
-    std::vector<string> slotsVec(slots.begin(), slots.end());
-    auto pConfig = make_unique<Config>(days, slotsVec, nbWeeks, nbDays, nbSlotsByDay, nbPros);
-    return pConfig;
+    auto nb_pros = 0;
+    std::vector<string> slots_vec(slots.begin(), slots.end());
+    auto p_config = make_unique<Config>(days, slots_vec, nb_weeks, nb_days, nb_slots_by_day, nb_pros);
+    return p_config;
 };
 
-unique_ptr<vector<shared_ptr<TimeSlot>>> readXLSSlots(XLWorksheet& rSheet) {
-    unique_ptr<vector<shared_ptr<TimeSlot>>> pSlots = make_unique<vector<shared_ptr<TimeSlot>>>();
+unique_ptr<vector<shared_ptr<TimeSlot>>> readXLSSlots(XLWorksheet& r_sheet) {
+    unique_ptr<vector<shared_ptr<TimeSlot>>> p_slots = make_unique<vector<shared_ptr<TimeSlot>>>();
     // Reading slots
     auto row_month = 3;
     auto row_day = 4;
     auto row_hour = 5;
-    auto colIter = 0;
-    auto colOffset = 1;
-    bool iterateSlots = true;
+    auto col_iter = 0;
+    auto col_offset = 1;
+    bool iterate_slots = true;
     string cur_month = "";
     string cur_day = "";
     auto cur_d = -1;
-    auto slotOfDay = 0;
-    while (iterateSlots) {
-        auto colIdx = colIter + colOffset;
-        auto hour = rSheet.cell(XLCellReference(row_hour + 1, colIdx + 1));
+    auto slot_of_day = 0;
+    while (iterate_slots) {
+        auto col_idx = col_iter + col_offset;
+        auto hour = r_sheet.cell(XLCellReference(row_hour + 1, col_idx + 1));
         string cur_hour;
         if (hour.valueType() == XLValueType::Empty) {
-            iterateSlots = false;
+            iterate_slots = false;
         } else {
             cur_hour = hour.value().get<string>();
-            auto month = rSheet.cell(XLCellReference(row_month + 1, colIdx + 1));
+            auto month = r_sheet.cell(XLCellReference(row_month + 1, col_idx + 1));
             if (month.valueType() != XLValueType::Empty) {
                 cur_month = month.value().get<string>();
             }
-            auto day = rSheet.cell(XLCellReference(row_day + 1, colIdx + 1));
+            auto day = r_sheet.cell(XLCellReference(row_day + 1, col_idx + 1));
             if (day.valueType() != XLValueType::Empty) {
                 cur_day = day.value().get<string>();
-                slotOfDay = 0;
+                slot_of_day = 0;
                 cur_d++;
             } else {
-                slotOfDay++;
+                slot_of_day++;
             }
-            auto slotName = cur_month + " " + cur_day + " " + cur_hour;
-            auto slot = make_shared<TimeSlot>(colIter, slotName, cur_hour, cur_d, slotOfDay);
-            pSlots->push_back(std::move(slot));
+            auto slot_name = cur_month + " " + cur_day + " " + cur_hour;
+            auto slot = make_shared<TimeSlot>(col_iter, slot_name, cur_hour, cur_d, slot_of_day);
+            p_slots->push_back(std::move(slot));
         }
-        colIter++;
+        col_iter++;
     }
-    return pSlots;
+    return p_slots;
 };
 
 unique_ptr<vector<shared_ptr<Professional>>> readXLSProfessionals(unique_ptr<Data>& data,
-                                                                  XLWorksheet& rSheet) {
-    auto pPros = make_unique<vector<shared_ptr<Professional>>>();
-    auto colSlotOff = 1;
-    auto colPros = 0;
-    auto rowIter = 0;
-    auto rowOffset = 6;
-    bool iteratePros = true;
+                                                                  XLWorksheet& r_sheet) {
+    auto p_pros = make_unique<vector<shared_ptr<Professional>>>();
+    auto col_slot_off = 1;
+    auto col_pros = 0;
+    auto row_iter = 0;
+    auto row_offset = 6;
+    bool iterate_pros = true;
     // Iterating on professionals names until "Nombre"
-    while (iteratePros) {
-        auto rowIdx = rowIter + rowOffset;
-        auto proName = rSheet.cell(XLCellReference(rowIdx + 1, colPros + 1)).value().get<string>();
-        if (proName.compare("Nombre") == 0) {
-            iteratePros = false;
+    while (iterate_pros) {
+        auto row_idx = row_iter + row_offset;
+        auto pro_name = r_sheet.cell(XLCellReference(row_idx + 1, col_pros + 1)).value().get<string>();
+        if (pro_name.compare("Nombre") == 0) {
+            iterate_pros = false;
         } else {
             vector<const shared_ptr<TimeSlot>> slots {};
             // Reading availabilities for this professional
-            for (auto slotIdx = 0; slotIdx < data->dimensions.numSlots; slotIdx++) {
-                auto colIdx = slotIdx + colSlotOff;
-                auto slotCell = rSheet.cell(XLCellReference(rowIdx + 1, colIdx + 1));
-                if (slotCell.valueType() == XLValueType::String) {
+            for (auto slotIdx = 0; slotIdx < data->dimensions.num_slots; slotIdx++) {
+                auto col_idx = slotIdx + col_slot_off;
+                auto slot_cell = r_sheet.cell(XLCellReference(row_idx + 1, col_idx + 1));
+                if (slot_cell.valueType() == XLValueType::String) {
                     auto slot = data->slots[slotIdx];
                     slots.push_back(slot);
                 }
             }
             vector<const shared_ptr<StudentGroup>> groups {};
-            auto pro = make_shared<Professional>(rowIter, string(proName), slots, groups);
-            pPros->push_back(pro);
+            auto pro = make_shared<Professional>(row_iter, string(pro_name), slots, groups);
+            p_pros->push_back(pro);
         }
-        rowIter++;
+        row_iter++;
     }
-    return pPros;
+    return p_pros;
 };
 
-unique_ptr<vector<shared_ptr<StudentGroup>>> readXLSGroups(XLWorksheet& rSheet,
+unique_ptr<vector<shared_ptr<StudentGroup>>> readXLSGroups(XLWorksheet& r_sheet,
                                                            Dimension& dimensions) {
-    auto pGroups = make_unique<vector<shared_ptr<StudentGroup>>>();
-    auto rowGroups = 0;
-    auto groupIdx = 0;
-    auto colOffset = 1;
-    bool iterateGroups = true;
+    auto p_groups = make_unique<vector<shared_ptr<StudentGroup>>>();
+    auto row_groups = 0;
+    auto group_idx = 0;
+    auto col_offset = 1;
+    bool iterate_groups = true;
     // Iterating on group names until empty cell
-    while (iterateGroups) {
-        auto row = rowGroups;
-        auto col = groupIdx + colOffset;
-        auto groupNameCell = rSheet.cell(XLCellReference(row + 1, col + 1));
-        if (groupNameCell.valueType() == XLValueType::String) {
-            auto groupName = groupNameCell.value().get<string>();
+    while (iterate_groups) {
+        auto row = row_groups;
+        auto col = group_idx + col_offset;
+        auto group_name_cell = r_sheet.cell(XLCellReference(row + 1, col + 1));
+        if (group_name_cell.valueType() == XLValueType::String) {
+            auto group_name = group_name_cell.value().get<string>();
             vector<const shared_ptr<Professional>> pros {};
-            auto group = make_shared<StudentGroup>(groupIdx, string(groupName), pros);
-            pGroups->push_back(std::move(group));
-            groupIdx++;
+            auto group = make_shared<StudentGroup>(group_idx, string(group_name), pros);
+            p_groups->push_back(std::move(group));
+            group_idx++;
         } else {
-            iterateGroups = false;
+            iterate_groups = false;
         }
     }
-    dimensions.numGroups = groupIdx;
-    return pGroups;
+    dimensions.num_groups = group_idx;
+    return p_groups;
 };
 
-void readXLSCompatibilities(unique_ptr<Data>& data, XLWorksheet& rSheet) {
-    auto colPros = 0;
-    auto rowGroups = 0;
-    auto colGroupsOff = 1;
-    auto rowProsOff  = 1;
-    auto colIter = 0;
-    bool iterateGroups = true;
+void readXLSCompatibilities(unique_ptr<Data>& data, XLWorksheet& r_sheet) {
+    auto col_pros = 0;
+    auto row_groups = 0;
+    auto col_groups_off = 1;
+    auto row_pros_off  = 1;
+    auto col_iter = 0;
+    bool iterate_groups = true;
     // Iterating on group names until empty cell
-    while (iterateGroups) {
-        auto groupNameCell = rSheet.cell(XLCellReference(rowGroups + 1, colIter + colGroupsOff + 1));
-        if (groupNameCell.valueType() == XLValueType::String) {
-            auto groupName = groupNameCell.value().get<string>();
-            auto pGroup = data->getGroupPtrByName(groupName);
+    while (iterate_groups) {
+        auto group_name_cell = r_sheet.cell(XLCellReference(row_groups + 1,
+                                                          col_iter + col_groups_off + 1));
+        if (group_name_cell.valueType() == XLValueType::String) {
+            auto group_name = group_name_cell.value().get<string>();
+            auto p_group = data->getGroupPtrByName(group_name);
             // If group is in the data set
-            if (pGroup != nullptr) {
-                auto rowIter = 0;
-                bool iteratePros = true;
+            if (p_group != nullptr) {
+                auto row_iter = 0;
+                bool iterate_pros = true;
                 // Iterating on professionals
-                while (iteratePros) {
-                    auto prosNameCell = rSheet.cell(XLCellReference(rowIter + rowProsOff + 1,
-                                                                    colPros + 1));
-                    if (prosNameCell.valueType() == XLValueType::String) {
-                        auto proName = prosNameCell.value().get<string>();
-                        auto pPro = data->getProPtrByName(proName);
+                while (iterate_pros) {
+                    auto pros_name_cell = r_sheet.cell(XLCellReference(row_iter + row_pros_off + 1,
+                                                                    col_pros + 1));
+                    if (pros_name_cell.valueType() == XLValueType::String) {
+                        auto pro_name = pros_name_cell.value().get<string>();
+                        auto p_pro = data->getProPtrByName(pro_name);
                         // If pro is in the data set
-                        if (pPro != nullptr) {
-                            auto compatCell = rSheet.cell(XLCellReference(rowIter + rowProsOff + 1,
-                                                                          colIter + colGroupsOff + 1));
-                            if (compatCell.valueType() == XLValueType::Empty) {
-                                pPro->groups.push_back(pGroup);
-                                pGroup->pros.push_back(pPro);
+                        if (p_pro != nullptr) {
+                            auto compat_cell = r_sheet.cell(XLCellReference(row_iter + row_pros_off + 1,
+                                                                          col_iter + col_groups_off + 1));
+                            if (compat_cell.valueType() == XLValueType::Empty) {
+                                p_pro->groups.push_back(p_group);
+                                p_group->pros.push_back(p_pro);
                             }
                         } else { // Consider full compatibility
                             for (auto pro : data->professionals) {
-                                pGroup->pros.push_back(pro);
-                                pro->groups.push_back(pGroup);
+                                p_group->pros.push_back(pro);
+                                pro->groups.push_back(p_group);
                             }
                         }
-                        rowIter++;
+                        row_iter++;
                     } else {
-                        iteratePros = false;
+                        iterate_pros = false;
                     }
                 }
             }
-            colIter++;
+            col_iter++;
         } else {
-            iterateGroups = false;
+            iterate_groups = false;
         }
     }
 };
 
 // IO functions
-unique_ptr<Data> readXLS(string& rFilename) {
-    auto pData = make_unique<Data>();
+unique_ptr<Data> readXLS(string& r_filename) {
+    auto p_data = make_unique<Data>();
     XLDocument doc;
-    doc.open(rFilename.c_str());
+    doc.open(r_filename.c_str());
     auto sheet1 = doc.workbook().worksheet("Sondage");
-    pData->dimensions = *readXLSDimensions(sheet1);
-    pData->config = *readXLSConfig(sheet1);
-    pData->slots = *readXLSSlots(sheet1);
-    pData->professionals = *readXLSProfessionals(pData, sheet1);
+    p_data->dimensions = *readXLSDimensions(sheet1);
+    p_data->config = *readXLSConfig(sheet1);
+    p_data->slots = *readXLSSlots(sheet1);
+    p_data->professionals = *readXLSProfessionals(p_data, sheet1);
     auto sheet2 = doc.workbook().worksheet("FPP");
-    pData->groups = *readXLSGroups(sheet2, pData->dimensions);
-    readXLSCompatibilities(pData, sheet2);
+    p_data->groups = *readXLSGroups(sheet2, p_data->dimensions);
+    readXLSCompatibilities(p_data, sheet2);
     doc.close();
 
-    return pData;
+    return p_data;
 };
 
-unique_ptr<Data> generateData(int numPros, int numGroups, float slotCompatProb,
-                              float proGroupCompatProb) {
+unique_ptr<Data> generateData(int num_pros, int num_groups, float slot_compatProb,
+                              float pro_group_compa_prob) {
     // Init DisplayConfig
-    auto numWeeks = 2;
-    auto nMaxProInterv = 3;
+    auto num_weeks = 2;
+    auto n_max_pro_interv = 3;
     vector<string> days{ "2020-11-09", "2020-11-11", "2020-11-12", "2020-11-13", "2020-11-14", "2020-11-15", "2020-11-16", "2020-11-17", "2020-11-18", "2020-11-19" };
-    vector<string> baseSlotsStart { "9h", "10h30", "14h", "15h30" };
-    vector<string> bastSlotsEnd{ "10h30", "12h", "15h30", "17h" };
+    vector<string> base_slots_start { "9h", "10h30", "14h", "15h30" };
+    vector<string> bast_slots_end{ "10h30", "12h", "15h30", "17h" };
 
     // Initializing random number generation
     srand(123);
     // srand(time(nullptr));
     static string charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-    string proName;
-    int strLength = 10;
-    proName.resize(strLength);
+    string pro_name;
+    int str_length = 10;
+    pro_name.resize(str_length);
     // Generating names for professionals
     vector<string> pros_str {};
-    for (int proI = 0; proI < numPros; proI++) {
-        for (int i = 0; i < strLength; i++) {
-            proName[i] = charset[rand() % charset.length()];
+    for (int proI = 0; proI < num_pros; proI++) {
+        for (int i = 0; i < str_length; i++) {
+            pro_name[i] = charset[rand() % charset.length()];
         }
-        pros_str.push_back("pro_" + proName);
+        pros_str.push_back("pro_" + pro_name);
     }
 
-    string groupName;
-    strLength = 6;
-    groupName.resize(strLength);
+    string group_name;
+    str_length = 6;
+    group_name.resize(str_length);
     // Generating names for students groups
     vector<string> groups_str {};
-    for (int grpI = 0; grpI < numGroups; grpI++) {
-        for (int i = 0; i < strLength; i++) {
-            groupName[i] = charset[rand() % charset.length()];
+    for (int grpI = 0; grpI < num_groups; grpI++) {
+        for (int i = 0; i < str_length; i++) {
+            group_name[i] = charset[rand() % charset.length()];
         }
-        groups_str.push_back("group_" + groupName);
+        groups_str.push_back("group_" + group_name);
     }
 
     auto config = make_shared<Config>();
@@ -354,113 +355,113 @@ unique_ptr<Data> generateData(int numPros, int numGroups, float slotCompatProb,
     auto cnt_days = 0;
     // Generating time slots
     for (auto day : days) {
-        for (unsigned long slot_idx = 0; slot_idx < baseSlotsStart.size(); ++slot_idx) {
+        for (unsigned long slot_idx = 0; slot_idx < base_slots_start.size(); ++slot_idx) {
             auto new_slot = make_shared<TimeSlot>();
             new_slot->idx = cnt_slots;
-            new_slot->name = day + " " + baseSlotsStart [slot_idx] + "-" + bastSlotsEnd[slot_idx];
-            new_slot->hours = baseSlotsStart [slot_idx] + "-" + bastSlotsEnd[slot_idx];
+            new_slot->name = day + " " + base_slots_start [slot_idx] + "-" + bast_slots_end[slot_idx];
+            new_slot->hours = base_slots_start [slot_idx] + "-" + bast_slots_end[slot_idx];
             new_slot->day = cnt_days;
-            new_slot->slotOfDay = slot_idx;
+            new_slot->slot_of_day = slot_idx;
             slots.push_back(new_slot);
             cnt_slots++;
         }
         cnt_days++;
     }
 
-    for (unsigned long slot_idx = 0; slot_idx < baseSlotsStart .size(); ++slot_idx) {
-        slots_str.push_back(baseSlotsStart [slot_idx] + "-" + bastSlotsEnd[slot_idx]);
+    for (unsigned long slot_idx = 0; slot_idx < base_slots_start .size(); ++slot_idx) {
+        slots_str.push_back(base_slots_start [slot_idx] + "-" + bast_slots_end[slot_idx]);
     }
     // Initializing config
     config->days = days;
     config->slots = slots_str;
-    config->nbWeeks = numWeeks;
-    config->nbDays = days.size();
-    config->nbSlotsByDay = slots_str.size();
-    config->nbPros = pros_str.size();
+    config->nb_weeks = num_weeks;
+    config->nb_days = days.size();
+    config->nb_slots_by_day = slots_str.size();
+    config->nb_pros = pros_str.size();
 
     shared_ptr<Dimension> dimensions = make_shared<Dimension>(pros_str.size(), groups_str.size(), 1,
                                                               slots.size());
 
-    int** dispo = new int*[dimensions->numPros];
+    int** dispo = new int*[dimensions->num_pros];
     // Generating random availabilities for professionals
-    for (int i = 0; i < dimensions->numPros; ++i) {
+    for (int i = 0; i < dimensions->num_pros; ++i) {
         dispo[i] = new int[slots.size()];
-        for (int j = 0; j < dimensions->numSlots; ++j) {
+        for (int j = 0; j < dimensions->num_slots; ++j) {
             auto rng = rand() % 2;
             dispo[i][j] = rng;
         }
     }
     vector<shared_ptr<StudentGroup>> groups;
-    auto cntGroup = 0;
+    auto cnt_group = 0;
     // Initializing students groups info
-    for (auto const& rGroup : groups_str) {
+    for (auto const& r_group : groups_str) {
         auto new_group = make_shared<StudentGroup>();
-        new_group->idx = cntGroup;
-        new_group->name = rGroup;
+        new_group->idx = cnt_group;
+        new_group->name = r_group;
         groups.push_back(new_group);
-        cntGroup++;
+        cnt_group++;
     }
     vector<shared_ptr<Professional>> pros;
     auto cntPro = 0;
     // Initializing professionals info
-    for (auto const& rPro : pros_str) {
-        auto pNewPro = make_shared<Professional>();
-        pNewPro->idx = cntPro;
-        pNewPro->name = rPro;
+    for (auto const& r_pro : pros_str) {
+        auto p_new_pro = make_shared<Professional>();
+        p_new_pro->idx = cntPro;
+        p_new_pro->name = r_pro;
         // Generating random pro availabilities
-        for (auto& rSlot : slots) {
+        for (auto& r_slot : slots) {
             auto randFloat = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-            if (randFloat <= slotCompatProb) {
-                pNewPro->slots.push_back(rSlot);
-                rSlot->pros.push_back(pNewPro);
+            if (randFloat <= slot_compatProb) {
+                p_new_pro->slots.push_back(r_slot);
+                r_slot->pros.push_back(p_new_pro);
             }
         }
         // Generating random compatibilities between pro and students groups
-        for (auto const& rGroup : groups) {
+        for (auto const& r_group : groups) {
             auto randFloat = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-            if (randFloat <= proGroupCompatProb) {
-                pNewPro->groups.push_back(rGroup);
+            if (randFloat <= pro_group_compa_prob) {
+                p_new_pro->groups.push_back(r_group);
             }
         }
-        pros.push_back(pNewPro);
+        pros.push_back(p_new_pro);
         cntPro++;
     }
     // Completing groups with compatible pros
-    for (auto& rGroup : groups) {
-        for (auto const& rPro : pros) {
-            if (find(rPro->groups.begin(), rPro->groups.end(), rGroup) != rPro->groups.end()) {
-                rGroup->pros.push_back(rPro);
+    for (auto& r_group : groups) {
+        for (auto const& r_pro : pros) {
+            if (find(r_pro->groups.begin(), r_pro->groups.end(), r_group) != r_pro->groups.end()) {
+                r_group->pros.push_back(r_pro);
             }
         }
     }
     // Constructing Data struct info
-    auto pData = make_unique<Data>();
-    pData->dimensions = *dimensions;
-    pData->config = *config;
-    pData->slots = slots;
-    pData->professionals = pros;
-    pData->groups = groups;
-    return pData;
+    auto p_data = make_unique<Data>();
+    p_data->dimensions = *dimensions;
+    p_data->config = *config;
+    p_data->slots = slots;
+    p_data->professionals = pros;
+    p_data->groups = groups;
+    return p_data;
 };
 
 // Getters
-shared_ptr<Professional> Data::getProPtrByName(std::string& proName) {
-    vector<shared_ptr<Professional>>::iterator pPro = find_if(professionals.begin(),
+shared_ptr<Professional> Data::getProPtrByName(std::string& pro_name) {
+    vector<shared_ptr<Professional>>::iterator p_pro = find_if(professionals.begin(),
         professionals.end(),
-        [&](shared_ptr<Professional>& pPro) {
-            return pPro->name.compare(proName) == 0;
+        [&](shared_ptr<Professional>& p_pro) {
+            return p_pro->name.compare(pro_name) == 0;
         });
-    if (pPro == professionals.end()) return nullptr;
-    return *pPro;
+    if (p_pro == professionals.end()) return nullptr;
+    return *p_pro;
 }
 
-shared_ptr<StudentGroup> Data::getGroupPtrByName(std::string& groupName) {
-    vector<shared_ptr<StudentGroup>>::iterator pGroup = find_if(groups.begin(), groups.end(),
-        [&](shared_ptr<StudentGroup>& pGgroupTmp) {
-            return pGgroupTmp->name.compare(groupName) == 0;
+shared_ptr<StudentGroup> Data::getGroupPtrByName(std::string& group_name) {
+    vector<shared_ptr<StudentGroup>>::iterator p_group = find_if(groups.begin(), groups.end(),
+        [&](shared_ptr<StudentGroup>& p_group_tmp) {
+            return p_group_tmp->name.compare(group_name) == 0;
         });
-    if (pGroup == groups.end()) return nullptr;
-    return *pGroup;
+    if (p_group == groups.end()) return nullptr;
+    return *p_group;
 }
 
 // Printers
@@ -477,8 +478,8 @@ ostream& Data::print(ostream& os) const {
 };
 
 ostream& Dimension::print(ostream& os) const {
-    os << "Dimension(" << "numPros : " << numPros << endl << "numGroups : " << numGroups << endl;
-    os << "numLanguages : " << numLanguages << endl << "numSlots : " << numSlots << endl << ")";
+    os << "Dimension(" << "num_pros : " << num_pros << endl << "num_groups : " << num_groups << endl;
+    os << "num_languages : " << num_languages << endl << "num_slots : " << num_slots << endl << ")";
     os << endl;
     return os;
 };
@@ -488,15 +489,15 @@ ostream& Config::print(ostream& os) const {
     for (auto& day : days) os << day << "," << endl;
     os << "slots " << endl;
     for (auto& slot : slots) os << slot << "," << endl;
-    os << "nb_weeks : " << nbWeeks << endl << "nb_days : " << nbDays << endl << "nb_base_slots : "
-        << nbSlotsByDay << endl << "nb_pros : " << nbPros << endl;
+    os << "nb_weeks : " << nb_weeks << endl << "nb_days : " << nb_days << endl << "nb_base_slots : "
+        << nb_slots_by_day << endl << "nb_pros : " << nb_pros << endl;
     os << ")" << endl;
     return os;
 };
 
 ostream& TimeSlot::print(ostream& os) const {
     os << "TimeSlot(idx : " << idx << ", name : " << name << ", time interval : (" << hours << ")";
-    os << ", day : " << day << ", slotOfDay : " << slotOfDay << ")" << endl;
+    os << ", day : " << day << ", slot_of_day : " << slot_of_day << ")" << endl;
     return os;
 };
 

@@ -21,36 +21,37 @@ struct TimeSlot;
 
 // Hold the dimensions of the main vectors of a Data struct
 struct Dimension {
-    int numPros;
-    int numGroups;
-    int numLanguages;
-    int numSlots;
+    int num_pros;
+    int num_groups;
+    int num_languages;
+    int num_slots;
     std::ostream& print(std::ostream& os = std::cout) const;
 
     Dimension(){};
-    Dimension(int numPros, int numGroups, int numLanguages, int numSlots)
-        : numPros(numPros), numGroups(numGroups), numLanguages(numLanguages), numSlots(numSlots) {};
+    Dimension(int num_pros, int num_groups, int num_languages, int num_slots)
+        : num_pros(num_pros), num_groups(num_groups), num_languages(num_languages),
+          num_slots(num_slots) {};
 };
 
 // Override cout
-inline std::ostream& operator<<(std::ostream& os, const Dimension& rDim) { return rDim.print(os); };
+inline std::ostream& operator<<(std::ostream& os, const Dimension& r_dim) { return r_dim.print(os); };
 
 // Contain useful information to display a Solution
 struct Config {
     std::vector<std::string> days;
     std::vector<std::string> slots;
-    int nbWeeks;
-    int nbDays;
-    int nbSlotsByDay;
-    int nbPros;
+    int nb_weeks;
+    int nb_days;
+    int nb_slots_by_day;
+    int nb_pros;
     Config();
-    Config(std::vector<std::string>& days, std::vector<std::string>& rSlots, int nbWeeks, int nbDays,
-           int nbSlotsByDay, int nbPros);
+    Config(std::vector<std::string>& days, std::vector<std::string>& rSlots, int nb_weeks,
+           int nb_days, int nb_slots_by_day, int nb_pros);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 
 // Override cout
-inline std::ostream& operator<<(std::ostream& os, const Config& rConfig) { return rConfig.print(os); };
+inline std::ostream& operator<<(std::ostream& os, const Config& r_config) { return r_config.print(os); };
 
 // Contain the information relative to a time slot
 struct TimeSlot {
@@ -58,15 +59,15 @@ struct TimeSlot {
     std::string name;
     std::string hours;
     int day;
-    int slotOfDay;
+    int slot_of_day;
     std::vector<const std::shared_ptr<Professional>> pros; // Professionals available on this time slot
     std::ostream& print(std::ostream& os = std::cout) const;
     TimeSlot();
-    TimeSlot(int idx, std::string name, std::string hours, int day, int slotOfDay);
+    TimeSlot(int idx, std::string name, std::string hours, int day, int slot_of_day);
 };
 
 // Override cout
-inline std::ostream& operator<<(std::ostream& os, const TimeSlot& rSlot) { return rSlot.print(os); };
+inline std::ostream& operator<<(std::ostream& os, const TimeSlot& r_slot) { return r_slot.print(os); };
 
 // Contain the information of a single student group
 struct StudentGroup {
@@ -74,13 +75,13 @@ struct StudentGroup {
     std::string name;
     std::vector<const std::shared_ptr<Professional>> pros; // Professionals compatible with this students group
     StudentGroup();
-    StudentGroup(int idx, std::string name, std::vector<const std::shared_ptr<Professional>>& rPros);
+    StudentGroup(int idx, std::string name, std::vector<const std::shared_ptr<Professional>>& r_pros);
     bool isProCompatible(std::shared_ptr<Professional> pro);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 
 // Overrides cout
-inline std::ostream& operator<<(std::ostream& os, const StudentGroup& rGroup) { return rGroup.print(os); };
+inline std::ostream& operator<<(std::ostream& os, const StudentGroup& r_group) { return r_group.print(os); };
 
 // Contain the information of a single professional
 struct Professional {
@@ -97,39 +98,39 @@ struct Professional {
 };
 
 // Overrides cout
-inline std::ostream& operator<<(std::ostream& os, const Professional& rPro) { return rPro.print(os); };
+inline std::ostream& operator<<(std::ostream& os, const Professional& r_pro) { return r_pro.print(os); };
 
 // Main structure that holds the information of the problem
 struct Data {
-    Dimension                   dimensions;
-    Config                      config;
+    Dimension                                  dimensions;
+    Config                                     config;
     std::vector<std::shared_ptr<Professional>> professionals;
     std::vector<std::shared_ptr<StudentGroup>> groups;
     std::vector<std::shared_ptr<TimeSlot>>     slots;
     Data();
-    Data(Dimension& rDimensions, Config& rConfig,
-         std::vector<std::shared_ptr<Professional>>& rProfessionals,
-         std::vector<std::shared_ptr<StudentGroup>>& rGroups,
-         std::vector<std::shared_ptr<TimeSlot>>& rSlots);
-    std::shared_ptr<Professional> getProPtrByName(std::string& rProName);
-    std::shared_ptr<StudentGroup> getGroupPtrByName(std::string& rGroupName);
+    Data(Dimension& r_dimensions, Config& r_config,
+         std::vector<std::shared_ptr<Professional>>& r_professionals,
+         std::vector<std::shared_ptr<StudentGroup>>& r_groups,
+         std::vector<std::shared_ptr<TimeSlot>>& r_slots);
+    std::shared_ptr<Professional> getProPtrByName(std::string& r_proName);
+    std::shared_ptr<StudentGroup> getGroupPtrByName(std::string& r_groupName);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 
 // Overrides cout
-inline std::ostream& operator<<(std::ostream& os, const Data& rData) { return rData.print(os); };
+inline std::ostream& operator<<(std::ostream& os, const Data& r_data) { return r_data.print(os); };
 
 // XLS reading functions
-std::unique_ptr<Dimension> readXLSDimensions(OpenXLSX::XLWorksheet& rSheet);
-std::unique_ptr<Config> readXLSConfig(OpenXLSX::XLWorksheet& rSheet);
+std::unique_ptr<Dimension> readXLSDimensions(OpenXLSX::XLWorksheet& r_sheet);
+std::unique_ptr<Config> readXLSConfig(OpenXLSX::XLWorksheet& r_sheet);
 std::unique_ptr<std::vector<std::shared_ptr<Professional>>> readXLSProfessionals(
-    std::unique_ptr<Data>& data, OpenXLSX::XLWorksheet& rSheet);
+    std::unique_ptr<Data>& data, OpenXLSX::XLWorksheet& r_sheet);
 std::unique_ptr<std::vector<std::shared_ptr<StudentGroup>>> readXLSGroups(
-    OpenXLSX::XLWorksheet& rSheet, Dimension& rDimensions);
-std::unique_ptr<std::vector<std::shared_ptr<TimeSlot>>> readXLSSlots(OpenXLSX::XLWorksheet& rSheet);
-void readXLSCompatibilities(std::unique_ptr<Data>& data, OpenXLSX::XLWorksheet& rSheet);
-std::unique_ptr<Data> readXLS(std::string& rFilename);
+    OpenXLSX::XLWorksheet& r_sheet, Dimension& r_dimensions);
+std::unique_ptr<std::vector<std::shared_ptr<TimeSlot>>> readXLSSlots(OpenXLSX::XLWorksheet& r_sheet);
+void readXLSCompatibilities(std::unique_ptr<Data>& data, OpenXLSX::XLWorksheet& r_sheet);
+std::unique_ptr<Data> readXLS(std::string& r_dilename);
 
 // Generate a random data set with the given number of professionals and students groups
-std::unique_ptr<Data> generateData(int numPros, int numGroups, float slotCompatProb,
-                                   float proGroupCompatProb);
+std::unique_ptr<Data> generateData(int num_pros, int num_groups, float slot_compat_prob,
+                                   float pro_group_compat_prob);

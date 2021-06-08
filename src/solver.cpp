@@ -1,4 +1,4 @@
-/* 
+/*
  * Developped by Alexis TOULLAT (alexis.toullat@at-consulting.fr)
  * solver.cpp
  */
@@ -19,15 +19,15 @@ void AlgorithmStrategy::setAlgorithm(int type)
         algo_ = new AlgorithmHeuristic();
 }
 
-unique_ptr<Solution> AlgorithmStrategy::solve(unique_ptr<Data>& pData)
+unique_ptr<Solution> AlgorithmStrategy::solve(unique_ptr<Data>& p_data)
 {
-    return algo_->solve(pData);
+    return algo_->solve(p_data);
 }
 
-unique_ptr<Solution> AlgorithmHeuristic::solve(unique_ptr<Data>& pData)
+unique_ptr<Solution> AlgorithmHeuristic::solve(unique_ptr<Data>& p_data)
 {
-    auto pBestNode = pseudoGenetic(pData);
-    auto pSolution = buildSolution(pData, pBestNode);
+    auto pBestNode = pseudoGenetic(p_data);
+    auto pSolution = buildSolution(p_data, pBestNode);
     return pSolution;
 }
 

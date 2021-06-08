@@ -1,5 +1,5 @@
 /*
- * Developped by Alexis TOULLAT (alexis.toullat@at-consulting.fr)
+ * Developped _by Alexis TOULLAT (alexis.toullat@at-consulting.fr)
  * solution.h: define and builds a structure holding a solution,
  * as well as functions to evaluation its quality and display it
  */
@@ -20,25 +20,25 @@ struct Assignation {
     std::shared_ptr<Professional> pro;
     std::shared_ptr<StudentGroup> group;
     std::shared_ptr<TimeSlot> slot;
-    Assignation(std::shared_ptr<Professional> pPro, std::shared_ptr<StudentGroup> pGroup,
-                std::shared_ptr<TimeSlot> pSlot);
+    Assignation(std::shared_ptr<Professional> p_pro, std::shared_ptr<StudentGroup> p_group,
+                std::shared_ptr<TimeSlot> p_slot);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 
 // Overrides cout
-inline std::ostream& operator<<(std::ostream& os, const Assignation& rAssign) { return rAssign.print(os); };
+inline std::ostream& operator<<(std::ostream& os, const Assignation& r_assign) { return r_assign.print(os); };
 
 // Hold and display a Solution of the problem
 struct Solution {
     std::vector<std::unique_ptr<Assignation>> assignations;
     Solution(std::vector<std::unique_ptr<Assignation>>& assignations);
     std::ostream& print(std::ostream& os = std::cout) const;
-    void writeDays(std::unique_ptr<Data>& pData, OpenXLSX::XLWorksheet& rSheet, int rowOffset,
-                   int startDateCol, int startDay, int endDay);
-    void writeSlots(std::unique_ptr<Data>& pData, OpenXLSX::XLWorksheet& rSheet, int rowOffset);
-    void writeAssignations(std::unique_ptr<Data>& pData, OpenXLSX::XLWorksheet& rSheet, int rowOff,
-                           int startDateCol, int startDay, int endDay);
-    void writeXLS(std::unique_ptr<Data>& pData); // Write solution to XLSfile
+    void writeDays(std::unique_ptr<Data>& p_data, OpenXLSX::XLWorksheet& r_sheet, int row_offset,
+                   int start_date_col, int start_day, int end_day);
+    void writeSlots(std::unique_ptr<Data>& p_data, OpenXLSX::XLWorksheet& r_sheet, int row_offset);
+    void writeAssignations(std::unique_ptr<Data>& p_data, OpenXLSX::XLWorksheet& r_sheet, int row_dff,
+                           int start_date_col, int start_day, int end_day);
+    void writeXLS(std::unique_ptr<Data>& p_data); // Write solution to XLSfile
 };
 
 // Overrides cout
@@ -57,27 +57,27 @@ bool validateSolution(std::unique_ptr<Data>& data, std::unique_ptr<Solution>& so
 
 // Hold the result of the evulation of a solution
 struct SolutionEvaluation {
-    std::unique_ptr<Data>& pData;
-    int numAssign;
-    std::vector<int> numAssignBySlot;
-    std::vector<int> numAssignByDay;
-    std::vector<int> numAssignByPro;
-    std::vector<int> numAssignByGroup;
-    float stdevAssignBySlot;
-    float stdevAssignByDay;
-    float stdevAssignByPro;
-    float stdevAssignByGroup;
-    SolutionEvaluation(std::unique_ptr<Data>& pData, int numAssign,
-                       std::vector<int>& rNumAssignBySlot, std::vector<int>& rNumAssignByDay,
-                       std::vector<int>& rNumAssignByPro, std::vector<int>& rNumAssignByGroup,
-                       float stdevAssignBySlot, float stdevAssignByDay, float stdevAssignByPro,
-                       float stdevAssignByGroup);
+    std::unique_ptr<Data>& p_data;
+    int num_assign;
+    std::vector<int> num_assign_by_slot;
+    std::vector<int> num_assign_by_day;
+    std::vector<int> num_assign_by_pro;
+    std::vector<int> num_assign_by_group;
+    float std_assign_by_slot;
+    float std_assign_by_day;
+    float std_assign_by_pro;
+    float std_assign_by_group;
+    SolutionEvaluation(std::unique_ptr<Data>& p_data, int num_assign,
+                       std::vector<int>& r_num_assign_by_slot, std::vector<int>& r_num_assign_by_day,
+                       std::vector<int>& r_num_assign_by_pro, std::vector<int>& r_num_assign_by_group,
+                       float std_assign_by_slot, float std_assign_by_day, float std_assign_by_pro,
+                       float std_assign_by_group);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 
 // Overrides cout
-inline std::ostream& operator<<(std::ostream& os, const SolutionEvaluation& solEval) {
-    return solEval.print(os);
+inline std::ostream& operator<<(std::ostream& os, const SolutionEvaluation& sol_eval) {
+    return sol_eval.print(os);
 };
 
 // Return the evaluation of the quality of a solution
