@@ -24,22 +24,22 @@ TimeSlot::TimeSlot(int idx, std::string name, std::string hours, int day, int sl
 
 StudentGroup::StudentGroup(){};
 
-StudentGroup::StudentGroup(int idx, std::string name, std::vector<const Professional*>& rPros) :
-    idx(idx), name(name), pros(rPros) {};
+StudentGroup::StudentGroup(int idx, std::string name, std::vector<const shared_ptr<Professional>>& rPros) :
+    idx(idx), name(name), pros(std::move(rPros)) {};
 
 Professional::Professional(){};
 
-Professional::Professional(int idx, std::string name, std::vector<const TimeSlot *>& rSlots,
-    std::vector<const StudentGroup*>& rGroups) :
-    idx(idx), name(name), slots(rSlots), groups(rGroups)
+Professional::Professional(int idx, std::string name, std::vector<const shared_ptr<TimeSlot>>& rSlots,
+    std::vector<const shared_ptr<StudentGroup>>& rGroups) :
+    idx(idx), name(name), slots(std::move(rSlots)), groups(std::move(rGroups))
     {};
 
 Data::Data(){};
 
-Data::Data(Dimension& rDimensions, Config& rConfig, std::vector<Professional *>& rProfessionals,
-    std::vector<StudentGroup *>& rGroups, std::vector<TimeSlot *>& rSlots) :
-    dimensions(rDimensions), config(rConfig), professionals(rProfessionals), groups(rGroups),
-    slots(rSlots)
+Data::Data(Dimension& rDimensions, Config& rConfig, std::vector<shared_ptr<Professional>>& rProfessionals,
+    std::vector<shared_ptr<StudentGroup>>& rGroups, std::vector<shared_ptr<TimeSlot>>& rSlots) :
+    dimensions(rDimensions), config(rConfig), professionals(std::move(rProfessionals)),
+        groups(std::move(rGroups)), slots(std::move(rSlots))
     {};
 
 Config::Config() {};
@@ -50,19 +50,19 @@ Config::Config(vector<string> &days, vector<string>& slots, int nbWeeks, int nbD
     nbPros(nbPros)
     {};
 
-bool StudentGroup::isProCompatible(Professional* pPro) {
+bool StudentGroup::isProCompatible(shared_ptr<Professional> pPro) {
     return find(pros.begin(), pros.end(), pPro) != pros.end();
 }
 
-bool Professional::isProAvailOnSlot(TimeSlot* pSlot) {
+bool Professional::isProAvailOnSlot(shared_ptr<TimeSlot> pSlot) {
     return find(slots.begin(), slots.end(), pSlot) != slots.end();
 }
 
-bool Professional::isGroupCompatible(StudentGroup* pGroup) {
+bool Professional::isGroupCompatible(shared_ptr<StudentGroup> pGroup) {
     return find(groups.begin(), groups.end(), pGroup) != groups.end();
 }
 
-Dimension* readXLSDimensions(XLWorksheet& rSheet) {
+unique_ptr<Dimension> readXLSDimensions(XLWorksheet& rSheet) {
     // Number of slots
     auto numSlots = 0;
     auto rowHours = 5;
@@ -94,11 +94,11 @@ Dimension* readXLSDimensions(XLWorksheet& rSheet) {
     }
     auto numGroups = 0;
     auto numLanguages = 0;
-    Dimension* pDimensions = new Dimension(numPros, numGroups, numLanguages, numSlots);
+    auto pDimensions = make_unique<Dimension>(numPros, numGroups, numLanguages, numSlots);
     return pDimensions;
 };
 
-Config* readXLSConfig(XLWorksheet& rSheet) {
+unique_ptr<Config> readXLSConfig(XLWorksheet& rSheet) {
     auto nbWeeks = 2;
     // Reading days and slot names
     vector<string> days {};
@@ -134,12 +134,12 @@ Config* readXLSConfig(XLWorksheet& rSheet) {
     }
     auto nbPros = 0;
     std::vector<string> slotsVec(slots.begin(), slots.end());
-    Config* pConfig = new Config(days, slotsVec, nbWeeks, nbDays, nbSlotsByDay, nbPros);
+    auto pConfig = make_unique<Config>(days, slotsVec, nbWeeks, nbDays, nbSlotsByDay, nbPros);
     return pConfig;
 };
 
-vector<TimeSlot *>* readXLSSlots(XLWorksheet& rSheet) {
-    vector<TimeSlot *>* pSlots = new vector<TimeSlot *>();
+unique_ptr<vector<shared_ptr<TimeSlot>>> readXLSSlots(XLWorksheet& rSheet) {
+    unique_ptr<vector<shared_ptr<TimeSlot>>> pSlots = make_unique<vector<shared_ptr<TimeSlot>>>();
     // Reading slots
     auto row_month = 3;
     auto row_day = 4;
@@ -172,16 +172,16 @@ vector<TimeSlot *>* readXLSSlots(XLWorksheet& rSheet) {
                 slotOfDay++;
             }
             auto slotName = cur_month + " " + cur_day + " " + cur_hour;
-            TimeSlot* slot = new TimeSlot(colIter, slotName, cur_hour, cur_d, slotOfDay);
-            pSlots->push_back(slot);
+            auto slot = make_shared<TimeSlot>(colIter, slotName, cur_hour, cur_d, slotOfDay);
+            pSlots->push_back(std::move(slot));
         }
         colIter++;
     } 
     return pSlots;
 };
 
-vector<Professional *>* readXLSProfessionals(unique_ptr<Data>& data, XLWorksheet& rSheet) {
-    vector<Professional *>* pPros = new vector<Professional *>();
+unique_ptr<vector<shared_ptr<Professional>>> readXLSProfessionals(unique_ptr<Data>& data, XLWorksheet& rSheet) {
+    auto pPros = make_unique<vector<shared_ptr<Professional>>>();
     auto colSlotOff = 1;
     auto colPros = 0;
     auto rowIter = 0;
@@ -194,7 +194,7 @@ vector<Professional *>* readXLSProfessionals(unique_ptr<Data>& data, XLWorksheet
         if (proName.compare("Nombre") == 0) {
             iteratePros = false;
         } else {
-            vector<const TimeSlot *> slots {};
+            vector<const shared_ptr<TimeSlot>> slots {};
             // Reading availabilities for this professional
             for (auto slotIdx = 0; slotIdx < data->dimensions.numSlots; slotIdx++) {
                 auto colIdx = slotIdx + colSlotOff;
@@ -204,8 +204,8 @@ vector<Professional *>* readXLSProfessionals(unique_ptr<Data>& data, XLWorksheet
                     slots.push_back(slot);
                 }
             }
-            vector<const StudentGroup *> groups {};
-            Professional* pro = new Professional(rowIter, string(proName), slots, groups);
+            vector<const shared_ptr<StudentGroup>> groups {};
+            auto pro = make_shared<Professional>(rowIter, string(proName), slots, groups);
             pPros->push_back(pro);
         }
         rowIter++;
@@ -213,8 +213,8 @@ vector<Professional *>* readXLSProfessionals(unique_ptr<Data>& data, XLWorksheet
     return pPros;
 };
 
-vector<StudentGroup *>* readXLSGroups(XLWorksheet& rSheet, Dimension& dimensions) {
-    vector<StudentGroup *>* pGroups = new vector<StudentGroup *>();
+unique_ptr<vector<shared_ptr<StudentGroup>>> readXLSGroups(XLWorksheet& rSheet, Dimension& dimensions) {
+    auto pGroups = make_unique<vector<shared_ptr<StudentGroup>>>();
     auto rowGroups = 0;
     auto groupIdx = 0;
     auto colOffset = 1;
@@ -226,9 +226,9 @@ vector<StudentGroup *>* readXLSGroups(XLWorksheet& rSheet, Dimension& dimensions
         auto groupNameCell = rSheet.cell(XLCellReference(row + 1, col + 1));
         if (groupNameCell.valueType() == XLValueType::String) {
             auto groupName = groupNameCell.value().get<string>();
-            vector<const Professional *> pros {};
-            StudentGroup* group = new StudentGroup(groupIdx, string(groupName), pros);
-            pGroups->push_back(group);
+            vector<const shared_ptr<Professional>> pros {};
+            auto group = make_shared<StudentGroup>(groupIdx, string(groupName), pros);
+            pGroups->push_back(std::move(group));
             groupIdx++;
         } else {
             iterateGroups = false;
@@ -250,7 +250,7 @@ void readXLSCompatibilities(unique_ptr<Data>& data, XLWorksheet& rSheet) {
         auto groupNameCell = rSheet.cell(XLCellReference(rowGroups + 1, colIter + colGroupsOff + 1));
         if (groupNameCell.valueType() == XLValueType::String) {
             auto groupName = groupNameCell.value().get<string>();
-            StudentGroup* pGroup = data->getGroupPtrByName(groupName);
+            auto pGroup = data->getGroupPtrByName(groupName);
             // If group is in the data set
             if (pGroup != nullptr) {
                 auto rowIter = 0;
@@ -260,7 +260,7 @@ void readXLSCompatibilities(unique_ptr<Data>& data, XLWorksheet& rSheet) {
                     auto prosNameCell = rSheet.cell(XLCellReference(rowIter + rowProsOff + 1, colPros + 1));
                     if (prosNameCell.valueType() == XLValueType::String) {
                         auto proName = prosNameCell.value().get<string>();
-                        Professional* pPro = data->getProPtrByName(proName);
+                        auto pPro = data->getProPtrByName(proName);
                         // If pro is in the data set
                         if (pPro != nullptr) {
                             auto compatCell = rSheet.cell(XLCellReference(rowIter + rowProsOff + 1, colIter + colGroupsOff + 1));
@@ -269,7 +269,7 @@ void readXLSCompatibilities(unique_ptr<Data>& data, XLWorksheet& rSheet) {
                                 pGroup->pros.push_back(pPro);
                             }
                         } else { // Consider full compatibility
-                            for (auto& pro : data->professionals) {
+                            for (auto pro : data->professionals) {
                                 pGroup->pros.push_back(pro);
                                 pro->groups.push_back(pGroup);
                             }
@@ -341,16 +341,16 @@ unique_ptr<Data> generateData(int numPros, int numGroups, float slotCompatProb, 
         groups_str.push_back("group_" + groupName);
     }
 
-    Config* config = new Config();
+    auto config = make_shared<Config>();
 
     vector<string> slots_str;
-    vector<TimeSlot *> slots;
+    vector<shared_ptr<TimeSlot>> slots;
     auto cnt_slots = 0;
     auto cnt_days = 0;
     // Generating time slots
     for (auto day : days) {
         for (unsigned long slot_idx = 0; slot_idx < baseSlotsStart .size(); ++slot_idx) {
-            TimeSlot* new_slot = new TimeSlot();
+            auto new_slot = make_shared<TimeSlot>();
             new_slot->idx = cnt_slots;
             new_slot->name = day + " " + baseSlotsStart [slot_idx] + "-" + bastSlotsEnd[slot_idx];
             new_slot->hours = baseSlotsStart [slot_idx] + "-" + bastSlotsEnd[slot_idx];
@@ -373,7 +373,7 @@ unique_ptr<Data> generateData(int numPros, int numGroups, float slotCompatProb, 
     config->nbSlotsByDay = slots_str.size();
     config->nbPros = pros_str.size();
 
-    Dimension* dimensions = new Dimension(pros_str.size(), groups_str.size(), 1, slots.size());
+    shared_ptr<Dimension> dimensions = make_shared<Dimension>(pros_str.size(), groups_str.size(), 1, slots.size());
 
     int** dispo = new int*[dimensions->numPros];
     // Generating random availabilities for professionals
@@ -384,21 +384,21 @@ unique_ptr<Data> generateData(int numPros, int numGroups, float slotCompatProb, 
             dispo[i][j] = rng;
         }
     }
-    vector<StudentGroup *> groups;
+    vector<shared_ptr<StudentGroup>> groups;
     auto cntGroup = 0;
     // Initializing students groups info
     for (auto const& rGroup : groups_str) {
-        StudentGroup* new_group = new StudentGroup();
+        auto new_group = make_shared<StudentGroup>();
         new_group->idx = cntGroup;
         new_group->name = rGroup;
         groups.push_back(new_group);
         cntGroup++;
     }
-    vector<Professional *> pros;
+    vector<shared_ptr<Professional>> pros;
     auto cntPro = 0;
     // Initializing professionals info
     for (auto const& rPro : pros_str) {
-        Professional* pNewPro = new Professional();
+        auto pNewPro = make_shared<Professional>();
         pNewPro->idx = cntPro;
         pNewPro->name = rPro;
         // Generating random pro availabilities
@@ -438,18 +438,18 @@ unique_ptr<Data> generateData(int numPros, int numGroups, float slotCompatProb, 
 };
 
 // Getters
-Professional* Data::getProPtrByName(std::string& proName) {
-    vector<Professional*>::iterator pPro = find_if(professionals.begin(), professionals.end(),
-        [&] (Professional* pPro) {
+shared_ptr<Professional> Data::getProPtrByName(std::string& proName) {
+    vector<shared_ptr<Professional>>::iterator pPro = find_if(professionals.begin(), professionals.end(),
+        [&] (shared_ptr<Professional>& pPro) {
             return pPro->name.compare(proName) == 0;
         });
     if (pPro == professionals.end()) return nullptr;
     return *pPro;
 }
 
-StudentGroup* Data::getGroupPtrByName(std::string& groupName) {
-    vector<StudentGroup*>::iterator pGroup = find_if(groups.begin(), groups.end(),
-        [&] (StudentGroup* pGgroupTmp) {
+shared_ptr<StudentGroup> Data::getGroupPtrByName(std::string& groupName) {
+    vector<shared_ptr<StudentGroup>>::iterator pGroup = find_if(groups.begin(), groups.end(),
+        [&] (shared_ptr<StudentGroup>& pGgroupTmp) {
             return pGgroupTmp->name.compare(groupName) == 0;
         });
     if (pGroup == groups.end()) return nullptr;

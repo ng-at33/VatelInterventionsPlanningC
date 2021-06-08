@@ -17,10 +17,11 @@
 
 // Hold the information about one intervention
 struct Assignation {
-    Professional* pro;
-    StudentGroup* group;
-    TimeSlot* slot;
-    Assignation(Professional* pPro, StudentGroup* pGroup, TimeSlot* pSlot);
+    std::shared_ptr<Professional> pro;
+    std::shared_ptr<StudentGroup> group;
+    std::shared_ptr<TimeSlot> slot;
+    Assignation(std::shared_ptr<Professional> pPro, std::shared_ptr<StudentGroup> pGroup,
+        std::shared_ptr<TimeSlot> pSlot);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 
@@ -29,8 +30,8 @@ inline std::ostream& operator<<(std::ostream& os, const Assignation& rAssign) { 
 
 // Hold and display a Solution of the problem
 struct Solution {
-    std::vector<Assignation *> assignations;
-    Solution(std::vector<Assignation *>& assignations);
+    std::vector<std::unique_ptr<Assignation>> assignations;
+    Solution(std::vector<std::unique_ptr<Assignation>>& assignations);
     std::ostream& print(std::ostream& os = std::cout) const;
     void writeDays(std::unique_ptr<Data>& pData, OpenXLSX::XLWorksheet& rSheet, int rowOffset, int startDateCol, int startDay, int endDay);
     void writeSlots(std::unique_ptr<Data>& pData, OpenXLSX::XLWorksheet& rSheet, int rowOffset);

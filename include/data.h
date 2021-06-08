@@ -60,7 +60,7 @@ struct TimeSlot {
     std::string hours;
     int day;
     int slotOfDay;
-    std::vector<const Professional *> pros; // Professionals available on this time slot
+    std::vector<const std::shared_ptr<Professional>> pros; // Professionals available on this time slot
     std::ostream& print(std::ostream& os = std::cout) const;
     TimeSlot();
     TimeSlot(int idx, std::string name, std::string hours, int day, int slotOfDay);
@@ -73,10 +73,10 @@ inline std::ostream& operator<<(std::ostream& os, const TimeSlot& rSlot) { retur
 struct StudentGroup {
     int idx;
     std::string name;
-    std::vector<const Professional*> pros; // Professionals compatible with this students group
+    std::vector<const std::shared_ptr<Professional>> pros; // Professionals compatible with this students group
     StudentGroup();
-    StudentGroup(int idx, std::string name, std::vector<const Professional*>& rPros);
-    bool isProCompatible(Professional* pro);
+    StudentGroup(int idx, std::string name, std::vector<const std::shared_ptr<Professional>>& rPros);
+    bool isProCompatible(std::shared_ptr<Professional> pro);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 
@@ -87,13 +87,13 @@ inline std::ostream& operator<<(std::ostream& os, const StudentGroup& rGroup) { 
 struct Professional {
     int idx;
     std::string name;
-    std::vector<const TimeSlot *> slots; // Time slots when this professional is available
-    std::vector<const StudentGroup*> groups; // Groups compatible with this professional
+    std::vector<const std::shared_ptr<TimeSlot>> slots; // Time slots when this professional is available
+    std::vector<const std::shared_ptr<StudentGroup>> groups; // Groups compatible with this professional
     Professional();
-    Professional(int idx, std::string name, std::vector<const TimeSlot *>& slots,
-        std::vector<const StudentGroup*>& groups);
-    bool isProAvailOnSlot(TimeSlot* slot);
-    bool isGroupCompatible(StudentGroup* group);
+    Professional(int idx, std::string name, std::vector<const std::shared_ptr<TimeSlot>>& slots,
+        std::vector<const std::shared_ptr<StudentGroup>>& groups);
+    bool isProAvailOnSlot(std::shared_ptr<TimeSlot> slot);
+    bool isGroupCompatible(std::shared_ptr<StudentGroup> group);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 
@@ -104,14 +104,14 @@ inline std::ostream& operator<<(std::ostream& os, const Professional& rPro) { re
 struct Data {
     Dimension                   dimensions;
     Config                      config;
-    std::vector<Professional *> professionals;
-    std::vector<StudentGroup *> groups;
-    std::vector<TimeSlot *>     slots;
+    std::vector<std::shared_ptr<Professional>> professionals;
+    std::vector<std::shared_ptr<StudentGroup>> groups;
+    std::vector<std::shared_ptr<TimeSlot>>     slots;
     Data();
-    Data(Dimension& rDimensions, Config& rConfig, std::vector<Professional *>& rProfessionals,
-        std::vector<StudentGroup *>& rGroups, std::vector<TimeSlot *>& rSlots);
-    Professional* getProPtrByName(std::string& rProName);
-    StudentGroup* getGroupPtrByName(std::string& rGroupName);
+    Data(Dimension& rDimensions, Config& rConfig, std::vector<std::shared_ptr<Professional>>& rProfessionals,
+        std::vector<std::shared_ptr<StudentGroup>>& rGroups, std::vector<std::shared_ptr<TimeSlot>>& rSlots);
+    std::shared_ptr<Professional> getProPtrByName(std::string& rProName);
+    std::shared_ptr<StudentGroup> getGroupPtrByName(std::string& rGroupName);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 
@@ -119,11 +119,11 @@ struct Data {
 inline std::ostream& operator<<(std::ostream& os, const Data& rData) { return rData.print(os); };
 
 // XLS reading functions
-Dimension* readXLSDimensions(OpenXLSX::XLWorksheet& rSheet);
-Config* readXLSConfig(OpenXLSX::XLWorksheet& rSheet);
-std::vector<Professional *>* readXLSProfessionals(std::unique_ptr<Data>& data, OpenXLSX::XLWorksheet& rSheet);
-std::vector<StudentGroup *>* readXLSGroups(OpenXLSX::XLWorksheet& rSheet, Dimension& rDimensions);
-std::vector<TimeSlot *>* readXLSSlots(OpenXLSX::XLWorksheet& rSheet);
+std::unique_ptr<Dimension> readXLSDimensions(OpenXLSX::XLWorksheet& rSheet);
+std::unique_ptr<Config> readXLSConfig(OpenXLSX::XLWorksheet& rSheet);
+std::unique_ptr<std::vector<std::shared_ptr<Professional>>> readXLSProfessionals(std::unique_ptr<Data>& data, OpenXLSX::XLWorksheet& rSheet);
+std::unique_ptr<std::vector<std::shared_ptr<StudentGroup>>> readXLSGroups(OpenXLSX::XLWorksheet& rSheet, Dimension& rDimensions);
+std::unique_ptr<std::vector<std::shared_ptr<TimeSlot>>> readXLSSlots(OpenXLSX::XLWorksheet& rSheet);
 void readXLSCompatibilities(std::unique_ptr<Data>& data, OpenXLSX::XLWorksheet& rSheet);
 std::unique_ptr<Data> readXLS(std::string& rFilename);
 

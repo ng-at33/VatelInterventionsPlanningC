@@ -17,19 +17,19 @@
 using namespace std;
 using namespace OpenXLSX;
 
-Assignation::Assignation(Professional* pPro, StudentGroup* pGroup, TimeSlot* pSlot) :
+Assignation::Assignation(shared_ptr<Professional> pPro, shared_ptr<StudentGroup> pGroup, shared_ptr<TimeSlot> pSlot) :
     pro(pPro), group(pGroup),  slot(pSlot)
     {};
 
-Solution::Solution(vector<Assignation *>& rAssignations) : assignations(rAssignations) {};
+Solution::Solution(vector<unique_ptr<Assignation>>& rAssignations) : assignations(std::move(rAssignations)) {};
 
 unique_ptr<Solution> buildSolution(unique_ptr<Data>& pData, unique_ptr<HeurNode>& node) {
-    vector<Assignation *> assignations {};
+    vector<unique_ptr<Assignation>> assignations {};
     auto slotIdx = 0;
     for (auto const& rSlot: node->slots) {
         for (auto const& rPair: rSlot) {
-            Assignation* assignation = new Assignation(rPair.first, rPair.second, pData->slots[slotIdx]);
-            assignations.push_back(assignation);
+            auto assignation = make_unique<Assignation>(rPair.first, rPair.second, pData->slots[slotIdx]);
+            assignations.push_back(std::move(assignation));
         }
         slotIdx++;
     }
@@ -162,7 +162,7 @@ bool validateSolution(unique_ptr<Data>& pData, unique_ptr<Solution>& pSol) {
     }
     // Checking that all professionals are not scheduled more than once per time slot
     for (auto const& rSlot : pData->slots) {
-        vector<Professional *> prosInSlot {};
+        vector<shared_ptr<Professional>> prosInSlot {};
         for (auto const& rAssign : pSol->assignations) {
             if (rAssign->slot == rSlot) {
                 if (find(prosInSlot.begin(), prosInSlot.end(), rAssign->pro) != prosInSlot.end()) {
@@ -176,7 +176,7 @@ bool validateSolution(unique_ptr<Data>& pData, unique_ptr<Solution>& pSol) {
     }
     // Checking that all students groups are not scheduled more than once per time slot
     for (auto const& rSlot : pData->slots) {
-        vector<StudentGroup *> sgInSlot {};
+        vector<shared_ptr<StudentGroup>> sgInSlot {};
         for (auto const& rAssign : pSol->assignations) {
             if (rAssign->slot == rSlot) {
                 if (find(sgInSlot.begin(), sgInSlot.end(), rAssign->group) != sgInSlot.end()) {

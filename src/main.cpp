@@ -16,15 +16,12 @@ using namespace std;
 int main(int argc, char** argv) {
     string fn = "data/doodle_new.xlsx";
     auto pData = readXLS(fn);
-    cout << " bug 1 " << endl;
     // auto pData = generateData(50, 100, 1.0, 0.5);
     cout << *pData << endl;
-    cout << " bug 2 " << endl;
     AlgorithmStrategy algo;
     // 1 : Heuristic
     algo.setAlgorithm(1);
     auto pSol = algo.solve(pData);
-    cout << " bug 3 " << endl;
     pSol->print(cout);
     auto isSolValid = validateSolution(pData, pSol);
     auto solEval = evaluate(pData, pSol);
