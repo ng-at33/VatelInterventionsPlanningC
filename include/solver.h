@@ -1,4 +1,4 @@
-/* 
+/*
  * Developped by Alexis TOULLAT (alexis.toullat@at-consulting.fr)
  * solver.h: implement the Strategy pattern for launching different
  * solving algorithms

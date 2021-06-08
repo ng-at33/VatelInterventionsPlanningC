@@ -1,4 +1,4 @@
-/* 
+/*
  * Developped by Alexis TOULLAT (alexis.toullat@at-consulting.fr)
  * solution.h: define and builds a structure holding a solution,
  * as well as functions to evaluation its quality and display it
@@ -21,7 +21,7 @@ struct Assignation {
     std::shared_ptr<StudentGroup> group;
     std::shared_ptr<TimeSlot> slot;
     Assignation(std::shared_ptr<Professional> pPro, std::shared_ptr<StudentGroup> pGroup,
-        std::shared_ptr<TimeSlot> pSlot);
+                std::shared_ptr<TimeSlot> pSlot);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 
@@ -33,10 +33,11 @@ struct Solution {
     std::vector<std::unique_ptr<Assignation>> assignations;
     Solution(std::vector<std::unique_ptr<Assignation>>& assignations);
     std::ostream& print(std::ostream& os = std::cout) const;
-    void writeDays(std::unique_ptr<Data>& pData, OpenXLSX::XLWorksheet& rSheet, int rowOffset, int startDateCol, int startDay, int endDay);
+    void writeDays(std::unique_ptr<Data>& pData, OpenXLSX::XLWorksheet& rSheet, int rowOffset,
+                   int startDateCol, int startDay, int endDay);
     void writeSlots(std::unique_ptr<Data>& pData, OpenXLSX::XLWorksheet& rSheet, int rowOffset);
-    void writeAssignations(std::unique_ptr<Data>& pData, OpenXLSX::XLWorksheet& rSheet, int rowOff, int startDateCol,
-        int startDay, int endDay);
+    void writeAssignations(std::unique_ptr<Data>& pData, OpenXLSX::XLWorksheet& rSheet, int rowOff,
+                           int startDateCol, int startDay, int endDay);
     void writeXLS(std::unique_ptr<Data>& pData); // Write solution to XLSfile
 };
 
@@ -48,7 +49,7 @@ inline std::ostream& operator<<(std::ostream& os, const Solution& sol) {
 // TODO: define a generic data structure to hold algorithms solutions
 // Build a solution from heuristic node
 std::unique_ptr<Solution> buildSolution(std::unique_ptr<Data>& data, std::unique_ptr<HeurNode>& node);
-// Produce a SolutionProfiling to validate and also evaluate the quality of a solution 
+// Produce a SolutionProfiling to validate and also evaluate the quality of a solution
 // SolutionProfiling* evaluteSolution(Data& data, Solution& sol);
 
 // Validate that a Solution is valid regarding all constraints of the problem
@@ -66,10 +67,11 @@ struct SolutionEvaluation {
     float stdevAssignByDay;
     float stdevAssignByPro;
     float stdevAssignByGroup;
-    SolutionEvaluation(std::unique_ptr<Data>& pData, int numAssign, std::vector<int>& rNumAssignBySlot,
-        std::vector<int>& rNumAssignByDay, std::vector<int>& rNumAssignByPro,
-        std::vector<int>& rNumAssignByGroup, float stdevAssignBySlot, float stdevAssignByDay,
-        float stdevAssignByPro, float stdevAssignByGroup);
+    SolutionEvaluation(std::unique_ptr<Data>& pData, int numAssign,
+                       std::vector<int>& rNumAssignBySlot, std::vector<int>& rNumAssignByDay,
+                       std::vector<int>& rNumAssignByPro, std::vector<int>& rNumAssignByGroup,
+                       float stdevAssignBySlot, float stdevAssignByDay, float stdevAssignByPro,
+                       float stdevAssignByGroup);
     std::ostream& print(std::ostream& os = std::cout) const;
 };
 

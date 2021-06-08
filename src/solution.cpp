@@ -1,4 +1,4 @@
-/* 
+/*
  * Developped by Alexis TOULLAT (alexis.toullat@at-consulting.fr)
  * solution.cpp
  */
@@ -17,18 +17,20 @@
 using namespace std;
 using namespace OpenXLSX;
 
-Assignation::Assignation(shared_ptr<Professional> pPro, shared_ptr<StudentGroup> pGroup, shared_ptr<TimeSlot> pSlot) :
-    pro(pPro), group(pGroup),  slot(pSlot)
-    {};
+Assignation::Assignation(shared_ptr<Professional> pPro, shared_ptr<StudentGroup> pGroup,
+                         shared_ptr<TimeSlot> pSlot)
+        : pro(pPro), group(pGroup),  slot(pSlot) {};
 
-Solution::Solution(vector<unique_ptr<Assignation>>& rAssignations) : assignations(std::move(rAssignations)) {};
+Solution::Solution(vector<unique_ptr<Assignation>>& rAssignations)
+        : assignations(std::move(rAssignations)) {};
 
 unique_ptr<Solution> buildSolution(unique_ptr<Data>& pData, unique_ptr<HeurNode>& node) {
-    vector<unique_ptr<Assignation>> assignations {};
+                                   vector<unique_ptr<Assignation>> assignations {};
     auto slotIdx = 0;
     for (auto const& rSlot: node->slots) {
         for (auto const& rPair: rSlot) {
-            auto assignation = make_unique<Assignation>(rPair.first, rPair.second, pData->slots[slotIdx]);
+            auto assignation = make_unique<Assignation>(rPair.first, rPair.second,
+                                                        pData->slots[slotIdx]);
             assignations.push_back(std::move(assignation));
         }
         slotIdx++;
@@ -50,7 +52,7 @@ ostream& Solution::print(ostream& os) const {
 };
 
 void Solution::writeDays(unique_ptr<Data>& pData, XLWorksheet& rSheet, int rowOff, int startDateCol,
-        int startDay, int endDay) {
+                         int startDay, int endDay) {
     auto startSlotRow = 0 + rowOff;
     // Writing days
     for (auto iDay = 0; iDay < endDay - startDay + 1; iDay++) {
@@ -72,8 +74,8 @@ void Solution::writeSlots(unique_ptr<Data>& pData, XLWorksheet& rSheet, int rowO
     }
 }
 
-void Solution::writeAssignations(unique_ptr<Data>& pData, XLWorksheet& rSheet, int rowOff, int startDateCol,
-        int startDay, int endDay) {
+void Solution::writeAssignations(unique_ptr<Data>& pData, XLWorksheet& rSheet, int rowOff,
+                                 int startDateCol, int startDay, int endDay) {
     auto rowAssOff = 1 + rowOff;
     // Writing assignations
     for (auto d = startDay; d < endDay + 1; d++) {
@@ -123,7 +125,8 @@ bool validateSolution(unique_ptr<Data>& pData, unique_ptr<Solution>& pSol) {
             if (rAssign != rOAssign) {
                 if (rAssign->pro == rOAssign->pro && rAssign->group == rOAssign->group) {
                     cout << "ERROR: " << rAssign->pro->name << " and " << rAssign->group->name
-                        << " assigned on slots " << *rAssign->slot << " and " << *rOAssign->slot << endl;
+                        << " assigned on slots " << *rAssign->slot << " and " << *rOAssign->slot
+                        << endl;
                 }
             }
         }
@@ -133,7 +136,8 @@ bool validateSolution(unique_ptr<Data>& pData, unique_ptr<Solution>& pSol) {
     // Computing number of interventions by professional and slot
     for (auto const& rAssign : pSol->assignations) {
         // Checking that the professional was available on this time slot
-        if (find(rAssign->pro->slots.begin(), rAssign->pro->slots.end(), rAssign->slot) == rAssign->pro->slots.end()) {
+        if (find(rAssign->pro->slots.begin(), rAssign->pro->slots.end(), rAssign->slot) ==
+                rAssign->pro->slots.end()) {
             cout << "ERROR: " << rAssign->pro->name << " not available on time slot " <<
                 rAssign->slot->name << endl;
         }
@@ -149,7 +153,7 @@ bool validateSolution(unique_ptr<Data>& pData, unique_ptr<Solution>& pSol) {
     // Checking that no professional has exceeded its max number of assignations
     for (auto const& rPro : pData->professionals) {
         if (nbAssByPr[rPro->idx] > G_MAX_NUMBER_INTERV_PRO) {
-            cout << "ERROR: " << rPro->name << " found assigned more " << "than " 
+            cout << "ERROR: " << rPro->name << " found assigned more " << "than "
                 << G_MAX_NUMBER_INTERV_PRO << " times" << endl;
         }
     }
@@ -167,7 +171,7 @@ bool validateSolution(unique_ptr<Data>& pData, unique_ptr<Solution>& pSol) {
             if (rAssign->slot == rSlot) {
                 if (find(prosInSlot.begin(), prosInSlot.end(), rAssign->pro) != prosInSlot.end()) {
                     cout << "ERROR: " << (*rAssign->pro).name << " found assigned in slot "
-                        << *rSlot << " more than once" << endl;
+                         << *rSlot << " more than once" << endl;
                     isSolValid = false;
                 }
                 prosInSlot.push_back(rAssign->pro);
@@ -181,7 +185,7 @@ bool validateSolution(unique_ptr<Data>& pData, unique_ptr<Solution>& pSol) {
             if (rAssign->slot == rSlot) {
                 if (find(sgInSlot.begin(), sgInSlot.end(), rAssign->group) != sgInSlot.end()) {
                     cout << "ERROR: " << (*rAssign->group).name << " found assigned in slot "
-                        << *rSlot << " more than once" << endl;
+                         << *rSlot << " more than once" << endl;
                     isSolValid = false;
                 }
                 sgInSlot.push_back(rAssign->group);
@@ -191,14 +195,15 @@ bool validateSolution(unique_ptr<Data>& pData, unique_ptr<Solution>& pSol) {
     return isSolValid;
 };
 
-SolutionEvaluation::SolutionEvaluation(unique_ptr<Data>& pData, int numAssign, vector<int>& rNumAssignBySlot,
-        vector<int>& rNumAssignByDay, vector<int>& rNumAssignByPro,
-        vector<int>& rNumAssignByGroup, float stdevAssignBySlot, float stdevAssignByDay,
-        float stdevAssignByPro, float stdevAssignByGroup) : pData(pData), numAssign(numAssign),
-        numAssignBySlot(rNumAssignBySlot), numAssignByDay(rNumAssignByDay),
-        numAssignByPro(rNumAssignByPro), numAssignByGroup(rNumAssignByGroup),
-        stdevAssignBySlot(stdevAssignBySlot), stdevAssignByDay(stdevAssignByDay),
-        stdevAssignByPro(stdevAssignByPro), stdevAssignByGroup(stdevAssignByGroup) {}
+SolutionEvaluation::SolutionEvaluation(unique_ptr<Data>& pData, int numAssign,
+                                       vector<int>& rNumAssignBySlot, vector<int>& rNumAssignByDay,
+                                       vector<int>& rNumAssignByPro, vector<int>& rNumAssignByGroup,
+                                       float stdevAssignBySlot, float stdevAssignByDay,
+                                       float stdevAssignByPro, float stdevAssignByGroup)
+        : pData(pData), numAssign(numAssign), numAssignByDay(rNumAssignByDay),
+          numAssignByPro(rNumAssignByPro), numAssignByGroup(rNumAssignByGroup),
+          stdevAssignBySlot(stdevAssignBySlot), stdevAssignByDay(stdevAssignByDay),
+          stdevAssignByPro(stdevAssignByPro), stdevAssignByGroup(stdevAssignByGroup) {}
 
 ostream& SolutionEvaluation::print(ostream& os) const {
     os << "SolutionEvaluation(Number of assignations : " << numAssign << endl;
@@ -209,7 +214,7 @@ ostream& SolutionEvaluation::print(ostream& os) const {
     os << "Number of assignations by pro :" << endl;
     for (auto const& rPro : pData->professionals) {
         os << "    " << rPro->name << " : " << numAssignByPro[rPro->idx] << " / "
-            << rPro->slots.size() << endl;
+           << rPro->slots.size() << endl;
     }
     return os;
 };
@@ -231,8 +236,10 @@ SolutionEvaluation* evaluate(unique_ptr<Data>& pData, unique_ptr<Solution>& pSol
     float stdevAssignByPro = computeSDVec(numAssignByPro);
     float stdevAssignByGroup = computeSDVec(numAssignByGroup);
     SolutionEvaluation* pSolEval = new SolutionEvaluation(pData, numAssign, numAssignBySlot,
-        numAssignByDay, numAssignByPro, numAssignByGroup, stdevAssignBySlot, stdevAssignByDay,
-        stdevAssignByPro, stdevAssignByGroup);
-    
+                                                          numAssignByDay, numAssignByPro,
+                                                          numAssignByGroup, stdevAssignBySlot,
+                                                          stdevAssignByDay, stdevAssignByPro,
+                                                          stdevAssignByGroup);
+
     return pSolEval;
 };

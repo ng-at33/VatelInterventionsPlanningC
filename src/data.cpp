@@ -1,4 +1,4 @@
-/* 
+/*
  * Developped by Alexis TOULLAT (alexis.toullat@at-consulting.fr)
  * data.cpp
  */
@@ -18,37 +18,37 @@ using namespace OpenXLSX;
 // Constructors
 TimeSlot::TimeSlot(){}
 
-TimeSlot::TimeSlot(int idx, std::string name, std::string hours, int day, int slotOfDay) :
-    idx(idx), name(name), hours(hours), day(day), slotOfDay(slotOfDay)
-    {};
+TimeSlot::TimeSlot(int idx, std::string name, std::string hours, int day, int slotOfDay)
+        : idx(idx), name(name), hours(hours), day(day), slotOfDay(slotOfDay) {};
 
-StudentGroup::StudentGroup(){};
+StudentGroup::StudentGroup() {};
 
-StudentGroup::StudentGroup(int idx, std::string name, std::vector<const shared_ptr<Professional>>& rPros) :
-    idx(idx), name(name), pros(std::move(rPros)) {};
+StudentGroup::StudentGroup(int idx, std::string name,
+                           std::vector<const shared_ptr<Professional>>& rPros)
+        : idx(idx), name(name), pros(std::move(rPros)) {};
 
-Professional::Professional(){};
+Professional::Professional() {};
 
-Professional::Professional(int idx, std::string name, std::vector<const shared_ptr<TimeSlot>>& rSlots,
-    std::vector<const shared_ptr<StudentGroup>>& rGroups) :
-    idx(idx), name(name), slots(std::move(rSlots)), groups(std::move(rGroups))
-    {};
+Professional::Professional(int idx, std::string name,
+                           std::vector<const shared_ptr<TimeSlot>>& rSlots,
+                           std::vector<const shared_ptr<StudentGroup>>& rGroups)
+        : idx(idx), name(name), slots(std::move(rSlots)), groups(std::move(rGroups)) {};
 
-Data::Data(){};
+Data::Data() {};
 
-Data::Data(Dimension& rDimensions, Config& rConfig, std::vector<shared_ptr<Professional>>& rProfessionals,
-    std::vector<shared_ptr<StudentGroup>>& rGroups, std::vector<shared_ptr<TimeSlot>>& rSlots) :
-    dimensions(rDimensions), config(rConfig), professionals(std::move(rProfessionals)),
-        groups(std::move(rGroups)), slots(std::move(rSlots))
+Data::Data(Dimension& rDimensions, Config& rConfig,
+           std::vector<shared_ptr<Professional>>& rProfessionals,
+           std::vector<shared_ptr<StudentGroup>>& rGroups, std::vector<shared_ptr<TimeSlot>>& rSlots)
+        : dimensions(rDimensions), config(rConfig), professionals(std::move(rProfessionals)),
+          groups(std::move(rGroups)), slots(std::move(rSlots))
     {};
 
 Config::Config() {};
 
 Config::Config(vector<string> &days, vector<string>& slots, int nbWeeks, int nbDays,
-    int nbSlotsByDay, int nbPros) :
-    days(days), slots(slots), nbWeeks(nbWeeks), nbDays(nbDays), nbSlotsByDay(nbSlotsByDay),
-    nbPros(nbPros)
-    {};
+               int nbSlotsByDay, int nbPros)
+        : days(days), slots(slots), nbWeeks(nbWeeks), nbDays(nbDays), nbSlotsByDay(nbSlotsByDay),
+           nbPros(nbPros) {};
 
 bool StudentGroup::isProCompatible(shared_ptr<Professional> pPro) {
     return find(pros.begin(), pros.end(), pPro) != pros.end();
@@ -176,11 +176,12 @@ unique_ptr<vector<shared_ptr<TimeSlot>>> readXLSSlots(XLWorksheet& rSheet) {
             pSlots->push_back(std::move(slot));
         }
         colIter++;
-    } 
+    }
     return pSlots;
 };
 
-unique_ptr<vector<shared_ptr<Professional>>> readXLSProfessionals(unique_ptr<Data>& data, XLWorksheet& rSheet) {
+unique_ptr<vector<shared_ptr<Professional>>> readXLSProfessionals(unique_ptr<Data>& data,
+                                                                  XLWorksheet& rSheet) {
     auto pPros = make_unique<vector<shared_ptr<Professional>>>();
     auto colSlotOff = 1;
     auto colPros = 0;
@@ -213,7 +214,8 @@ unique_ptr<vector<shared_ptr<Professional>>> readXLSProfessionals(unique_ptr<Dat
     return pPros;
 };
 
-unique_ptr<vector<shared_ptr<StudentGroup>>> readXLSGroups(XLWorksheet& rSheet, Dimension& dimensions) {
+unique_ptr<vector<shared_ptr<StudentGroup>>> readXLSGroups(XLWorksheet& rSheet,
+                                                           Dimension& dimensions) {
     auto pGroups = make_unique<vector<shared_ptr<StudentGroup>>>();
     auto rowGroups = 0;
     auto groupIdx = 0;
@@ -257,13 +259,15 @@ void readXLSCompatibilities(unique_ptr<Data>& data, XLWorksheet& rSheet) {
                 bool iteratePros = true;
                 // Iterating on professionals
                 while (iteratePros) {
-                    auto prosNameCell = rSheet.cell(XLCellReference(rowIter + rowProsOff + 1, colPros + 1));
+                    auto prosNameCell = rSheet.cell(XLCellReference(rowIter + rowProsOff + 1,
+                                                                    colPros + 1));
                     if (prosNameCell.valueType() == XLValueType::String) {
                         auto proName = prosNameCell.value().get<string>();
                         auto pPro = data->getProPtrByName(proName);
                         // If pro is in the data set
                         if (pPro != nullptr) {
-                            auto compatCell = rSheet.cell(XLCellReference(rowIter + rowProsOff + 1, colIter + colGroupsOff + 1));
+                            auto compatCell = rSheet.cell(XLCellReference(rowIter + rowProsOff + 1,
+                                                                          colIter + colGroupsOff + 1));
                             if (compatCell.valueType() == XLValueType::Empty) {
                                 pPro->groups.push_back(pGroup);
                                 pGroup->pros.push_back(pPro);
@@ -305,7 +309,8 @@ unique_ptr<Data> readXLS(string& rFilename) {
     return pData;
 };
 
-unique_ptr<Data> generateData(int numPros, int numGroups, float slotCompatProb, float proGroupCompatProb) {
+unique_ptr<Data> generateData(int numPros, int numGroups, float slotCompatProb,
+                              float proGroupCompatProb) {
     // Init DisplayConfig
     auto numWeeks = 2;
     auto nMaxProInterv = 3;
@@ -349,7 +354,7 @@ unique_ptr<Data> generateData(int numPros, int numGroups, float slotCompatProb, 
     auto cnt_days = 0;
     // Generating time slots
     for (auto day : days) {
-        for (unsigned long slot_idx = 0; slot_idx < baseSlotsStart .size(); ++slot_idx) {
+        for (unsigned long slot_idx = 0; slot_idx < baseSlotsStart.size(); ++slot_idx) {
             auto new_slot = make_shared<TimeSlot>();
             new_slot->idx = cnt_slots;
             new_slot->name = day + " " + baseSlotsStart [slot_idx] + "-" + bastSlotsEnd[slot_idx];
@@ -373,7 +378,8 @@ unique_ptr<Data> generateData(int numPros, int numGroups, float slotCompatProb, 
     config->nbSlotsByDay = slots_str.size();
     config->nbPros = pros_str.size();
 
-    shared_ptr<Dimension> dimensions = make_shared<Dimension>(pros_str.size(), groups_str.size(), 1, slots.size());
+    shared_ptr<Dimension> dimensions = make_shared<Dimension>(pros_str.size(), groups_str.size(), 1,
+                                                              slots.size());
 
     int** dispo = new int*[dimensions->numPros];
     // Generating random availabilities for professionals
@@ -439,8 +445,9 @@ unique_ptr<Data> generateData(int numPros, int numGroups, float slotCompatProb, 
 
 // Getters
 shared_ptr<Professional> Data::getProPtrByName(std::string& proName) {
-    vector<shared_ptr<Professional>>::iterator pPro = find_if(professionals.begin(), professionals.end(),
-        [&] (shared_ptr<Professional>& pPro) {
+    vector<shared_ptr<Professional>>::iterator pPro = find_if(professionals.begin(),
+        professionals.end(),
+        [&](shared_ptr<Professional>& pPro) {
             return pPro->name.compare(proName) == 0;
         });
     if (pPro == professionals.end()) return nullptr;
@@ -449,7 +456,7 @@ shared_ptr<Professional> Data::getProPtrByName(std::string& proName) {
 
 shared_ptr<StudentGroup> Data::getGroupPtrByName(std::string& groupName) {
     vector<shared_ptr<StudentGroup>>::iterator pGroup = find_if(groups.begin(), groups.end(),
-        [&] (shared_ptr<StudentGroup>& pGgroupTmp) {
+        [&](shared_ptr<StudentGroup>& pGgroupTmp) {
             return pGgroupTmp->name.compare(groupName) == 0;
         });
     if (pGroup == groups.end()) return nullptr;
