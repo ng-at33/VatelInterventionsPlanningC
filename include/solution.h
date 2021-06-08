@@ -36,8 +36,8 @@ struct Solution {
     void writeDays(std::unique_ptr<Data>& p_data, OpenXLSX::XLWorksheet& r_sheet, int row_offset,
                    int start_date_col, int start_day, int end_day);
     void writeSlots(std::unique_ptr<Data>& p_data, OpenXLSX::XLWorksheet& r_sheet, int row_offset);
-    void writeAssignations(std::unique_ptr<Data>& p_data, OpenXLSX::XLWorksheet& r_sheet, int row_dff,
-                           int start_date_col, int start_day, int end_day);
+    void writeAssignations(std::unique_ptr<Data>& p_data, OpenXLSX::XLWorksheet& r_sheet,
+                           int row_dff, int start_date_col, int start_day, int end_day);
     void writeXLS(std::unique_ptr<Data>& p_data); // Write solution to XLSfile
 };
 

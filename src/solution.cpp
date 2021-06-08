@@ -51,14 +51,15 @@ ostream& Solution::print(ostream& os) const {
     return os;
 };
 
-void Solution::writeDays(unique_ptr<Data>& p_data, XLWorksheet& r_sheet, int row_off, int start_date_col,
-                         int start_day, int end_day) {
+void Solution::writeDays(unique_ptr<Data>& p_data, XLWorksheet& r_sheet, int row_off,
+                         int start_date_col, int start_day, int end_day) {
     auto start_slot_row = 0 + row_off;
     // Writing days
     for (auto i_day = 0; i_day < end_day - start_day + 1; i_day++) {
         auto day_idx = i_day + start_day;
         auto day_str = p_data->config.days[day_idx];
-        auto cell_day = r_sheet.cell(XLCellReference(start_slot_row + 1, start_date_col + i_day + 1));
+        auto cell_day = r_sheet.cell(XLCellReference(start_slot_row + 1,
+                                                     start_date_col + i_day + 1));
         cell_day.value() = day_str.c_str();
     }
 }
@@ -69,7 +70,8 @@ void Solution::writeSlots(unique_ptr<Data>& p_data, XLWorksheet& r_sheet, int ro
     // Writing slots
     for (unsigned long iSlot = 0; iSlot < p_data->config.slots.size(); iSlot++) {
         auto slot_str = p_data->config.slots[iSlot];
-        auto cell_slot = r_sheet.cell(XLCellReference(iSlot + row_slot_offset + 1, start_slot_col + 1));
+        auto cell_slot = r_sheet.cell(XLCellReference(iSlot + row_slot_offset + 1,
+                                                      start_slot_col + 1));
         cell_slot.value() = slot_str.c_str();
     }
 }
@@ -196,8 +198,10 @@ bool validateSolution(unique_ptr<Data>& p_data, unique_ptr<Solution>& p_sol) {
 };
 
 SolutionEvaluation::SolutionEvaluation(unique_ptr<Data>& p_data, int num_assign,
-                                       vector<int>& r_num_assign_by_slot, vector<int>& r_num_assign_by_day,
-                                       vector<int>& r_num_assign_by_pro, vector<int>& r_num_assign_by_group,
+                                       vector<int>& r_num_assign_by_slot,
+                                       vector<int>& r_num_assign_by_day,
+                                       vector<int>& r_num_assign_by_pro,
+                                       vector<int>& r_num_assign_by_group,
                                        float std_assign_by_slot, float std_assign_by_day,
                                        float std_assign_by_pro, float std_assign_by_group)
         : p_data(p_data), num_assign(num_assign), num_assign_by_day(r_num_assign_by_day),

@@ -38,7 +38,8 @@ Data::Data() {};
 
 Data::Data(Dimension& r_dimensions, Config& r_config,
            std::vector<shared_ptr<Professional>>& r_professionals,
-           std::vector<shared_ptr<StudentGroup>>& r_groups, std::vector<shared_ptr<TimeSlot>>& r_slots)
+           std::vector<shared_ptr<StudentGroup>>& r_groups,
+           std::vector<shared_ptr<TimeSlot>>& r_slots)
         : dimensions(r_dimensions), config(r_config), professionals(std::move(r_professionals)),
           groups(std::move(r_groups)), slots(std::move(r_slots))
     {};
@@ -134,7 +135,8 @@ unique_ptr<Config> readXLSConfig(XLWorksheet& r_sheet) {
     }
     auto nb_pros = 0;
     std::vector<string> slots_vec(slots.begin(), slots.end());
-    auto p_config = make_unique<Config>(days, slots_vec, nb_weeks, nb_days, nb_slots_by_day, nb_pros);
+    auto p_config = make_unique<Config>(days, slots_vec, nb_weeks, nb_days, nb_slots_by_day,
+                                        nb_pros);
     return p_config;
 };
 
@@ -191,7 +193,8 @@ unique_ptr<vector<shared_ptr<Professional>>> readXLSProfessionals(unique_ptr<Dat
     // Iterating on professionals names until "Nombre"
     while (iterate_pros) {
         auto row_idx = row_iter + row_offset;
-        auto pro_name = r_sheet.cell(XLCellReference(row_idx + 1, col_pros + 1)).value().get<string>();
+        auto pro_name = r_sheet.cell(
+            XLCellReference(row_idx + 1, col_pros + 1)).value().get<string>();
         if (pro_name.compare("Nombre") == 0) {
             iterate_pros = false;
         } else {
@@ -267,8 +270,9 @@ void readXLSCompatibilities(unique_ptr<Data>& data, XLWorksheet& r_sheet) {
                         auto p_pro = data->getProPtrByName(pro_name);
                         // If pro is in the data set
                         if (p_pro != nullptr) {
-                            auto compat_cell = r_sheet.cell(XLCellReference(row_iter + row_pros_off + 1,
-                                                                          col_iter + col_groups_off + 1));
+                            auto compat_cell = r_sheet.cell(
+                                XLCellReference(row_iter + row_pros_off + 1,
+                                                col_iter + col_groups_off + 1));
                             if (compat_cell.valueType() == XLValueType::Empty) {
                                 p_pro->groups.push_back(p_group);
                                 p_group->pros.push_back(p_pro);
@@ -358,7 +362,8 @@ unique_ptr<Data> generateData(int num_pros, int num_groups, float slot_compatPro
         for (unsigned long slot_idx = 0; slot_idx < base_slots_start.size(); ++slot_idx) {
             auto new_slot = make_shared<TimeSlot>();
             new_slot->idx = cnt_slots;
-            new_slot->name = day + " " + base_slots_start [slot_idx] + "-" + bast_slots_end[slot_idx];
+            new_slot->name = day + " " + base_slots_start [slot_idx] + "-"
+                + bast_slots_end[slot_idx];
             new_slot->hours = base_slots_start [slot_idx] + "-" + bast_slots_end[slot_idx];
             new_slot->day = cnt_days;
             new_slot->slot_of_day = slot_idx;

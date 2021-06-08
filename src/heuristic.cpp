@@ -18,16 +18,20 @@ int HeurNode::s_node_counter(0);
 
 HeurNode::HeurNode(unique_ptr<Data>& p_data)
         : id(s_node_counter++), cost(0.0), is_interv_by_gr_sl(p_data->dimensions.num_groups,
-          vector<bool>(p_data->dimensions.num_slots, false)), is_interv_by_pr_sl(p_data->dimensions.num_pros,
-          vector<bool>(p_data->dimensions.num_slots, false)), nb_interv_by_pr_day(p_data->dimensions.num_pros,
+          vector<bool>(p_data->dimensions.num_slots, false)),
+          is_interv_by_pr_sl(p_data->dimensions.num_pros,
+          vector<bool>(p_data->dimensions.num_slots, false)),
+          nb_interv_by_pr_day(p_data->dimensions.num_pros,
           vector<int>(p_data->config.nb_days, 0)), nb_interv_by_pr(p_data->dimensions.num_pros, 0),
-          nb_interv_by_gr(p_data->dimensions.num_groups, 0), nb_interv_by_sl(p_data->dimensions.num_slots, 0),
+          nb_interv_by_gr(p_data->dimensions.num_groups, 0),
+          nb_interv_by_sl(p_data->dimensions.num_slots, 0),
           nb_interv_by_day(p_data->config.nb_days, 0), slots(p_data->dimensions.num_slots,
           set<std::pair<shared_ptr<Professional>, shared_ptr<StudentGroup>> >()), assignations() {};
 
 HeurNode::HeurNode(std::unique_ptr<HeurNode>& p_node)
         : id(s_node_counter++), cost(p_node->cost), is_interv_by_gr_sl(p_node->is_interv_by_gr_sl),
-          is_interv_by_pr_sl(p_node->is_interv_by_pr_sl), nb_interv_by_pr_day(p_node->nb_interv_by_pr_day),
+          is_interv_by_pr_sl(p_node->is_interv_by_pr_sl),
+          nb_interv_by_pr_day(p_node->nb_interv_by_pr_day),
           nb_interv_by_pr(p_node->nb_interv_by_pr), nb_interv_by_gr(p_node->nb_interv_by_gr),
           nb_interv_by_sl(p_node->nb_interv_by_sl), nb_interv_by_day(p_node->nb_interv_by_day),
           slots(p_node->slots), assignations(p_node->assignations) {};
@@ -313,8 +317,8 @@ bool isNbIntervByProReached(vector<int>& r_nb_interv_by_pr, shared_ptr<Professio
     return r_nb_interv_by_pr[p_pro->idx] >= G_MAX_NUMBER_INTERV_PRO;
 }
 
-bool isNbIntervByPrDaReached(vector<vector<int> >& r_nb_interv_by_pr_day, shared_ptr<Professional> p_pro,
-                             shared_ptr<TimeSlot> p_slot) {
+bool isNbIntervByPrDaReached(vector<vector<int> >& r_nb_interv_by_pr_day,
+                             shared_ptr<Professional> p_pro, shared_ptr<TimeSlot> p_slot) {
     return r_nb_interv_by_pr_day[p_pro->idx][p_slot->day] >= G_MAX_NUMBER_INTERV_PRO_DAY;
 }
 
@@ -327,8 +331,8 @@ bool isNbIntervSlReached(vector<int>& rnb_interv_by_sl, shared_ptr<TimeSlot> p_s
     return rnb_interv_by_sl[p_slot->idx] >= G_MAX_NUMBER_INTERV_SLOT;
 }
 
-bool isIntervGrSlAlready(vector<vector<bool> >& r_is_interv_by_gr_sl, shared_ptr<StudentGroup> p_group,
-                         shared_ptr<TimeSlot> p_slot) {
+bool isIntervGrSlAlready(vector<vector<bool> >& r_is_interv_by_gr_sl,
+                         shared_ptr<StudentGroup> p_group, shared_ptr<TimeSlot> p_slot) {
     return r_is_interv_by_gr_sl[p_group->idx][p_slot->idx];
 }
 
